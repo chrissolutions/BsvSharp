@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Description>Bitcoin SV library and services.</Description>
+    <Version Condition=" '$(Version)' == '' ">1.5.0</Version>
+    <Copyright>© 2021 Chris Solutions</Copyright>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageIcon>cafelib.png</PackageIcon>
+    <PackageTags>Bitcoin BitcoinSV BSV</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <AssemblyVersion>$(Version).0</AssemblyVersion>
+    <FileVersion>$(Version).0</FileVersion>
+    <Authors>Chris Solutions</Authors>
+    <Company>Chris Solutions</Company>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Passphrase\Cultures\ChineseSimplified.words" />
+    <EmbeddedResource Include="Passphrase\Cultures\ChineseTraditional.words" />
+    <EmbeddedResource Include="Passphrase\Cultures\English.words" />
+    <EmbeddedResource Include="Passphrase\Cultures\French.words" />
+    <EmbeddedResource Include="Passphrase\Cultures\Italian.words" />
+    <EmbeddedResource Include="Passphrase\Cultures\Japanese.words" />
+    <EmbeddedResource Include="Passphrase\Cultures\PortugueseBrazil.words" />
+    <EmbeddedResource Include="Passphrase\Cultures\Spanish.words" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CafeLib.Core" Version="$(Version)" />
+    <PackageReference Include="CafeLib.Core.Buffers" Version="$(Version)" />
+    <PackageReference Include="CafeLib.Core.Encodings" Version="$(Version)" />
+    <PackageReference Include="CafeLib.Core.Numerics" Version="$(Version)" />
+    <PackageReference Include="CafeLib.Cryptography" Version="$(Version)" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\cafelib.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
