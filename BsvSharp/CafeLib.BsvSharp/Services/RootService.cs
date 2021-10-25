@@ -7,8 +7,8 @@ namespace CafeLib.BsvSharp.Services
     public static class RootService
     {
         private static IBitcoinNetwork _bitcoinNetwork;
-        private static readonly object Mutex = new object();
-        private static readonly Lazy<IBitcoinNetwork[]> Networks = new Lazy<IBitcoinNetwork[]>(() => new IBitcoinNetwork[EnumExtensions.GetNames<NetworkType>().Length]);
+        private static readonly object Mutex = new();
+        private static readonly Lazy<IBitcoinNetwork[]> Networks = new(() => new IBitcoinNetwork[EnumExtensions.GetNames<NetworkType>().Length]);
 
         public static IBitcoinNetwork Network => _bitcoinNetwork ??= CreateNetwork(NetworkType.Main);
 
