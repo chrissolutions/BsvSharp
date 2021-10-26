@@ -18,12 +18,23 @@ namespace CafeLib.BsvSharp.Services
             AssignNetwork(networkType);
         }
 
-        public static void AssignNetwork(NetworkType networkType)
+        public static IBitcoinNetwork AssignNetwork(NetworkType networkType)
         {
             lock (Mutex)
             {
-                _bitcoinNetwork = CreateNetwork(networkType);
+                _bitcoinNetwork = GetNetwork(networkType);
             }
+
+            return _bitcoinNetwork;
+        }
+
+        public static IBitcoinNetwork GetNetwork(NetworkType? networkType = null)
+        {
+            return networkType switch
+            {
+                null => _bitcoinNetwork ?? CreateNetwork(NetworkType.Main),
+                _ => CreateNetwork(networkType.Value)
+            };
         }
 
         private static IBitcoinNetwork CreateNetwork(NetworkType networkType)
