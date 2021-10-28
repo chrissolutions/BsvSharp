@@ -42,7 +42,7 @@ namespace CafeLib.BsvSharp.Keys
             var (data, length, result) = 
                 Encoders.Base58Check.TryDecode(b58, out var bytes) && bytes.Length >= nVersionBytes 
                     ? (bytes, nVersionBytes, true) 
-                    : (new byte[0], 0, false);
+                    : (Array.Empty<byte>(), 0, false);
 
             _versionData = data;
             _versionLength = length;

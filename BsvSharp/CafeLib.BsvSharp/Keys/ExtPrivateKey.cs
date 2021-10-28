@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.Core.Buffers;
@@ -16,15 +17,14 @@ using CafeLib.Cryptography.BouncyCastle.Crypto.Macs;
 using CafeLib.Cryptography.BouncyCastle.Crypto.Parameters;
 using CafeLib.Cryptography.Cryptsharp;
 
-// ReSharper disable NonReadonlyMemberInGetHashCode
-
 namespace CafeLib.BsvSharp.Keys
 {
+    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
     public class ExtPrivateKey : ExtKey
     {
         private const string MasterBip32Key = "Bitcoin seed";
 
-        public PrivateKey PrivateKey { get; private set; } = new PrivateKey();
+        public PrivateKey PrivateKey { get; private set; } = new();
 
         /// <summary>
         /// Sets this extended private key to be a master (depth 0) with the given private key and chaincode and verifies required key paths.
@@ -244,12 +244,12 @@ namespace CafeLib.BsvSharp.Keys
             PrivateKey.SetData(code.Slice(42, UInt256.Length));
         }
 
-        public Base58ExtPrivateKey ToBase58() => new Base58ExtPrivateKey(this);
+        public Base58ExtPrivateKey ToBase58() => new(this);
         public override string ToString() => ToBase58().ToString();
 
         public override int GetHashCode() => base.GetHashCode() ^ PrivateKey.GetHashCode();
 
-        public bool Equals(ExtPrivateKey o) => !(o is null) && base.Equals(o) && PrivateKey.Equals(o.PrivateKey);
+        public bool Equals(ExtPrivateKey o) => o is not null && base.Equals(o) && PrivateKey.Equals(o.PrivateKey);
         public override bool Equals(object obj) => obj is ExtPrivateKey key && this == key;
 
         public static bool operator ==(ExtPrivateKey x, ExtPrivateKey y) => x?.Equals(y) ?? y is null;

@@ -4,15 +4,36 @@
 #endregion
 
 using CafeLib.BsvSharp.Extensions;
+using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Services;
 
 namespace CafeLib.BsvSharp.Keys
 {
     public class Base58ExtPublicKey : Base58Data
     {
-        public void SetKey(ExtPublicKey pubKey)
+        public Base58ExtPublicKey(ExtPublicKey pubKey)
         {
-            var prefix = RootService.Network.ExtPublicKey;
+            SetKey(pubKey, null);
+        }
+
+        public Base58ExtPublicKey(ExtPublicKey pubKey, NetworkType networkType)
+        {
+            SetKey(pubKey, networkType);
+        }
+
+        public Base58ExtPublicKey(string base58)
+        {
+            SetString(base58, null);
+        }
+
+        public Base58ExtPublicKey(string base58, NetworkType networkType)
+        {
+            SetString(base58, networkType);
+        }
+
+        public void SetKey(ExtPublicKey pubKey, NetworkType? networkType)
+        {
+            var prefix = RootService.GetNetwork(networkType).ExtPublicKey;
             var data = new byte[prefix.Length + ExtKey.Bip32KeySize];
             prefix.CopyTo(data, 0);
             pubKey.Encode(data.Slice(prefix.Length));
@@ -29,18 +50,9 @@ namespace CafeLib.BsvSharp.Keys
             return pubKey;
         }
 
-        public bool SetString(string b58) => SetString(b58, RootService.Network.ExtPublicKey.Length);
-
-        public Base58ExtPublicKey(ExtPublicKey pubKey)
-        {
-            SetKey(pubKey);
-        }
-
-        public Base58ExtPublicKey(string base58)
-        {
-            SetString(base58);
-        }
-
         public static ExtPublicKey GetKey(string base58) => new Base58ExtPublicKey(base58).GetKey();
+
+        internal bool SetString(string b58, NetworkType? networkType) 
+            => SetString(b58, RootService.GetNetwork(networkType).ExtPublicKey.Length);
     }
 }
