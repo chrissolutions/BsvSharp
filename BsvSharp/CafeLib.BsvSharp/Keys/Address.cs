@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
@@ -9,7 +10,6 @@ using CafeLib.Core.Encodings;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
-// ReSharper disable NonReadonlyMemberInGetHashCode
 
 namespace CafeLib.BsvSharp.Keys
 {
@@ -32,6 +32,7 @@ namespace CafeLib.BsvSharp.Keys
     /// * next 20 bytes - the hash value computed by taking the `ripemd160(sha256(PUBLIC_KEY))`
     /// * last 4 bytes  - a checksum value taken from the first four bytes of sha256(sha256(previous_21_bytes))
     /// </summary>
+    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
     public class Address : IEquatable<Address>
     {
         private static readonly HexEncoder Hex = Encoders.Hex;
@@ -58,7 +59,7 @@ namespace CafeLib.BsvSharp.Keys
         /// Version property.
         /// </summary>
         public int Version { get; private set; }
-        
+
         /// <summary>
         /// Public Key Hash.
         /// </summary>
@@ -118,7 +119,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <returns></returns>
         public static Address FromBase58(string base58Address) 
         {
-            if (base58Address.Length == 25 || base58Address.Length == 34)
+            if (base58Address.Length is 25 or 34)
             {
                 var address = new Address();
                 address.FromBase58CheckInternal(base58Address);
@@ -132,11 +133,12 @@ namespace CafeLib.BsvSharp.Keys
         /// Constructs a new address instance from a public key.
         /// </summary>
         /// <param name="hexPubKey">hexadecimal encoding of a public key</param>
+        /// <param name="networkType">network type</param>
         /// <returns>address</returns>
-        public static Address FromHex(string hexPubKey)
+        public static Address FromHex(string hexPubKey, NetworkType networkType = NetworkType.Main)
         {
             var address = new Address();
-            address.FromHexInternal(hexPubKey);
+            address.FromHexInternal(hexPubKey, networkType);
             return address;
         }
 
@@ -144,11 +146,12 @@ namespace CafeLib.BsvSharp.Keys
         /// Constructs a new P2SH Address object from a script
         /// </summary>
         /// <param name="script"></param>
+        /// <param name="networkType">network type</param>
         /// <returns>address</returns>
-        public static Address FromScript(Script script)
+        public static Address FromScript(Script script, NetworkType networkType = NetworkType.Main)
         {
             var address = new Address();
-            address.FromScriptInternal(script);
+            address.FromScriptInternal(script, networkType);
             return address;
         }
 
@@ -171,7 +174,7 @@ namespace CafeLib.BsvSharp.Keys
         public bool Equals(Address o) => o is not null && _bytes.SequenceEqual(o._bytes);
         public override bool Equals(object obj) => Equals((Address)obj);
 
-        public static implicit operator UInt160(Address rhs) => new UInt160(rhs._bytes[1..]);
+        public static implicit operator UInt160(Address rhs) => new(rhs._bytes[1..]);
         public static bool operator ==(Address x, Address y) => x?.Equals(y) ?? y is null;
         public static bool operator !=(Address x, Address y) => !(x == y);
 
@@ -183,15 +186,15 @@ namespace CafeLib.BsvSharp.Keys
             Version = _bytes[0];
         }
 
-        private void FromHexInternal(string hexPubKey)
+        private void FromHexInternal(string hexPubKey, NetworkType networkType)
         {
-            Version = RootService.Network.PublicKeyAddress[0];
+            Version = RootService.GetNetwork(networkType).PublicKeyAddress[0];
             _bytes = new[]{(byte)Version}.Concat(Hex.Decode(hexPubKey).Hash160().ToArray());
         }
 
-        private void FromScriptInternal(Script script)
+        private void FromScriptInternal(Script script, NetworkType networkType)
         {
-            Version = RootService.Network.PublicKeyAddress[0];
+            Version = RootService.GetNetwork(networkType).PublicKeyAddress[0];
             _bytes = new[]{(byte)Version}.Concat(Hex.Decode(script.ToHexString()).Hash160().ToArray());
         }
 
