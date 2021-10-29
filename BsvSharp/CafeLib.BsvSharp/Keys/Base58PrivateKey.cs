@@ -12,6 +12,25 @@ namespace CafeLib.BsvSharp.Keys
 {
     public class Base58PrivateKey : Base58Data
     {
+        public Base58PrivateKey() { }
+        public Base58PrivateKey(PrivateKey privateKey) => SetKey(privateKey);
+        public Base58PrivateKey(string base58) => SetString(base58);
+
+        /// <summary>
+        /// IsValid property.
+        /// </summary>
+        public bool IsValid
+        {
+            get
+            {
+                var d = KeyData;
+                var fExpectedFormat = d.Length == UInt256.Length || d.Length == UInt256.Length + 1 && d[^1] == 1;
+                var v = Version;
+                var fCorrectVersion = v.Data.SequenceEqual(RootService.Network.SecretKey);
+                return fExpectedFormat && fCorrectVersion;
+            }
+        }
+
         public void SetKey(PrivateKey privateKey)
         {
             Debug.Assert(privateKey.IsValid);
@@ -27,22 +46,6 @@ namespace CafeLib.BsvSharp.Keys
             return privateKey;
         }
 
-        public bool IsValid
-        {
-            get 
-            {
-                var d = KeyData;
-                var fExpectedFormat = d.Length == UInt256.Length || d.Length == UInt256.Length + 1 && d[^1] == 1;
-                var v = Version;
-                var fCorrectVersion = v.Data.SequenceEqual(RootService.Network.SecretKey);
-                return fExpectedFormat && fCorrectVersion;
-            }
-        }
-
         public bool SetString(string base58) => SetString(base58, RootService.Network.SecretKey.Length) && IsValid;
-
-        public Base58PrivateKey() {}
-        public Base58PrivateKey(PrivateKey privateKey) => SetKey(privateKey);
-        public Base58PrivateKey(string base58) => SetString(base58);
     }
 }

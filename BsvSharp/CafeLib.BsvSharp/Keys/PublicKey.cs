@@ -270,18 +270,9 @@ namespace CafeLib.BsvSharp.Keys
         /// <summary>
         /// Obtain an address.
         /// </summary>
-        /// <returns>address</returns>
-        public Address ToAddress() => new(
-            Encoders.Base58Check.Encode(RootService.Network.PublicKeyAddress
-                .ToArray()
-                .Concat(ToPubKeyHash())));
-
-        /// <summary>
-        /// Obtain an address.
-        /// </summary>
         /// <param name="networkType">network type</param>
         /// <returns>address</returns>
-        public Address ToAddress(NetworkType networkType) => new(
+        public Address ToAddress(NetworkType? networkType = null) => new(
             Encoders.Base58Check.Encode(RootService.GetNetwork(networkType).PublicKeyAddress
                 .ToArray()
                 .Concat(ToPubKeyHash())));

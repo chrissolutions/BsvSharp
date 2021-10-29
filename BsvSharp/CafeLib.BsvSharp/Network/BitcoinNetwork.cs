@@ -12,7 +12,7 @@ namespace CafeLib.BsvSharp.Network
 {
     public abstract class BitcoinNetwork : IBitcoinNetwork
     {
-        protected static readonly object Mutex = new object();
+        protected static readonly object Mutex = new();
 
         public Consensus Consensus { get; }
 

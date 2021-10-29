@@ -87,7 +87,7 @@ namespace CafeLib.BsvSharp.Scripting
                         return SetError(out error, ScriptError.DISABLED_OPCODE);
                     }
 
-                    if (fExec && 0 <= op.Code && op.Code <= Opcode.OP_PUSHDATA4)
+                    if (fExec && op.Code <= Opcode.OP_PUSHDATA4)
                     {
                         if (fRequireMinimal && !CheckMinimalPush(ref op))
                         {
