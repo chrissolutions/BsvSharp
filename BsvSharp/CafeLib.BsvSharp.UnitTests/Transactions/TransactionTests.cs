@@ -12,7 +12,6 @@ using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
-using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Services;
@@ -71,7 +70,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         [Fact]
         public void Parse_Transaction_Version_As_Signed_Integer()
         {
-            var transaction = new Transaction("ffffffff0000ffffffff");
+            var transaction = Transaction.FromHex("ffffffff0000ffffffff");
             Assert.Equal(-1, transaction.Version);
             Assert.Equal(0xffffffff, transaction.LockTime);
         }
@@ -82,7 +81,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
             const string txHex = "01000000015884e5db9de218238671572340b207ee85b628074e7e467096c267266baf77a4000000006a473044022013fa3089327b50263029265572ae1b022a91d10ac80eb4f32f291c914533670b02200d8a5ed5f62634a7e1a0dc9188a3cc460a986267ae4d58faf50c79105431327501210223078d2942df62c45621d209fab84ea9a7a23346201b7727b9b45a29c4e76f5effffffff0150690f00000000001976a9147821c0a3768aa9d1a37e16cf76002aef5373f1a888ac00000000";
             var writer = new ByteDataWriter();
 
-            var transaction = new Transaction(txHex);
+            var transaction = Transaction.FromHex(txHex);
             transaction.WriteTo(writer);
 
             var serializedHex = Encoders.Hex.Encode(writer.Span);
@@ -93,7 +92,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         public void Coinbase_Transaction()
         {
             const string txHex = "01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0104ffffffff0100f2052a0100000043410496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858eeac00000000";
-            var transaction = new Transaction(txHex);
+            var transaction = Transaction.FromHex(txHex);
             Assert.True(transaction.IsCoinbase);
         }
 
@@ -128,7 +127,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
                     var expectedHash = x.Transactions.First().Hash;
                     var expectedIndex = x.Transactions.First().Index;
                     var _ = x.Transactions.First().ScriptPubKey;
-                    var transaction = new Transaction(Encoders.Hex.Decode(x.Serialized));
+                    var transaction = Transaction.FromBytes(Encoders.Hex.Decode(x.Serialized));
                     var previousHash = transaction.Inputs.First().PrevOut.TxHash;
                     var previousIndex = transaction.Inputs.First().PrevOut.Index;
                     Assert.Equal(expectedHash, previousHash);
@@ -204,7 +203,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         [Fact]
         public void Verify_Zero_Fee_For_A_Coinbase()
         {
-            var coinbaseTransaction = new Transaction("01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0104ffffffff0100f2052a0100000043410496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858eeac00000000");
+            var coinbaseTransaction = Transaction.FromHex("01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0704ffff001d0104ffffffff0100f2052a0100000043410496b538e853519c726a2c91e61ec11600ae1390813a627c66fb8be7947be63c52da7589379515d4e0a604f8141781e62294721166bf621e73a82cbf2342c858eeac00000000");
             Assert.True(coinbaseTransaction.IsCoinbase);
             Assert.Equal(Amount.Zero, coinbaseTransaction.GetFee());
         }
@@ -241,7 +240,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         public void Verify_Hash_Decoded_Correctly()
         {
             const string tx1Hex = "01000000015884e5db9de218238671572340b207ee85b628074e7e467096c267266baf77a4000000006a473044022013fa3089327b50263029265572ae1b022a91d10ac80eb4f32f291c914533670b02200d8a5ed5f62634a7e1a0dc9188a3cc460a986267ae4d58faf50c79105431327501210223078d2942df62c45621d209fab84ea9a7a23346201b7727b9b45a29c4e76f5effffffff0150690f00000000001976a9147821c0a3768aa9d1a37e16cf76002aef5373f1a888ac00000000";
-            var tx = new Transaction(tx1Hex);
+            var tx = Transaction.FromHex(tx1Hex);
             Assert.Equal(Encoders.Hex.Encode(tx.Serialize()), tx1Hex);
         }
 

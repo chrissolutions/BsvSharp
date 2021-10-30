@@ -50,18 +50,15 @@ namespace CafeLib.BsvSharp.Transactions
             Outputs = new TxOutCollection();
         }
 
-        public Transaction(byte[] bytes, NetworkType? networkType = null)
-            : this(networkType)
-        {
-            var reader = new ByteSequenceReader(bytes);
-            TryReadTransaction(ref reader);
-        }
-
-        public Transaction(string hex, NetworkType? networkType = null)
-            : this(Encoders.Hex.Decode(hex), networkType)
-        {
-        }
-
+        /// <summary>
+        /// Transaction constructor
+        /// </summary>
+        /// <param name="version">version</param>
+        /// <param name="vin">inputs</param>
+        /// <param name="vout">outputs</param>
+        /// <param name="lockTime">lock time</param>
+        /// <param name="fee">transaction fee</param>
+        /// <param name="option">options</param>
         public Transaction(int version, TxInCollection vin, TxOutCollection vout, uint lockTime, long fee = 0L, TransactionOption option = 0)
         {
             Version = version;
@@ -71,6 +68,27 @@ namespace CafeLib.BsvSharp.Transactions
             _fee = new Amount(fee);
             Option = option;
         }
+
+        /// <summary>
+        /// Deserialize transaction from byte array.
+        /// </summary>
+        /// <param name="bytes">byte array</param>
+        /// <returns>transaction</returns>
+        public static Transaction FromBytes(byte[] bytes)
+        {
+            var transaction = new Transaction();
+            var reader = new ByteSequenceReader(bytes);
+            transaction.TryReadTransaction(ref reader);
+            return transaction;
+        }
+
+        /// <summary>
+        /// Deserialize transaction from hexadecimal string.
+        /// </summary>
+        /// <param name="hex">hex string</param>
+        /// <returns>transaction</returns>
+        public static Transaction FromHex(string hex) => FromBytes(Encoders.Hex.Decode(hex));
+
 
         /// <summary>
         /// Add transaction input
