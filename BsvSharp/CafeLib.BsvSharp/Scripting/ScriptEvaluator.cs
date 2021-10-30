@@ -17,7 +17,7 @@ namespace CafeLib.BsvSharp.Scripting
     {
         private readonly ScriptStack<VarType> _stack;
 
-        private static readonly DefaultSignatureChecker DefaultSignatureChecker = new DefaultSignatureChecker();
+        private static readonly DefaultSignatureChecker DefaultSignatureChecker = new();
 
         public int Count => _stack.Count;
 
@@ -96,7 +96,7 @@ namespace CafeLib.BsvSharp.Scripting
                         _stack.Push(op.Data);
                         // ( -- value)
                     }
-                    else if (fExec || Opcode.OP_IF <= op.Code && op.Code <= Opcode.OP_ENDIF)
+                    else if (fExec || op.Code is >= Opcode.OP_IF and <= Opcode.OP_ENDIF)
                     {
                         switch (op.Code)
                         {

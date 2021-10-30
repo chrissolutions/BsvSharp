@@ -6,11 +6,7 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using CafeLib.BsvSharp.Extensions;
-using CafeLib.BsvSharp.Numerics;
-using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Signatures;
-using CafeLib.BsvSharp.Transactions;
 
 namespace CafeLib.BsvSharp.Scripting
 {
@@ -18,26 +14,6 @@ namespace CafeLib.BsvSharp.Scripting
     {
         public static ScriptFlags ParseFlags(string flags)
         {
-#if false
-            var map = new Dictionary<string, KzScriptFlags>();
-            map.Add("NONE", KzScriptFlags.VERIFY_NONE);
-            map.Add("P2SH", KzScriptFlags.VERIFY_P2SH);
-            map.Add("STRICTENC", KzScriptFlags.VERIFY_STRICTENC);
-            map.Add("DERSIG", KzScriptFlags.VERIFY_DERSIG);
-            map.Add("LOW_S", KzScriptFlags.VERIFY_LOW_S);
-            map.Add("SIGPUSHONLY", KzScriptFlags.VERIFY_SIGPUSHONLY);
-            map.Add("MINIMALDATA", KzScriptFlags.VERIFY_MINIMALDATA);
-            map.Add("NULLDUMMY", KzScriptFlags.VERIFY_NULLDUMMY);
-            map.Add("DISCOURAGE_UPGRADABLE_NOPS", KzScriptFlags.VERIFY_DISCOURAGE_UPGRADABLE_NOPS);
-            map.Add("CLEANSTACK", KzScriptFlags.VERIFY_CLEANSTACK);
-            map.Add("MINIMALIF", KzScriptFlags.VERIFY_MINIMALIF);
-            map.Add("NULLFAIL", KzScriptFlags.VERIFY_NULLFAIL);
-            map.Add("CHECKLOCKTIMEVERIFY", KzScriptFlags.VERIFY_CHECKLOCKTIMEVERIFY);
-            map.Add("CHECKSEQUENCEVERIFY", KzScriptFlags.VERIFY_CHECKSEQUENCEVERIFY);
-            map.Add("COMPRESSED_PUBKEYTYPE", KzScriptFlags.VERIFY_COMPRESSED_PUBKEYTYPE);
-            map.Add("SIGHASH_FORKID", KzScriptFlags.ENABLE_SIGHASH_FORKID);
-            map.Add("REPLAY_PROTECTION", KzScriptFlags.ENABLE_REPLAY_PROTECTION);
-#endif
             var fs = flags.Split(',', StringSplitOptions.RemoveEmptyEntries);
             return fs.Select(f => Enum.GetNames(typeof(ScriptFlags))
                 .Single(n => n.Contains(f)))
