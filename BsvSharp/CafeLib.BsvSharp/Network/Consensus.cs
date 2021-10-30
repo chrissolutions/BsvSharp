@@ -5,7 +5,6 @@
 
 using System;
 using CafeLib.BsvSharp.Chain;
-using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Transactions;
 using CafeLib.BsvSharp.Units;

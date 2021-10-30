@@ -55,7 +55,7 @@ namespace CafeLib.BsvSharp.Keys
 
         public override int GetHashCode() => ToString().GetHashCode();
 
-        public bool Equals(Base58Data o) => !(o is null) && _versionData.SequenceEqual(o._versionData);
+        public bool Equals(Base58Data o) => o is not null && _versionData.SequenceEqual(o._versionData);
         public override bool Equals(object obj) => obj is Base58Data base58Data && this == base58Data;
 
         public static bool operator ==(Base58Data x, Base58Data y) => x?.Equals(y) ?? y is null;
