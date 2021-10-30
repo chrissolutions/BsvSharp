@@ -6,6 +6,7 @@
 using System;
 using System.Linq;
 using CafeLib.BsvSharp.Encoding;
+using CafeLib.BsvSharp.Network;
 using CafeLib.Core.Buffers;
 
 namespace CafeLib.BsvSharp.Keys
@@ -13,7 +14,7 @@ namespace CafeLib.BsvSharp.Keys
     /// <summary>
     /// Base class for Base58 encoded objects.
     /// </summary>
-    public class Base58Data : IComparable<Base58Data>
+    public abstract class Base58Data : IComparable<Base58Data>
     {
         private byte[] _versionData;
         private int _versionLength;
@@ -21,6 +22,7 @@ namespace CafeLib.BsvSharp.Keys
         protected ByteSpan Version => new Span<byte>(_versionData, 0, _versionLength);
         protected ByteSpan KeyData => new Span<byte>(_versionData, _versionLength, _versionData.Length - _versionLength);
         protected ReadOnlyByteSpan VersionData => _versionData;
+        public NetworkType NetworkType { get; protected set; }
 
         protected void SetData(byte[] versionData, int versionLength = 1)
         {

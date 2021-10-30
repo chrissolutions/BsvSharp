@@ -11,25 +11,11 @@ namespace CafeLib.BsvSharp.Keys
 {
     public class Base58ExtPublicKey : Base58Data
     {
-        public Base58ExtPublicKey(ExtPublicKey pubKey)
-        {
-            SetKey(pubKey, null);
-        }
+        public Base58ExtPublicKey(ExtPublicKey pubKey, NetworkType? networkType = null)
+            => SetKey(pubKey, networkType);
 
-        public Base58ExtPublicKey(ExtPublicKey pubKey, NetworkType networkType)
-        {
-            SetKey(pubKey, networkType);
-        }
-
-        public Base58ExtPublicKey(string base58)
-        {
-            SetString(base58, null);
-        }
-
-        public Base58ExtPublicKey(string base58, NetworkType networkType)
-        {
-            SetString(base58, networkType);
-        }
+        public Base58ExtPublicKey(string base58, NetworkType? networkType = null)
+            => SetString(base58, networkType);
 
         public void SetKey(ExtPublicKey pubKey, NetworkType? networkType)
         {
