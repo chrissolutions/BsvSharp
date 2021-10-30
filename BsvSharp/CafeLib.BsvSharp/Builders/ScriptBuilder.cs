@@ -49,13 +49,13 @@ namespace CafeLib.BsvSharp.Builders
         public bool IsPub
         {
             get => _isPub == true; 
-            set => _isPub = value ? (bool?)true : null;
+            set => _isPub = value ? true : null;
         }
 
         public bool IsSig
         {
             get => _isPub == false; 
-            set => _isPub = value ? (bool?)false : null;
+            set => _isPub = value ? false : null;
         }
 
         /// <summary>
@@ -275,16 +275,16 @@ namespace CafeLib.BsvSharp.Builders
                     var data = (byte[])null;
                     if (!Enum.TryParse("OP_" + ps[arg], out Opcode opcode))
                         throw new InvalidOperationException();
-                    if (opcode > Opcode.OP_0 && opcode < Opcode.OP_PUSHDATA1) {
+                    if (opcode is > Opcode.OP_0 and < Opcode.OP_PUSHDATA1) {
                         // add next single byte value to op.
                         arg++;
                         data = ParseCompactValueToBytes(ps[arg]);
                         if (data == null) {
                             // Put this arg back. Treat missing data as zero length.
-                            data = new byte[0];
+                            data = Array.Empty<byte>();
                             arg--;
                         }
-                    } else if (opcode >= Opcode.OP_PUSHDATA1 && opcode <= Opcode.OP_PUSHDATA4) {
+                    } else if (opcode is >= Opcode.OP_PUSHDATA1 and <= Opcode.OP_PUSHDATA4) {
                         // add next one, two, or four byte value as length of following data value to op.
                         arg++;
                         var lengthBytes = ParseCompactValueToBytes(ps[arg]);
@@ -309,7 +309,7 @@ namespace CafeLib.BsvSharp.Builders
                         }
                         if (len > 0) {
                             arg++;
-                            data = arg < ps.Length ? ParseCompactValueToBytes(ps[arg], len) : new byte[0];
+                            data = arg < ps.Length ? ParseCompactValueToBytes(ps[arg], len) : Array.Empty<byte>();
                         }
                     }
                     if (data == null)
@@ -380,7 +380,7 @@ namespace CafeLib.BsvSharp.Builders
                         sb.Add(op);
                     else
                         sb.Add(op, new VarType(data));
-                    ps = ps.Slice(args);
+                    ps = ps[args..];
                 } else
                     throw new InvalidOperationException();
             }
@@ -407,7 +407,7 @@ namespace CafeLib.BsvSharp.Builders
                             builder.Add(op);
                             break;
 
-                        case var _ when op < Opcode.OP_PUSHDATA1:
+                        case < Opcode.OP_PUSHDATA1:
                         {
                             var data = Encoders.Hex.Decode(tokens[++i]);
                             if (data.Length >= (int)Opcode.OP_PUSHDATA1) throw new InvalidOperationException();
@@ -415,7 +415,7 @@ namespace CafeLib.BsvSharp.Builders
                             break;
                         }
 
-                        case var _ when op <= Opcode.OP_PUSHDATA4:
+                        case <= Opcode.OP_PUSHDATA4:
                         {
                             if (!BitConverter.IsLittleEndian) throw new NotSupportedException();
                             var data = Encoders.Hex.Decode(tokens[++i]);
@@ -493,7 +493,7 @@ namespace CafeLib.BsvSharp.Builders
                         builder.Add(op);
                         break;
 
-                    case var _ when op < Opcode.OP_PUSHDATA1:
+                    case < Opcode.OP_PUSHDATA1:
                     {
                         var data = Encoders.Hex.Decode(tokens[++i]);
                         if (data.Length >= (int)Opcode.OP_PUSHDATA1) throw new InvalidOperationException();

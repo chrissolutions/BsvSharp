@@ -56,27 +56,17 @@ namespace CafeLib.BsvSharp.Builders
 
         public long Length => IsRaw ? Operand.Data.Length : Operand.Length;
 
-        public static implicit operator OperandBuilder(Operand op) 
-            => new OperandBuilder { IsFinal = true, Operand = op};
+        public static implicit operator OperandBuilder(Operand op)
+            => new() { IsFinal = true, Operand = op};
 
         public bool TryCopyTo(ref ByteSpan span)
         {
-            if (IsRaw)
-            {
-                var len = (int)Length;
-                if (len > span.Length) goto fail;
-                Operand.Data.Span.CopyTo(span.Slice(0, len));
-                span = span.Slice(len);
-            }
-            else
-            {
-                if (!Operand.TryCopyTo(ref span)) goto fail;
-            }
-
+            if (!IsRaw) return Operand.TryCopyTo(ref span);
+            var len = (int)Length;
+            if (len > span.Length) return false;
+            Operand.Data.Span.CopyTo(span[..len]);
+            span = span[len..];
             return true;
-
-            fail:
-            return false;
         }
 
         public string ToVerboseString() => IsRaw ? Encoders.Hex.EncodeSpan(Operand.Data) : Operand.ToVerboseString();
