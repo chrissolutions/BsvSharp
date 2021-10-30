@@ -31,7 +31,7 @@ namespace CafeLib.BsvSharp.Chain
 
         public Block
         (
-            Transaction[] txs,
+            IEnumerable<Transaction> txs,
             int version,
             UInt256 hashPrevBlock,
             UInt256 hashMerkleRoot,

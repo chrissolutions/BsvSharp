@@ -21,7 +21,7 @@ namespace CafeLib.BsvSharp.Chain
     public class MerkleTree
     {
         private long _count;
-        private readonly List<MerkleTreeNode> _nodes = new List<MerkleTreeNode>();
+        private readonly List<MerkleTreeNode> _nodes = new();
 
         /// <summary>
         /// Compute the full merkle tree root hash from the incremental state.

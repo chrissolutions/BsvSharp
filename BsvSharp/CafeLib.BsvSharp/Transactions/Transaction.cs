@@ -5,6 +5,7 @@ using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Keys;
+using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Scripting;
@@ -23,7 +24,8 @@ namespace CafeLib.BsvSharp.Transactions
         private ScriptBuilder _changeScriptBuilder;
         private bool _hasChangeScript;
         private Amount _fee = Amount.Null;
-        private long _feePerKb = RootService.Network.Consensus.FeePerKilobyte;
+        private readonly Consensus _consensus;
+        private long _feePerKb;
 
         public string TxId => Encoders.HexReverse.Encode(TxHash);
         public UInt256 TxHash { get; private set; }
@@ -31,28 +33,32 @@ namespace CafeLib.BsvSharp.Transactions
         public uint LockTime { get; private set; }
         public Address ChangeAddress { get; private set; }
 
-        public TxInCollection Inputs { get; private set; } //this transaction's inputs
-        public TxOutCollection Outputs { get; private set; } //this transaction's outputs
+        public TxInCollection Inputs { get; } //this transaction's inputs
+        public TxOutCollection Outputs { get; } //this transaction's outputs
 
         //if we have a Transaction with one input, and a prevTransactionId of zero, it's a coinbase.
         public bool IsCoinbase => Inputs.Count == 1 && Inputs[0].TxHash == UInt256.Zero;
 
         public TransactionOption Option { get; private set; }
 
-        public Transaction()
+        public Transaction(NetworkType? networkType = null)
         {
+            var network = RootService.GetNetwork(networkType);
+            _consensus = network.Consensus;
+            _feePerKb = network.Consensus.FeePerKilobyte;
             Inputs = new TxInCollection();
             Outputs = new TxOutCollection();
         }
 
-        public Transaction(byte[] bytes)
+        public Transaction(byte[] bytes, NetworkType? networkType = null)
+            : this(networkType)
         {
             var reader = new ByteSequenceReader(bytes);
             TryReadTransaction(ref reader);
         }
 
-        public Transaction(string hex)
-            : this(Encoders.Hex.Decode(hex))
+        public Transaction(string hex, NetworkType? networkType = null)
+            : this(Encoders.Hex.Decode(hex), networkType)
         {
         }
 
@@ -392,16 +398,16 @@ namespace CafeLib.BsvSharp.Transactions
         /// <returns></returns>
         public Transaction LockUntilDate(DateTime future)
         {
-            if (future.ToUnixTime() < RootService.Network.Consensus.LocktimeBlockheightLimit)
+            if (future.ToUnixTime() < _consensus.LocktimeBlockheightLimit)
             {
                 throw new LockTimeException("Block time is set too early");
             }
 
             Inputs.ForEach(x =>
             {
-                if (x.SequenceNumber == RootService.Network.Consensus.DefaultSeqnumber)
+                if (x.SequenceNumber == _consensus.DefaultSeqnumber)
                 {
-                    x.SequenceNumber = (uint)RootService.Network.Consensus.DefaultLocktimeSeqnumber;
+                    x.SequenceNumber = (uint)_consensus.DefaultLocktimeSeqnumber;
                 }
             });
 
@@ -459,7 +465,7 @@ namespace CafeLib.BsvSharp.Transactions
             Version = version;
 
             if (!r.TryReadVariant(out var countIn)) return false;
-            Inputs = new TxInCollection();
+            Inputs.Clear();
             for (var i = 0L; i < countIn; i++)
             {
                 var txIn = new TxIn();
@@ -468,7 +474,7 @@ namespace CafeLib.BsvSharp.Transactions
             }
 
             if (!r.TryReadVariant(out long countOut)) return false;
-            Outputs = new TxOutCollection();
+            Outputs.Clear();
             for (var i = 0L; i < countOut; i++)
             {
                 var txOut = new TxOut();
@@ -580,7 +586,7 @@ namespace CafeLib.BsvSharp.Transactions
 
             if ((Option & TransactionOption.DisableLargeFees) != 0) return;
 
-            var maximumFee = RootService.Network.Consensus.FeeSecurityMargin * EstimateFee();
+            var maximumFee = _consensus.FeeSecurityMargin * EstimateFee();
             if (unspent <= maximumFee) return;
 
             if (!_hasChangeScript)
@@ -666,7 +672,7 @@ namespace CafeLib.BsvSharp.Transactions
             var fee = new Amount((long)Math.Ceiling((double)estimatedSize / 1000 * _feePerKb));
             if (available > fee)
             {
-                estimatedSize += RootService.Network.Consensus.ChangeOutputMaxSize;
+                estimatedSize += _consensus.ChangeOutputMaxSize;
             }
 
             fee = new Amount((long)Math.Ceiling((double)estimatedSize / 1000 * _feePerKb));
@@ -679,14 +685,14 @@ namespace CafeLib.BsvSharp.Transactions
         /// <returns></returns>
         private int EstimateSize()
         {
-            var result = RootService.Network.Consensus.MaximumExtraSize;
+            var result = _consensus.MaximumExtraSize;
 
             //_txnInputs.forEach((input) {
             //    result += SCRIPT_MAX_SIZE; 
             //});
 
             //Note: we're only spending P2PKH atm.
-            result += RootService.Network.Consensus.ScriptMaxSize * Inputs.Count;
+            result += _consensus.ScriptMaxSize * Inputs.Count;
 
             // <---- HOW DO WE CALCULATE SCRIPT FROM JUST AN ADDRESS !? AND LENGTH ???
             Outputs.ForEach(x => result += Encoders.Hex.Decode(x.Script.ToHexString()).Length + 9);
@@ -699,7 +705,8 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="inputs"></param>
         private void SortInputs(TxInCollection inputs)
         {
-            Inputs = new TxInCollection(inputs.OrderBy(x => x.TxId).ToArray());
+            Inputs.Clear();
+            Inputs.AddRange(new TxInCollection(inputs.OrderBy(x => x.TxId).ToArray()));
         }
 
         /// <summary>
@@ -708,7 +715,8 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="outputs"></param>
         private void SortOutputs(TxOutCollection outputs)
         {
-            Outputs = new TxOutCollection(outputs.OrderBy(x => x.Amount).ToArray());
+            Outputs.Clear();
+            Outputs.AddRange(new TxOutCollection(outputs.OrderBy(x => x.Amount).ToArray()));
         }
 
         private void DoSerializationChecks()
@@ -733,7 +741,7 @@ namespace CafeLib.BsvSharp.Transactions
         {
             if ((Option & TransactionOption.DisableDustOutputs) != 0) return;
 
-            if (Outputs.Any(x => x.Amount < RootService.Network.Consensus.DustLimit && !x.IsDataOut))
+            if (Outputs.Any(x => x.Amount < _consensus.DustLimit && !x.IsDataOut))
             {
                 throw new TransactionAmountException("You have outputs with spending values below the dust limit");
             }
