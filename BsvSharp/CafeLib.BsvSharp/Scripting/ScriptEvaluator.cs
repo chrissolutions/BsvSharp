@@ -5,6 +5,7 @@
 
 using System.Runtime.CompilerServices;
 using CafeLib.BsvSharp.Extensions;
+using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Services;
 using CafeLib.BsvSharp.Signatures;
@@ -19,12 +20,15 @@ namespace CafeLib.BsvSharp.Scripting
 
         private static readonly DefaultSignatureChecker DefaultSignatureChecker = new();
 
+        private readonly NetworkType _networkType;
+
         public int Count => _stack.Count;
 
         public VarType Peek() => _stack.Peek();
 
-        public ScriptEvaluator()
+        internal ScriptEvaluator(NetworkType? networkType = null)
         {
+            _networkType = RootService.GetNetwork(networkType).NodeType;
             _stack = new ScriptStack<VarType>();
         }
 
@@ -50,7 +54,7 @@ namespace CafeLib.BsvSharp.Scripting
 
             SetError(out error, ScriptError.UNKNOWN_ERROR);
 
-            if (script.Length > RootService.Network.Consensus.MaxScriptSize)
+            if (script.Length > RootService.GetNetwork(_networkType).Consensus.MaxScriptSize)
                 return SetError(out error, ScriptError.SCRIPT_SIZE);
 
             var nOpCount = 0;
@@ -67,7 +71,7 @@ namespace CafeLib.BsvSharp.Scripting
                         return SetError(out error, ScriptError.BAD_OPCODE);
                     }
 
-                    if (op.Data.Length > RootService.Network.Consensus.MaxScriptElementSize)
+                    if (op.Data.Length > RootService.GetNetwork(_networkType).Consensus.MaxScriptElementSize)
                     {
                         return SetError(out error, ScriptError.PUSH_SIZE);
                     }
@@ -741,7 +745,7 @@ namespace CafeLib.BsvSharp.Scripting
 
                                     var x2 = _stack.Pop();
                                     var x1 = _stack.Pop();
-                                    if (x1.Length + x2.Length > RootService.Network.Consensus.MaxScriptElementSize) return SetError(out error, ScriptError.PUSH_SIZE);
+                                    if (x1.Length + x2.Length > RootService.GetNetwork(_networkType).Consensus.MaxScriptElementSize) return SetError(out error, ScriptError.PUSH_SIZE);
 
                                     _stack.Push(x1.Cat(x2));
                                 }
@@ -774,7 +778,7 @@ namespace CafeLib.BsvSharp.Scripting
                                     if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
                                     var size = _stack.Pop().ToScriptNum(fRequireMinimal).GetInt();
-                                    if (size < 0 || size > RootService.Network.Consensus.MaxScriptElementSize)
+                                    if (size < 0 || size > RootService.GetNetwork(_networkType).Consensus.MaxScriptElementSize)
                                         return SetError(out error, ScriptError.PUSH_SIZE);
 
                                     var num = _stack.Pop();
@@ -953,7 +957,7 @@ namespace CafeLib.BsvSharp.Scripting
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsValidMaxOpsPerScript(int nOpCount) => nOpCount <= RootService.Network.Consensus.MaxOperationsPerScript;
+        private bool IsValidMaxOpsPerScript(int nOpCount) => nOpCount <= RootService.GetNetwork(_networkType).Consensus.MaxOperationsPerScript;
 
         // ReSharper disable once UnusedParameter.Local
         private static bool IsOpcodeDisabled(Opcode opcode, ScriptFlags flags)
