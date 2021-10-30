@@ -5,10 +5,8 @@
 
 using System;
 using System.Buffers;
-using CafeLib.BsvSharp.Crypto;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
-using CafeLib.BsvSharp.Numerics;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
@@ -38,7 +36,7 @@ namespace CafeLib.BsvSharp.Chain
         private uint _bits;
         private uint _nonce;
 
-        private readonly UInt256 _hash = new UInt256();
+        private readonly UInt256 _hash;
         public UInt256 Hash => _hash;
 
         public int Height { get; set; }
@@ -53,6 +51,7 @@ namespace CafeLib.BsvSharp.Chain
 
         public BlockHeader()
         {
+            _hash = new UInt256();
         }
 
         /// <summary>
@@ -65,6 +64,7 @@ namespace CafeLib.BsvSharp.Chain
         /// <param name="bits">the current difficulty target in compact format</param>
         /// <param name="nonce">the nonce field that miners use to find a sha256 hash value that matches the difficulty target</param>
         public BlockHeader(int version, UInt256 prevBlockHash, UInt256 merkleRootHash, uint timestamp, uint bits, uint nonce)
+            : this()
         {
             _version = version;
             _prevBlockHash = prevBlockHash;
@@ -96,19 +96,6 @@ namespace CafeLib.BsvSharp.Chain
             var reader = new ByteSequenceReader(buffer);
             return blockHeader.TryReadBlockHeader(ref reader) ? blockHeader : throw new FormatException(nameof(buffer));
         }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="ros"></param>
-        ///// <returns></returns>
-        //public bool TryReadBlockHeader(ref ReadOnlyByteSequence ros)
-        //{
-        //    var r = new ByteSequenceReader(ros);
-        //    if (!TryReadBlockHeader(ref r)) return false;
-        //    ros = ros.Data.Slice(r.Data.Consumed);
-        //    return true;
-        //}
 
         public bool TryReadBlockHeader(ref ByteSequenceReader r)
         {
