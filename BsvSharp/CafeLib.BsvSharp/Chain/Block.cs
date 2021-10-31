@@ -44,14 +44,6 @@ namespace CafeLib.BsvSharp.Chain
             Txs = new TxCollection(txs);
         }
 
-        //public bool TryParseBlock(ref ReadOnlyByteSequence ros, int height, IBlockParser bp)
-        //{
-        //    var r = new ByteSequenceReader(ros);
-        //    if (!TryParseBlock(ref r, height, bp)) return false;
-        //    ros = ros.Data.Slice(r.Data.Consumed);
-        //    return true;
-        //}
-
         public bool TryReadBlock(ref ReadOnlyByteSequence ros)
         {
             var r = new ByteSequenceReader(ros);
@@ -59,36 +51,6 @@ namespace CafeLib.BsvSharp.Chain
             ros = ros.Data.Slice(r.Data.Consumed);
             return true;
         }
-
-        //public bool TryParseBlock(ref ByteSequenceReader r, int height, IBlockParser bp)
-        //{
-        //    var offset = r.Data.Consumed;
-
-        //    if (!TryReadBlockHeader(ref r)) goto fail;
-
-        //    Height = height;
-
-        //    bp.BlockStart(this, offset);
-
-        //    if (!r.TryReadVariant(out var count)) goto fail;
-
-        //    Txs = new Chain.Transaction[count];
-
-        //    for (var i = 0L; i < count; i++)
-        //    {
-        //        var t = new Chain.Transaction();
-        //        Txs[i] = t;
-        //        if (!t.TryParseTransaction(ref r, bp)) goto fail;
-        //    }
-
-        //    if (!VerifyMerkleRoot()) goto fail;
-
-        //    bp.BlockParsed(this, r.Data.Consumed);
-
-        //    return true;
-        //fail:
-        //    return false;
-        //}
 
         private bool TryReadBlock(ref ByteSequenceReader r)
         {

@@ -475,7 +475,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// </summary>
         /// <param name="r"></param>
         /// <returns></returns>
-        public bool TryReadTransaction(ref ByteSequenceReader r)
+        internal bool TryReadTransaction(ref ByteSequenceReader r)
         {
             var start = r.Data.Position;
 
