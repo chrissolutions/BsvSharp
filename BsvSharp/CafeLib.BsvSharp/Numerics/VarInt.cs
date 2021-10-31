@@ -41,10 +41,10 @@ namespace CafeLib.BsvSharp.Numerics
         }
 
         public static implicit operator byte[](VarInt rhs) => rhs.ToArray();
-        public static explicit operator VarInt(int rhs) => new VarInt(rhs);
-        public static explicit operator VarInt(uint rhs) => new VarInt(rhs);
-        public static explicit operator VarInt(long rhs) => new VarInt(rhs);
-        public static explicit operator VarInt(ulong rhs) => new VarInt(rhs);
+        public static explicit operator VarInt(int rhs) => new(rhs);
+        public static explicit operator VarInt(uint rhs) => new(rhs);
+        public static explicit operator VarInt(long rhs) => new(rhs);
+        public static explicit operator VarInt(ulong rhs) => new(rhs);
 
         public byte[] ToArray() => AsBytes(Value);
 
@@ -107,7 +107,7 @@ namespace CafeLib.BsvSharp.Numerics
                 len = SizeofVarChar; 
                 prefix = 0xfd; 
             }
-            else if (unsigned <= 0xffff_ffff)
+            else if (unsigned <= 0xffffffff)
             {
                 len = SizeofVarInt; 
                 prefix = 0xfe; 

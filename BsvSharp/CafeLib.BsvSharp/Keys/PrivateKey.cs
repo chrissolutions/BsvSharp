@@ -130,10 +130,10 @@ namespace CafeLib.BsvSharp.Keys
 
         public byte[] ToArray() => _keyData;
 
-        public static PrivateKey FromHex(string hex, bool compressed = true) => new PrivateKey(new UInt256(hex, true), compressed);
+        public static PrivateKey FromHex(string hex, bool compressed = true) => new(new UInt256(hex, true), compressed);
         public static PrivateKey FromBase58(string base58) => new Base58PrivateKey(base58).GetKey();
         public static PrivateKey FromWif(string wif) => new Base58PrivateKey(wif).GetKey();
-        public static PrivateKey FromRandom() => new PrivateKey();
+        public static PrivateKey FromRandom() => new();
 
         /// <summary>
         /// Derive a new private key.
@@ -159,7 +159,6 @@ namespace CafeLib.BsvSharp.Keys
 
             Buffer.BlockCopy(l, 0, ll, 0, 32);
             Buffer.BlockCopy(l, 32, lr, 0, 32);
-            var ccChild = lr;
 
             var parse256LL = new BigInteger(1, ll);
             var kPar = new BigInteger(1, _keyData);
@@ -175,7 +174,7 @@ namespace CafeLib.BsvSharp.Keys
             if (keyBytes.Length < 32)
                 keyBytes = new byte[32 - keyBytes.Length].Concat(keyBytes);
 
-            return (new PrivateKey(new UInt256(keyBytes)), new UInt256(ccChild));
+            return (new PrivateKey(new UInt256(keyBytes)), new UInt256(lr));
         }
 
         /// <summary>

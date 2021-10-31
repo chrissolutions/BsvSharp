@@ -110,12 +110,12 @@ namespace CafeLib.BsvSharp.Keys
             return bytes;
         }
 
-        public Base58ExtPublicKey ToBase58() => new Base58ExtPublicKey(this);
+        public Base58ExtPublicKey ToBase58() => new(this);
         public override string ToString() => ToBase58().ToString();
 
         public override int GetHashCode() => base.GetHashCode() ^ PublicKey.GetHashCode();
 
-        public bool Equals(ExtPublicKey o) => !(o is null) && base.Equals(o) && PublicKey == o.PublicKey;
+        public bool Equals(ExtPublicKey o) => o is not null && base.Equals(o) && PublicKey == o.PublicKey;
         public override bool Equals(object obj) => obj is ExtPublicKey key && this == key;
 
         public static bool operator ==(ExtPublicKey x, ExtPublicKey y) => x?.Equals(y) ?? y is null;

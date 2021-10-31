@@ -25,10 +25,10 @@ namespace CafeLib.BsvSharp.Numerics
             _buffer = new ByteArrayBuffer(bytes);
         }
 
-        public static readonly VarType Empty = new VarType();
+        public static readonly VarType Empty = new();
         public static readonly VarType Zero = Empty;
         public static readonly VarType False = Empty;
-        public static readonly VarType True = new VarType(new byte[] { 1 });
+        public static readonly VarType True = new(new byte[] { 1 });
 
         public bool IsEmpty => Length == 0;
         public int Length => Buffer.Length;
@@ -305,7 +305,7 @@ namespace CafeLib.BsvSharp.Numerics
         public override bool Equals(object obj) => obj is VarType type && this == type;
         public bool Equals(VarType rhs) => Buffer.Span.SequenceEqual(rhs.Buffer.Span);
 
-        public static implicit operator VarType(byte[] rhs) => new VarType(rhs);
+        public static implicit operator VarType(byte[] rhs) => new(rhs);
         public static implicit operator byte[](VarType rhs) => rhs.ToArray();
 
         public static implicit operator bool(VarType rhs) => rhs.ToBool();

@@ -86,15 +86,15 @@ namespace CafeLib.BsvSharp.Crypto
             var c = AesEncryption.Encrypt(data, _kE.Span, iv);
             //var c = AESCBC_Encrypt(data.ToArray(), _kE.ToBytes(), iv);
             var d = Hashes.HmacSha256(_kM.Span, c).Span;
-            if (ShortTag) d = d.Slice(0, 4);
+            if (ShortTag) d = d[..4];
 
             var key = NoKey ? ReadOnlyByteSpan.Empty : _privateKey.CreatePublicKey().Data;
             var len = key.Length + c.Length + d.Length;
             var bytes = new byte[len];
             var result = bytes.AsSpan();
-            key.CopyTo(result.Slice(0));
-            c.CopyTo(result.Slice(key.Length));
-            d.CopyTo(result.Slice(key.Length + c.Length));
+            key.CopyTo(result[..]);
+            c.CopyTo(result[key.Length..]);
+            d.CopyTo(result[(key.Length + c.Length)..]);
             return bytes;
         }
 
@@ -105,8 +105,8 @@ namespace CafeLib.BsvSharp.Crypto
             // 16 byte IV, <encrypted data>, 4 (ShortTag) or 32 byte d (signature)
             // NoKey == false
             // 33 byte pub key, 16 byte IV, <encrypted data>, 4 (ShortTag) or 32 byte d (signature)
-            var key = NoKey ? ReadOnlyByteSpan.Empty : data.Slice(0, 33);
-            var cd = NoKey ? data : data.Slice(33);
+            var key = NoKey ? ReadOnlyByteSpan.Empty : data[..33];
+            var cd = NoKey ? data : data[33..];
             var dLen = ShortTag ? 4 : 32;
             var d = cd.Slice(cd.Length - dLen);
             var c = cd.Slice(0, cd.Length - dLen);
@@ -119,7 +119,7 @@ namespace CafeLib.BsvSharp.Crypto
 
             var d1 = Hashes.HmacSha256(_kM.Span, c).Span;
             if (ShortTag)
-                d1 = d1.Slice(0, 4);
+                d1 = d1[..4];
 
             var ok = d.ToHex() == d1.ToHex();
             if (!ok)
