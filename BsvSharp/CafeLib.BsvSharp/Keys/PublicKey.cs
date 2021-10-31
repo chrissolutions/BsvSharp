@@ -72,11 +72,9 @@ namespace CafeLib.BsvSharp.Keys
         public PublicKey(ReadOnlyByteSpan bytes)
             : this()
         {
-            if (bytes.Length > 0 && bytes.Length == PredictLength(bytes[0]))
-            {
-                _keyData = new byte[bytes.Length];
-                bytes.CopyTo(_keyData);
-            }
+            if (bytes.Length <= 0 || bytes.Length != PredictLength(bytes[0])) return;
+            _keyData = new byte[bytes.Length];
+            bytes.CopyTo(_keyData);
         }
 
         /// <summary>
@@ -103,7 +101,7 @@ namespace CafeLib.BsvSharp.Keys
             try
             {
                 var vch = Encoders.Hex.Decode(hex);
-                if ((vch.Length == CompressedLength || vch.Length == UncompressedLength) && vch.Length == PredictLength(vch[0]))
+                if (vch.Length is CompressedLength or UncompressedLength && vch.Length == PredictLength(vch[0]))
                     _keyData = vch;
             }
             catch
@@ -143,9 +141,12 @@ namespace CafeLib.BsvSharp.Keys
         /// <returns>0, 33, or 65</returns>
         private static int PredictLength(byte firstByte)
         {
-            if (firstByte == 2 || firstByte == 3) return CompressedLength;
-            if (firstByte == 4 || firstByte == 6 || firstByte == 7) return UncompressedLength;
-            return 0;
+            return firstByte switch
+            {
+                2 or 3 => CompressedLength,
+                4 or 6 or 7 => UncompressedLength,
+                _ => 0
+            };
         }
 
         public ReadOnlyByteSpan Data => _keyData;
@@ -185,7 +186,7 @@ namespace CafeLib.BsvSharp.Keys
             // The header byte: 0x1B = first key with even y, 0x1C = first key with odd y,
             //                  0x1D = second key with even y, 0x1E = second key with odd y
 
-            if (header < 27 || header > 34)
+            if (header is < 27 or > 34)
                 throw new ArgumentException("Header byte out of range: " + header);
 
             var r = new BigInteger(1, signatureEncoded[1..33]);
