@@ -97,25 +97,24 @@ namespace CafeLib.BsvSharp.Numerics
             byte prefix;
             var unsigned = (ulong)value;
 
-            if (unsigned <= 0xfc)
+            switch (unsigned)
             {
-                len = SizeofVarByte;
-                prefix = 0;
-            }
-            else if (unsigned <= 0xffff)
-            {
-                len = SizeofVarChar; 
-                prefix = 0xfd; 
-            }
-            else if (unsigned <= 0xffffffff)
-            {
-                len = SizeofVarInt; 
-                prefix = 0xfe; 
-            }
-            else
-            {
-                len = SizeofVarLong; 
-                prefix = 0xff;
+                case <= 0xfc:
+                    len = SizeofVarByte;
+                    prefix = 0;
+                    break;
+                case <= 0xffff:
+                    len = SizeofVarChar; 
+                    prefix = 0xfd;
+                    break;
+                case <= 0xffffffff:
+                    len = SizeofVarInt; 
+                    prefix = 0xfe;
+                    break;
+                default:
+                    len = SizeofVarLong; 
+                    prefix = 0xff;
+                    break;
             }
 
             return (len, prefix);
