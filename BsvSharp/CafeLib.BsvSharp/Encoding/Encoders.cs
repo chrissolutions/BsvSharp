@@ -11,14 +11,14 @@ namespace CafeLib.BsvSharp.Encoding
 {
     public static class Encoders
     {
-        private static readonly Lazy<HexEncoder> LazyHex = new Lazy<HexEncoder>(() => new HexEncoder(), true);
-        private static readonly Lazy<HexReverseEncoder> LazyHexReverse = new Lazy<HexReverseEncoder>(() => new HexReverseEncoder(), true);
-        private static readonly Lazy<Base58Encoder> LazyBase58 = new Lazy<Base58Encoder>(() => new Base58Encoder());
-        private static readonly Lazy<Base58CheckEncoder> LazyBase58Check = new Lazy<Base58CheckEncoder>(() => new Base58CheckEncoder());
-        private static readonly Lazy<Base64Encoder> LazyBase64 = new Lazy<Base64Encoder>(() => new Base64Encoder());
-        private static readonly Lazy<AsciiEncoder> LazyAscii = new Lazy<AsciiEncoder>(() => new AsciiEncoder());
-        private static readonly Lazy<Utf8Encoder> LazyUtf8 = new Lazy<Utf8Encoder>(() => new Utf8Encoder());
-        private static readonly Lazy<EndianEncoder> LazyEndian = new Lazy<EndianEncoder>(() => new EndianEncoder());
+        private static readonly Lazy<HexEncoder> LazyHex = new(() => new HexEncoder(), true);
+        private static readonly Lazy<HexReverseEncoder> LazyHexReverse = new(() => new HexReverseEncoder(), true);
+        private static readonly Lazy<Base58Encoder> LazyBase58 = new(() => new Base58Encoder());
+        private static readonly Lazy<Base58CheckEncoder> LazyBase58Check = new(() => new Base58CheckEncoder());
+        private static readonly Lazy<Base64Encoder> LazyBase64 = new(() => new Base64Encoder());
+        private static readonly Lazy<AsciiEncoder> LazyAscii = new(() => new AsciiEncoder());
+        private static readonly Lazy<Utf8Encoder> LazyUtf8 = new(() => new Utf8Encoder());
+        private static readonly Lazy<EndianEncoder> LazyEndian = new(() => new EndianEncoder());
 
         /// <summary>
         /// Encodes a sequence of bytes as hexadecimal digits where:

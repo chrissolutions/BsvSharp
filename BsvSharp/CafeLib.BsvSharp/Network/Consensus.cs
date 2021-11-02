@@ -47,8 +47,8 @@ namespace CafeLib.BsvSharp.Network
          * is also used for BIP9 deployments.
          * Examples: 1916 for 95%, 1512 for testchains.
          */
-        public UInt32 RuleChangeActivationThreshold;
-        public UInt32 MinerConfirmationWindow;
+        public uint RuleChangeActivationThreshold;
+        public uint MinerConfirmationWindow;
 
         public Bip9Deployment[] Deployments;
 
@@ -56,8 +56,8 @@ namespace CafeLib.BsvSharp.Network
         public UInt256 ProofOfWorkLimit;
         public bool AllowMinDifficultyBlocks;
         public bool NoRetargeting;
-        public Int64 ProofOfWorkTargetSpacing;
-        public Int64 ProofOfWorkTargetTimespan;
+        public long ProofOfWorkTargetSpacing;
+        public long ProofOfWorkTargetTimespan;
         public UInt256 MinimumChainWork;
         public UInt256 DefaultAssumeValid;
 

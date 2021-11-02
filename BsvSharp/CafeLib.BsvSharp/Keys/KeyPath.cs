@@ -41,7 +41,7 @@ namespace CafeLib.BsvSharp.Keys
         /// Creates an empty path (zero indices) with FromPriv set to null.
         /// </summary>
         public KeyPath()
-            : this(new uint[0])
+            : this(Array.Empty<uint>())
         {
         }
 
@@ -224,12 +224,12 @@ namespace CafeLib.BsvSharp.Keys
 		{
 			get
             {
-                if (Count == 0) throw new InvalidOperationException("No index found in this KzHDKeyPath");
+                if (Count == 0) throw new InvalidOperationException("No index found");
                 return (_indices[Count - 1] & HardenedBit) != 0;
             }
         }
 
-        public static implicit operator KeyPath(string s) => new KeyPath(s);
+        public static implicit operator KeyPath(string s) => new(s);
 
         #region Helpers
 

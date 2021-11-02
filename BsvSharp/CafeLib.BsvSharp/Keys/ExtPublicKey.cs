@@ -5,13 +5,13 @@
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.Core.Buffers;
 
-// ReSharper disable NonReadonlyMemberInGetHashCode
-
 namespace CafeLib.BsvSharp.Keys
 {
+    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
     public class ExtPublicKey : ExtKey
     {
         public PublicKey PublicKey { get; private set; }
