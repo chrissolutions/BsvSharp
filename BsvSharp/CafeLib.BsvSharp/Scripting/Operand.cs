@@ -259,19 +259,19 @@ namespace CafeLib.BsvSharp.Scripting
                 } 
                 else if (opcode == (byte)Opcode.OP_PUSHDATA2)
                 {
-                    if (!r.TryReadLittleEndian(out UInt16 size2)) goto fail;
+                    if (!r.TryReadLittleEndian(out ushort size2)) goto fail;
                     nSize = size2;
                 } 
                 else if (opcode == (byte)Opcode.OP_PUSHDATA4)
                 {
-                    if (!r.TryReadLittleEndian(out UInt32 size4)) goto fail;
+                    if (!r.TryReadLittleEndian(out uint size4)) goto fail;
                     nSize = size4;
                 }
 
                 if (nSize >= 0)
                 {
                     if (r.Data.Remaining < nSize) goto fail;
-                    Data = new VarType(r.Data.Sequence.Slice(r.Data.Position, (Int32)nSize).ToArray());
+                    Data = new VarType(r.Data.Sequence.Slice(r.Data.Position, (int)nSize).ToArray());
                     r.Data.Advance(nSize);
                 }
             }
@@ -308,7 +308,7 @@ namespace CafeLib.BsvSharp.Scripting
                 case Opcode.OP_1NEGATE:
                     return CodeName;
 
-                case var _ when Code < Opcode.OP_PUSHDATA1:
+                case < Opcode.OP_PUSHDATA1:
                     return $"{(Data.Length > 0 ? Encoders.Hex.EncodeSpan(Data) : "")}";
 
                 case Opcode.OP_PUSHDATA1:
