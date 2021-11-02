@@ -108,8 +108,8 @@ namespace CafeLib.BsvSharp.Crypto
             var key = NoKey ? ReadOnlyByteSpan.Empty : data[..33];
             var cd = NoKey ? data : data[33..];
             var dLen = ShortTag ? 4 : 32;
-            var d = cd.Slice(cd.Length - dLen);
-            var c = cd.Slice(0, cd.Length - dLen);
+            var d = cd[^dLen..];
+            var c = cd[..^dLen];
 
             if (!NoKey)
             {

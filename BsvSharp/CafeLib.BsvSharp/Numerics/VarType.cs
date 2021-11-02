@@ -6,6 +6,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Scripting;
@@ -14,6 +15,7 @@ using CafeLib.Core.Buffers.Arrays;
 
 namespace CafeLib.BsvSharp.Numerics
 {
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public struct VarType : IEquatable<VarType>
     {
         private ByteArrayBuffer _buffer;
@@ -35,8 +37,19 @@ namespace CafeLib.BsvSharp.Numerics
         public byte FirstByte => Buffer[0];
         public byte LastByte => Buffer[Length - 1];
 
+        /// <summary>
+        /// Buffer indexer.
+        /// </summary>
+        /// <param name="index"></param>
+        public byte this[Index index] => Span[index];
 
-        public VarType Slice(int start, int length) => new VarType(Buffer.Span.Slice(start, length));
+        /// <summary>
+        /// Buffer slice.
+        /// </summary>
+        /// <param name="range"></param>
+        public VarType this[Range range] => new(Span[range]);
+
+        public VarType Slice(int start, int length) => new(Span[start..length]);
 
         public override string ToString() => Encoders.Hex.EncodeSpan(Buffer.Span);
 

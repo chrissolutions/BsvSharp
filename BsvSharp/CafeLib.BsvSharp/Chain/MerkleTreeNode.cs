@@ -90,6 +90,5 @@ namespace CafeLib.BsvSharp.Chain
         {
             return Hashes.Hash256(LeftHash);
         }
-
     }
 }
