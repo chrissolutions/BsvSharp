@@ -4,6 +4,7 @@
 #endregion
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Extensions;
@@ -15,6 +16,7 @@ using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Transactions
 {
+    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
     public class TxOut : ITxId, IDataSerializer, IEquatable<TxOut>
     {
         private ScriptBuilder _scriptBuilder;
@@ -22,7 +24,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <summary>
         /// Empty transaction output
         /// </summary>
-        public static readonly TxOut Empty = new TxOut();
+        public static readonly TxOut Empty = new();
 
         /// <summary>
         /// Owner Transaction Hash.
@@ -70,7 +72,7 @@ namespace CafeLib.BsvSharp.Transactions
         }
 
         /// <summary>
-        /// 
+        /// TxOut constructor.
         /// </summary>
         /// <param name="txHash"></param>
         /// <param name="index"></param>
@@ -96,18 +98,6 @@ namespace CafeLib.BsvSharp.Transactions
             _scriptBuilder = new ScriptBuilder(script);
             return true;
         }
-
-        //public void Write(BinaryWriter s)
-        //{
-        //    s.Write(_amount);
-        //    _script.Write(s);
-        //}
-
-        //public void Read(BinaryReader s)
-        //{
-        //    _amount = s.ReadInt64();
-        //    _script.Read(s);
-        //}
 
         /// <summary>
         /// Returns true is satoshi amount is within valid range
@@ -146,7 +136,7 @@ namespace CafeLib.BsvSharp.Transactions
 
         public bool Equals(TxOut other)
         {
-            return !(other is null) && Equals(_scriptBuilder, other._scriptBuilder) && TxHash.Equals(other.TxHash) && Index == other.Index && Amount.Equals(other.Amount) && IsChangeOutput == other.IsChangeOutput;
+            return other is not null && Equals(_scriptBuilder, other._scriptBuilder) && TxHash.Equals(other.TxHash) && Index == other.Index && Amount.Equals(other.Amount) && IsChangeOutput == other.IsChangeOutput;
         }
 
         public override bool Equals(object obj)
