@@ -14,7 +14,7 @@ using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Scripting
 {
-    public class ScriptEvaluator
+    internal class ScriptEvaluator
     {
         private readonly ScriptStack<VarType> _stack;
 

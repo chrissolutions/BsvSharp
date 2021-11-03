@@ -9,20 +9,20 @@ namespace CafeLib.BsvSharp.Units
 {
     public readonly struct Amount : IComparable<Amount>, IComparable
     {
-        public static Amount Zero = new Amount(0L);
+        public static Amount Zero = new(0L);
         public static Amount Null => -1L;
 
         /// <summary>
         /// This is a value slightly higher than the maximum number of satoshis that will ever be in circulation: 21 million coins, 2.1 quadrillion satoshis.
         /// 2_100_000_000_000_000
         /// </summary>
-        public static Amount MaxValue = new Amount(2_100_000_000_000_000);
+        public static Amount MaxValue = new(2_100_000_000_000_000);
 
         /// <summary>
         /// This is the negated value slightly higher than the maximum number of satoshis that will ever be in circulation: -21 million coins, -2.1 quadrillion satoshis.
         /// -2_100_000_000_000_000
         /// </summary>
-        public static Amount MinValue = new Amount(-2_100_000_000_000_000);
+        public static Amount MinValue = new(-2_100_000_000_000_000);
 
         /// <summary>
         /// long.MaxValue is 9_223_372_036_854_775_807
@@ -31,37 +31,32 @@ namespace CafeLib.BsvSharp.Units
         public long Satoshis { get; }
 
         public Amount(long satoshis = long.MinValue)
+            : this (satoshis, BitcoinUnit.Satoshi)
         {
-            Satoshis = satoshis;
         }
 
-        public Amount(ulong satoshis)
+        /// <summary>
+        /// Amount constructor
+        /// </summary>
+        /// <param name="amount">amount</param>
+        /// <param name="unit">bitcoin unit</param>
+        public Amount(long amount, BitcoinUnit unit)
         {
-            checked { Satoshis = (long)satoshis; }
+            checked { Satoshis = amount * (long)unit; }
         }
 
         /// <summary>
         /// decimal has 28-29 significant digits with a exponent range to shift that either
         /// all to the left of the decimal or to the right.
         /// </summary>
-        /// <param name="amount"></param>
-        /// <param name="unit"></param>
+        /// <param name="amount">amount</param>
+        /// <param name="unit">bitcoin unit</param>
         public Amount(decimal amount, BitcoinUnit unit)
         {
             checked
             {
                 Satoshis = (long)(amount * (long)unit);
             }
-        }
-
-        public Amount(long amount, BitcoinUnit unit)
-        {
-            checked { Satoshis = amount * (long)unit; }
-        }
-
-        public Amount(ulong amount, BitcoinUnit unit)
-        {
-            checked { Satoshis = (long)amount * (long)unit; }
         }
 
         public static bool TryParse(string text, BitcoinUnit unit, out Amount amount)
@@ -119,7 +114,7 @@ namespace CafeLib.BsvSharp.Units
         public override bool Equals(object obj) => obj is Amount amount && this == amount;
         public bool Equals(Amount o) => Satoshis == o.Satoshis;
 
-        public static implicit operator Amount(long value) => new Amount(value);
+        public static implicit operator Amount(long value) => new(value);
         public static implicit operator long(Amount value) => value.Satoshis;
 
         public static bool operator ==(Amount x, Amount y) => x.Equals(y);
@@ -141,7 +136,7 @@ namespace CafeLib.BsvSharp.Units
                 ulong ul => Satoshis.CompareTo(ul),
                 int i => Satoshis.CompareTo(i),
                 uint ui => Satoshis.CompareTo(ui),
-                _ => throw new NotImplementedException(nameof(obj))
+                _ => throw new NotSupportedException(nameof(obj))
             };
         }
 

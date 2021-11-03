@@ -28,8 +28,8 @@ namespace CafeLib.BsvSharp.Scripting
 
         private static readonly IEncoder Hex = Encoders.HexReverse;
 
-        public static readonly ScriptNum Zero = new ScriptNum(0);
-        public static readonly ScriptNum One = new ScriptNum(1);
+        public static readonly ScriptNum Zero = new(0);
+        public static readonly ScriptNum One = new(1);
 
         public class OverflowError : Exception { public OverflowError(string message) : base(message) { } }
         public class MinEncodeError : Exception { public MinEncodeError(string message) : base(message) { } }
@@ -56,7 +56,7 @@ namespace CafeLib.BsvSharp.Scripting
         {
         }
 
-        public VarType ToValType() => new VarType(ToArray());
+        public VarType ToValType() => new(ToArray());
 
         public string GetHex() => Hex.Encode(ToArray());
 
