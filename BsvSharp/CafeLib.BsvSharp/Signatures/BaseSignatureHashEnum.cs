@@ -1,4 +1,6 @@
-﻿namespace CafeLib.BsvSharp.Signatures
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace CafeLib.BsvSharp.Signatures
 {
     /// <summary>
     /// Base signature hash types
@@ -7,6 +9,7 @@
     /// c99c49da4c38af669dea436d3e73780dfdb6c1ecf9958baa52960e8baee30e73 for an
     /// example where an unsupported base sig hash of 0 was used.
     /// </summary>
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public enum BaseSignatureHashEnum : byte
     {
         Unsupported = 0,

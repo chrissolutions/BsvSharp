@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
@@ -6,6 +7,7 @@ using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Signatures
 {
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public struct Signature : IEquatable<Signature>
     {
         private byte[] _data;
@@ -21,7 +23,7 @@ namespace CafeLib.BsvSharp.Signatures
         /// <summary>
         /// Null signature.
         /// </summary>
-        public static readonly Signature Empty = new Signature();
+        public static readonly Signature Empty = new();
 
         /// <summary>
         /// Signature constructor.
@@ -57,9 +59,9 @@ namespace CafeLib.BsvSharp.Signatures
 
         public bool IsTxDerEncoding() => IsTxDerEncoding(Data);
 
-        public static Signature FromHex(string hex) => new Signature(Encoders.Hex.Decode(hex));
+        public static Signature FromHex(string hex) => new(Encoders.Hex.Decode(hex));
 
-        public static Signature FromBase64(string base64) => new Signature(Encoders.Base64.Decode(base64));
+        public static Signature FromBase64(string base64) => new(Encoders.Base64.Decode(base64));
 
         /// <summary>
         /// Determine whether a signature is normalized (lower-S).

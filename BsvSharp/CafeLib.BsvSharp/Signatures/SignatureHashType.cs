@@ -1,8 +1,11 @@
-﻿namespace CafeLib.BsvSharp.Signatures
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace CafeLib.BsvSharp.Signatures
 {
     /// <summary>
     /// Signature hash type.
     /// </summary>
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class SignatureHashType
     {
         private SignatureHashEnum SignatureHash => (SignatureHashEnum)RawSigHashType;

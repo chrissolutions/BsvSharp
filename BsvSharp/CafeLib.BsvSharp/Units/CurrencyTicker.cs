@@ -1,5 +1,8 @@
-﻿namespace CafeLib.BsvSharp.Units 
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace CafeLib.BsvSharp.Units 
 {
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public enum CurrencyTicker 
     {
         // "Crypto" currency symbols

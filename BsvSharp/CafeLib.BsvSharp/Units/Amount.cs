@@ -4,9 +4,11 @@
 #endregion
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CafeLib.BsvSharp.Units
 {
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public readonly struct Amount : IComparable<Amount>, IComparable
     {
         public static Amount Zero = new(0L);

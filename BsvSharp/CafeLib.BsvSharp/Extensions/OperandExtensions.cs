@@ -4,10 +4,12 @@
 #endregion
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using CafeLib.BsvSharp.Scripting;
 
 namespace CafeLib.BsvSharp.Extensions
 {
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     public static class OperandExtensions
     {
         private static readonly IDictionary<Opcode, string> OpcodeMap = new Dictionary<Opcode, string>

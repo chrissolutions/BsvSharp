@@ -3,6 +3,7 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
+using System.Diagnostics.CodeAnalysis;
 using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
@@ -22,6 +23,7 @@ namespace CafeLib.BsvSharp.Transactions
     /// Not used for making dynamic changes (building scripts).
     /// See <see cref="Transaction"/> when dynamically building a transaction input.
     /// </summary>
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class TxIn : ITxId, IDataSerializer
     {
         /// <summary>
@@ -72,7 +74,7 @@ namespace CafeLib.BsvSharp.Transactions
 
         public uint SequenceNumber { get; set; }
 
-        public Amount Amount { get; private set; }
+        public Amount Amount { get; }
 
         public Script ScriptSig => _scriptBuilder;
 
@@ -133,7 +135,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="utxoScript"></param>
         /// <param name="sequenceNumber"></param>
         /// <param name="scriptBuilder"></param>
-        public TxIn(UInt256 prevTxId, int outIndex, Amount amount, Script utxoScript = new Script(), uint sequenceNumber = SequenceFinal, ScriptBuilder scriptBuilder = null)
+        public TxIn(UInt256 prevTxId, int outIndex, Amount amount, Script utxoScript = new(), uint sequenceNumber = SequenceFinal, ScriptBuilder scriptBuilder = null)
             : this(new OutPoint(prevTxId, outIndex), amount, utxoScript, sequenceNumber, scriptBuilder)
         {
         }

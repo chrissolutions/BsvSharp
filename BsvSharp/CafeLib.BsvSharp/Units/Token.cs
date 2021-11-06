@@ -4,6 +4,7 @@
 #endregion
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CafeLib.BsvSharp.Units
 {
@@ -11,6 +12,7 @@ namespace CafeLib.BsvSharp.Units
     /// In practice, the value of an amount is often required in terms of a non-Bitcoin fiat or foreign currency.
     /// There are three quantities
     /// </summary>
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class Token
     {
         private Amount _amount;
@@ -44,7 +46,7 @@ namespace CafeLib.BsvSharp.Units
         }
 
 
-        public static implicit operator Token(Amount value) => new Token(value);
+        public static implicit operator Token(Amount value) => new(value);
 
         public bool HasAll => ValueSetOrder > TokenValues.R;
         public bool HasAmount => ValueSetOrder > TokenValues.R || ValueSetOrder == TokenValues.S;
@@ -63,11 +65,11 @@ namespace CafeLib.BsvSharp.Units
 
         public Amount? Amount
         {
-            get => HasAmount ? _amount : (Amount?) null;
-            set => _amount = value ?? BsvSharp.Units.Amount.Zero;
+            get => HasAmount ? _amount : null;
+            set => _amount = value ?? Units.Amount.Zero;
         }
 
-        public long? Satoshis => HasAmount ? _amount.Satoshis : (long?)null;
+        public long? Satoshis => HasAmount ? _amount.Satoshis : null;
 
         public ExchangeRate Rate
         {
@@ -79,7 +81,7 @@ namespace CafeLib.BsvSharp.Units
 
         public decimal? FiatValue
         {
-            get => HasFiat ? _fiatValue : (decimal?)null; 
+            get => HasFiat ? _fiatValue : null; 
             set => _fiatValue = value ?? decimal.Zero;
         }
 
@@ -131,11 +133,11 @@ namespace CafeLib.BsvSharp.Units
                     break;
 
                 case TokenValues.ZF:
-                    _amount = BsvSharp.Units.Amount.Zero;
+                    _amount = Units.Amount.Zero;
                     break;
 
                 default: 
-                    throw new NotImplementedException();
+                    throw new NotSupportedException(nameof(ValueSetOrder));
             }
         }
 
@@ -182,8 +184,8 @@ namespace CafeLib.BsvSharp.Units
                         ValueSetOrder = TokenValues.RS;
                         break;
 
-                    default: 
-                        throw new NotImplementedException();
+                    default:
+                        throw new NotSupportedException(nameof(ValueSetOrder));
                 }
             } 
             else 
@@ -217,8 +219,8 @@ namespace CafeLib.BsvSharp.Units
                         ValueSetOrder = TokenValues.R;
                         break;
 
-                    default: 
-                        throw new NotImplementedException();
+                    default:
+                        throw new NotSupportedException(nameof(ValueSetOrder));
                 }
             }
 
@@ -268,8 +270,8 @@ namespace CafeLib.BsvSharp.Units
                         ValueSetOrder = TokenValues.RF;
                         break;
 
-                    default: 
-                        throw new NotImplementedException();
+                    default:
+                        throw new NotSupportedException(nameof(ValueSetOrder));
                 }
             } 
             else
@@ -304,8 +306,8 @@ namespace CafeLib.BsvSharp.Units
                         ValueSetOrder = TokenValues.R;
                         break;
 
-                    default: 
-                        throw new NotImplementedException();
+                    default:
+                        throw new NotSupportedException(nameof(ValueSetOrder));
                 }
             }
 
@@ -348,8 +350,8 @@ namespace CafeLib.BsvSharp.Units
                         ValueSetOrder = TokenValues.FR;
                         break;
 
-                    default: 
-                        throw new NotImplementedException();
+                    default:
+                        throw new NotSupportedException(nameof(ValueSetOrder));
                 }
             } 
             else 
@@ -379,8 +381,8 @@ namespace CafeLib.BsvSharp.Units
                         ValueSetOrder = _fiatValue == decimal.Zero ? TokenValues.ZF : TokenValues.F;
                         break;
 
-                    default: 
-                        throw new NotImplementedException();
+                    default:
+                        throw new NotSupportedException(nameof(ValueSetOrder));
                 }
             }
 

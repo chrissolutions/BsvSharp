@@ -22,7 +22,7 @@ namespace CafeLib.BsvSharp.Extensions
             var ecKey = new ECKey(privateKey.ToArray(), true);
             var q = ecKey.GetPublicKeyParameters().Q;
 
-            //Pub key (q) is composed into X and Y, the compressed form only include X, which can derive Y along with 02 or 03 prepent depending on whether Y in even or odd.
+            //Pub key (q) is composed into X and Y, the compressed form only include X, which can derive Y along with 02 or 03 prepended depending on whether Y in even or odd.
             var result = Secp256k1.Curve.CreatePoint(q.X.ToBigInteger(), q.Y.ToBigInteger(), privateKey.IsCompressed).GetEncoded();
             return new PublicKey(result);
         }

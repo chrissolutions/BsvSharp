@@ -5,7 +5,6 @@
 
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Scripting;
-using CafeLib.BsvSharp.Transactions;
 
 namespace CafeLib.BsvSharp.Signatures
 {

@@ -1,8 +1,10 @@
-﻿using CafeLib.BsvSharp.Encoding;
+﻿using System.Diagnostics.CodeAnalysis;
+using CafeLib.BsvSharp.Encoding;
 using CafeLib.Core.Buffers;
 
 namespace CafeLib.BsvSharp.Extensions
 {
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static class BufferExtensions
     {
         public static string ToHex(this ByteSpan data) => Encoders.Hex.Encode(data);
