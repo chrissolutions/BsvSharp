@@ -6,9 +6,11 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using CafeLib.BsvSharp.Api.WhatsOnChain.Models.Mapi;
 using CafeLib.BsvSharp.Network;
 using CafeLib.Core.Extensions;
 using CafeLib.Web.Request;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace CafeLib.BsvSharp.Api.UnitTests 
@@ -74,14 +76,22 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         }
 
         [Theory]
-        [InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR", 107297900, 0)]
-        public async Task GetAddressUtxos_Test(string address, long value, int position)
+        [InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR")]
+        public async Task GetAddressUtxos_Spent_Test(string address)
         {
             var unspentTransactions = await Api.GetAddressUtxos(address);
-            Assert.NotEmpty(unspentTransactions);
-            Assert.Equal(value, unspentTransactions.First().Value);
-            Assert.Equal(position, unspentTransactions.First().TransactionPosition);
+            Assert.Empty(unspentTransactions);
         }
+
+        //[Theory]
+        //[InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR", 107297900, 0)]
+        //public async Task GetAddressUtxos_UnspentTest(string address, long value, int position)
+        //{
+        //    var unspentTransactions = await Api.GetAddressUtxos(address);
+        //    Assert.NotEmpty(unspentTransactions);
+        //    Assert.Equal(value, unspentTransactions.First().Value);
+        //    Assert.Equal(position, unspentTransactions.First().TransactionPosition);
+        //}
 
         [Fact]
         public async Task GetBulkAddressUtxos_Test()
@@ -96,7 +106,8 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             Assert.NotEmpty(utxos);
             Assert.Equal(2, utxos.Length);
             Assert.Equal(addresses[0], utxos.First().Address);
-            Assert.Equal(107297900, utxos.First().Utxos.First().Value);
+            Assert.Empty(utxos.First().Utxos);
+            Assert.Empty(utxos.Last().Utxos);
         }
 
         #endregion
@@ -176,9 +187,10 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("995ea8d0f752f41cdd99bb9d54cb004709e04c7dc4088bcbbbb9ea5c390a43c3")]
         public async Task GetTxStatus_Test(string txHash)
         {
-            var status = await Api.GetTranactionStatus(txHash);
+            var status = await Api.GetTransactionStatus(txHash);
             Assert.NotNull(status.Payload);
-            Assert.Equal("mempool", status.ProviderName);
+            var payload = JsonConvert.DeserializeObject<TransactionPayload>(status.Payload);
+            Assert.Equal(txHash, payload?.TxId);
         }
 
         [Theory]

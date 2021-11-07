@@ -4,12 +4,6 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain.Models.Mapi
 {
     public class TransactionStatus
     {
-        [JsonProperty("providerName")]
-        public string ProviderName { get; set; }
-
-        [JsonProperty("providerId")]
-        public string ProviderId { get; set; }
-
         [JsonProperty("payload")]
         public string Payload { get; set; }
 
@@ -18,5 +12,11 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain.Models.Mapi
 
         [JsonProperty("publicKey")]
         public string PublicKey { get; set; }
-    }
+
+        [JsonProperty("encoding")]
+        public string Encoding { get; set; }
+
+        [JsonProperty("mimetype")]
+        public string MimeType { get; set; }
+   }
 }

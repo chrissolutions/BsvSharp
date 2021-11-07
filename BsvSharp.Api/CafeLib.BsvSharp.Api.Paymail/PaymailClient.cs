@@ -21,7 +21,7 @@ namespace CafeLib.BsvSharp.Api.Paymail
     {
         private const string HandleRegexPattern = @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$";
         private readonly IDictionary<string, CapabilitiesResponse> _cache;
-        private static readonly Lazy<Regex> HandleRegex = new Lazy<Regex>(() => new Regex(HandleRegexPattern), true);
+        private static readonly Lazy<Regex> HandleRegex = new(() => new Regex(HandleRegexPattern), true);
 
         /// <summary>
         /// Paymail api default constructor.
@@ -168,13 +168,10 @@ namespace CafeLib.BsvSharp.Api.Paymail
                 }
             }
 
-            if (pubkey == null)
+            // Attempt to determine the correct pubkey for the paymail.
+            if (pubkey == null && await DomainHasCapability(domain, Capability.Pki))
             {
-                // Attempt to determine the correct pubkey for the paymail.
-                if (await DomainHasCapability(domain, Capability.Pki))
-                {
-                    pubkey = await GetPublicKey(paymail);
-                }
+                pubkey = await GetPublicKey(paymail);
             }
 
             return pubkey != null 

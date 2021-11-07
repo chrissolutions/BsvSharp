@@ -38,6 +38,7 @@
     <ProjectReference Include="..\CafeLib.BsvSharp.Api.Paymail\CafeLib.BsvSharp.Api.Paymail.csproj" />
     <ProjectReference Include="..\CafeLib.BsvSharp.Api.WhatsOnChain\CafeLib.BsvSharp.Api.WhatsOnChain.csproj" />
     <ProjectReference Include="..\CafeLib.BsvSharp.Mapi.MatterPool\CafeLib.BsvSharp.Mapi.MatterPool.csproj" />
+    <ProjectReference Include="..\CafeLib.BsvSharp.Mapi.Taal\CafeLib.BsvSharp.Mapi.Taal.csproj" />
   </ItemGroup>
   
 </Project>
