@@ -2,7 +2,7 @@
 
 namespace CafeLib.BsvSharp.Mapi.Models
 {
-    public class MerchantResponse<T> : Envelope
+    public class MerchantResponse<T> : Envelope where T : Cargo
     {
         [JsonProperty("providerName")]
         public string ProviderName { get; set; }

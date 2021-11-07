@@ -33,12 +33,12 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         #region Address
 
         [Theory]
-        [InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR", 107297900, 0)]
-        public async Task GetAddressBalance_Test(string address, long confirm, long unconfirmed)
+        [InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR")]
+        public async Task GetAddressBalance_Test(string address)
         {
             var balance = await Api.GetAddressBalance(address);
-            Assert.Equal(confirm, balance.Confirmed);
-            Assert.Equal(unconfirmed, balance.Unconfirmed);
+            Assert.Equal(0, balance.Confirmed);
+            Assert.Equal(0, balance.Unconfirmed);
         }
 
         [Fact]
