@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using CafeLib.BsvSharp.Keys;
-using CafeLib.BsvSharp.Mapi;
 using CafeLib.BsvSharp.Mapi.Extensions;
 using CafeLib.BsvSharp.Mapi.MatterPool;
 using CafeLib.BsvSharp.Mapi.Models;
@@ -93,11 +93,11 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             var submit = response.Result.Cargo;
             Assert.Equal(207, submit.CurrentHighestBlockHeight);
             Assert.Equal("71a7374389afaec80fcabbbf08dcd82d392cf68c9a13fe29da1a0c853facef01", submit.CurrentHighestBlockHash);
-            Assert.True(Math.Abs((submit.Timestamp - DateTime.UtcNow).TotalMinutes) < 1);
+            Assert.Equal(DateTime.Parse("2020-01-15T11:40:29.826"), submit.Timestamp);
             Assert.True(new PublicKey(submit.MinerId).IsValid);
-            Assert.Equal("failure", submit.ReturnResult);
-            Assert.True(submit.ResultDescription.Length > 0); // e.g. Not enough fees
-            Assert.Equal("", submit.TxId); // e.g. Not enough fees
+            Assert.Equal("success", submit.ReturnResult);
+            Assert.Equal(string.Empty, submit.ResultDescription);
+            Assert.Equal("6bdbcfab0526d30e8d68279f79dff61fb4026ace8b7b32789af016336e54f2f0", submit.TxId);
             Assert.Equal(0, submit.TxSecondMempoolExpiry); // e.g. Not enough fees
         }
 
