@@ -11,29 +11,35 @@ namespace CafeLib.BsvSharp.Api.UnitTests
 {
     public class TaalClientTests
     {
-        private readonly TaalClient _taal = new TaalClient();
+        private readonly TaalClient _taal;
+
+        public TaalClientTests()
+        {
+            var apiKey = Guid.NewGuid();
+            _taal = new TaalClient(apiKey.ToString());
+        }
 
         #region Mapi
 
-        //[Fact]
-        //public async Task GetFeeQuotes_Test()
-        //{
-        //    var response = await _taal.GetFeeQuote();
-        //    Assert.NotNull(response);
-        //    Assert.Equal("taal", response.Result.ProviderName);
+        [Fact]
+        public async Task GetFeeQuotes_Test()
+        {
+            var response = await _taal.GetFeeQuote();
+            Assert.NotNull(response);
+            Assert.Equal("taal", response.Result.ProviderName);
 
-        //    var feeQuote = response.Result.Cargo;
-        //    Assert.True(feeQuote.Expiry > DateTime.UtcNow);
-        //    Assert.True(Math.Abs((feeQuote.Timestamp - DateTime.UtcNow).TotalMinutes) < 1);
-        //    Assert.True(feeQuote.CurrentHighestBlockHeight > 630000);
-        //    Assert.True(new UInt256(feeQuote.CurrentHighestBlockHash).ToBigInteger() > 0);
-        //    Assert.Equal(2, feeQuote.Fees.Length);
-        //    Assert.True(new PublicKey(feeQuote.MinerId).IsValid);
-        //    Assert.True(feeQuote.GetStandardMiningFee().Bytes > 0);
-        //    Assert.True(feeQuote.GetStandardMiningFee().Satoshis >= 0);
-        //    Assert.True(feeQuote.GetStandardRelayFee().Bytes > 0);
-        //    Assert.True(feeQuote.GetStandardRelayFee().Satoshis >= 0);
-        //}
+            var feeQuote = response.Result.Cargo;
+            Assert.True(feeQuote.Expiry > DateTime.UtcNow);
+            Assert.True(Math.Abs((feeQuote.Timestamp - DateTime.UtcNow).TotalMinutes) < 1);
+            Assert.True(feeQuote.CurrentHighestBlockHeight > 630000);
+            Assert.True(new UInt256(feeQuote.CurrentHighestBlockHash).ToBigInteger() > 0);
+            Assert.Equal(2, feeQuote.Fees.Length);
+            Assert.True(new PublicKey(feeQuote.MinerId).IsValid);
+            Assert.True(feeQuote.GetStandardMiningFee().Bytes > 0);
+            Assert.True(feeQuote.GetStandardMiningFee().Satoshis >= 0);
+            Assert.True(feeQuote.GetStandardRelayFee().Bytes > 0);
+            Assert.True(feeQuote.GetStandardRelayFee().Satoshis >= 0);
+        }
 
         [Theory]
         [InlineData("3ea6bb35923dbff216aa11084280e0d6d477d78ed8010edac92c3253b3d79024")]
@@ -41,7 +47,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         {
             var response = await _taal.GetTransactionStatus(txHash);
             Assert.NotNull(response);
-            Assert.Equal("matterpool", response.Result.ProviderName);
+            Assert.Equal("taal", response.Result.ProviderName);
             Assert.NotNull(response.Result.Payload);
 
             var status = response.Result.Cargo;
