@@ -56,28 +56,28 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             Assert.True(Math.Abs((status.Timestamp - DateTime.UtcNow).TotalMinutes) < 1);
             Assert.True(new PublicKey(status.MinerId).IsValid);
             Assert.Equal("0000000000000000011e0221844b65bfbbc2599bbd7f71ca0f914a53d90fa8b6", status.BlockHash);
-            Assert.Equal(81187, status.Confirmations);
+            Assert.True(status.Confirmations >= 81187);
         }
 
-        //[Theory]
-        //[InlineData("0100000001747623f8e6f9b684c2c72d81245d1f1532043088e76ba63805339823e5b16389000000006a47304402204c108078b91ef1f6d2ce154b11bca8c31f6d37dac451a28c07edd7e737efef3802201ecfb09763d64d3ad293eec1c4ecaf0fd45b91dbdf428e422d282b98483300de4121036166800571f944768676842e4d2f8f96825c0f030139b6b78d6c9830de082828ffffffff09f9e15100000000001976a9143e0ea504169d4ef931e913cbbecb3f07b1d4b6f088acf9e15100000000001976a914229db1b4735321f46165ae5837e47dabd064f16e88acf9e15100000000001976a9144a5b03c7eea7b8e6e611559627a56963d514d1ea88ac6e6e5700000000001976a914c042299061557b60e0e5085bee8fadc8d7e5483388acf9e15100000000001976a914633d58a958c54d9858887b0f3aa65be4eb37f07488acf9e15100000000001976a9148d3cf51026f94d03fda5709160c7171b855ba22488ac50c84c00000000001976a9142a03a8943e47cdbd9ba448994e61d237e8d1ac4b88acf9e15100000000001976a914359f98091121e785e6663f10251832d9ae556f8588acf9e15100000000001976a91415a8feff23bfce20f837956c82e1eb1f2457f93488ac00000000")]
-        //public async Task SubmitTransaction_Test(string txRaw)
-        //{
-        //    var response = await _matterPool.SubmitTransaction(txRaw);
-        //    Assert.NotNull(response);
-        //    Assert.Equal("matterpool", response.Result.ProviderName);
-        //    Assert.NotNull(response.Result.Payload);
+        [Theory]
+        [InlineData("0100000001747623f8e6f9b684c2c72d81245d1f1532043088e76ba63805339823e5b16389000000006a47304402204c108078b91ef1f6d2ce154b11bca8c31f6d37dac451a28c07edd7e737efef3802201ecfb09763d64d3ad293eec1c4ecaf0fd45b91dbdf428e422d282b98483300de4121036166800571f944768676842e4d2f8f96825c0f030139b6b78d6c9830de082828ffffffff09f9e15100000000001976a9143e0ea504169d4ef931e913cbbecb3f07b1d4b6f088acf9e15100000000001976a914229db1b4735321f46165ae5837e47dabd064f16e88acf9e15100000000001976a9144a5b03c7eea7b8e6e611559627a56963d514d1ea88ac6e6e5700000000001976a914c042299061557b60e0e5085bee8fadc8d7e5483388acf9e15100000000001976a914633d58a958c54d9858887b0f3aa65be4eb37f07488acf9e15100000000001976a9148d3cf51026f94d03fda5709160c7171b855ba22488ac50c84c00000000001976a9142a03a8943e47cdbd9ba448994e61d237e8d1ac4b88acf9e15100000000001976a914359f98091121e785e6663f10251832d9ae556f8588acf9e15100000000001976a91415a8feff23bfce20f837956c82e1eb1f2457f93488ac00000000")]
+        public async Task SubmitTransaction_Test(string txRaw)
+        {
+            var response = await _taal.SubmitTransaction(txRaw);
+            Assert.NotNull(response);
+            Assert.Equal("matterpool", response.Result.ProviderName);
+            Assert.NotNull(response.Result.Payload);
 
-        //    var submit = response.Result.Cargo;
-        //    Assert.True(submit.CurrentHighestBlockHeight > 630000);
-        //    Assert.True(new UInt256(submit.CurrentHighestBlockHash) > UInt256.Zero);
-        //    Assert.True(Math.Abs((submit.Timestamp - DateTime.UtcNow).TotalMinutes) < 1);
-        //    Assert.True(new PublicKey(submit.MinerId).IsValid);
-        //    Assert.Equal("failure", submit.ReturnResult);
-        //    Assert.True(submit.ResultDescription.Length > 0); // e.g. Not enough fees
-        //    Assert.Equal("", submit.TxId); // e.g. Not enough fees
-        //    Assert.Equal(0, submit.TxSecondMempoolExpiry); // e.g. Not enough fees
-        //}
+            var submit = response.Result.Payload;
+            Assert.True(submit.CurrentHighestBlockHeight > 630000);
+            Assert.True(new UInt256(submit.CurrentHighestBlockHash) > UInt256.Zero);
+            Assert.True(Math.Abs((submit.Timestamp - DateTime.UtcNow).TotalMinutes) < 1);
+            Assert.True(new PublicKey(submit.MinerId).IsValid);
+            Assert.Equal("failure", submit.ReturnResult);
+            Assert.True(submit.ResultDescription.Length > 0); // e.g. Not enough fees
+            Assert.Equal("", submit.TxId); // e.g. Not enough fees
+            Assert.Equal(0, submit.TxSecondMempoolExpiry); // e.g. Not enough fees
+        }
 
         #endregion
     }
