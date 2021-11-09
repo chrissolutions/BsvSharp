@@ -75,9 +75,9 @@ namespace CafeLib.BsvSharp.Mapi
                 if (response == null) throw new MerchantClientException<TMerchantResponse>("null response");
 
                 response.ProviderName = Name;
-                response.Cargo = JsonConvert.DeserializeObject<TCargo>(response.Payload);
-                if (response.Cargo == null) throw new MerchantClientException<TMerchantResponse>(response, "missing payload");
-                response.ProviderId = response.Cargo.MinerId;
+                response.Payload = JsonConvert.DeserializeObject<TCargo>(response.JsonPayload);
+                if (response.Payload == null) throw new MerchantClientException<TMerchantResponse>(response, "missing payload");
+                response.ProviderId = response.Payload.MinerId;
                 return GetType().CreateInstance<TApiResponse>(response);
             }
             catch (Exception ex)
@@ -96,9 +96,9 @@ namespace CafeLib.BsvSharp.Mapi
                 if (response == null) throw new MerchantClientException<TMerchantResponse>("null response");
 
                 response.ProviderName = Name;
-                response.Cargo = JsonConvert.DeserializeObject<TCargo>(response.Payload);
-                if (response.Cargo == null) throw new MerchantClientException<TMerchantResponse>(response, "missing payload");
-                response.ProviderId = response.Cargo.MinerId;
+                response.Payload = JsonConvert.DeserializeObject<TCargo>(response.JsonPayload);
+                if (response.Payload == null) throw new MerchantClientException<TMerchantResponse>(response, "missing payload");
+                response.ProviderId = response.Payload.MinerId;
                 return GetType().CreateInstance<TApiResponse>(response);
             }
             catch (Exception ex)

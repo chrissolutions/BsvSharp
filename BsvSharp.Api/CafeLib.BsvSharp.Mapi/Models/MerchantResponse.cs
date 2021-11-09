@@ -10,6 +10,6 @@ namespace CafeLib.BsvSharp.Mapi.Models
         [JsonProperty("providerId")]
         public string ProviderId { get; set; }
 
-        public T Cargo { get; set; }
+        public T Payload { get; set; }
     }
 }

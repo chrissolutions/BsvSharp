@@ -5,7 +5,7 @@ namespace CafeLib.BsvSharp.Mapi.Models
     public class Envelope
     {
         [JsonProperty("payload")]
-        public string Payload { get; set; }
+        public string JsonPayload { get; set; }
 
         [JsonProperty("signature")]
         public string Signature { get; set; }
