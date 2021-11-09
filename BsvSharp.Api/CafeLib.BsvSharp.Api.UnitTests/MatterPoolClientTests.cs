@@ -27,7 +27,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             Assert.NotNull(response);
             Assert.Equal("matterpool", response.Result.ProviderName);
 
-            var feeQuote = response.Result.Cargo;
+            var feeQuote = response.Result.Payload;
             Assert.True(feeQuote.Expiry > DateTime.UtcNow);
             Assert.True(Math.Abs((feeQuote.Timestamp - DateTime.UtcNow).TotalMinutes) < 1);
             Assert.True(feeQuote.CurrentHighestBlockHeight > 630000);
@@ -47,11 +47,11 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             var response = await _matterPool.GetTransactionStatus(txHash);
             Assert.NotNull(response);
             Assert.Equal("matterpool", response.Result.ProviderName);
-            Assert.NotNull(response.Result.Payload);
+            Assert.NotNull(response.Result.JsonPayload);
 
-            var status = response.Result.Cargo;
+            var status = response.Result.Payload;
             Assert.NotNull(status);
-            Assert.Equal("failure", status.ReturnResult);
+            Assert.Equal("success", status.ReturnResult);
             Assert.True(status.ResultDescription.Length > 0);
             Assert.True(Math.Abs((status.Timestamp - DateTime.UtcNow).TotalMinutes) < 1);
             Assert.True(new PublicKey(status.MinerId).IsValid);
@@ -78,8 +78,8 @@ namespace CafeLib.BsvSharp.Api.UnitTests
 
                 var response = JsonConvert.DeserializeObject<TransactionSubmitResponse>(json) ?? throw new ArgumentNullException();
                 response.ProviderName = _matterPool.Name;
-                response.Cargo = JsonConvert.DeserializeObject<TransactionSubmit>(response.Payload) ?? throw new ArgumentNullException();
-                response.ProviderId = response.Cargo.MinerId;
+                response.Payload = JsonConvert.DeserializeObject<TransactionSubmit>(response.JsonPayload) ?? throw new ArgumentNullException();
+                response.ProviderId = response.Payload.MinerId;
                 return GetType().CreateInstance<ApiResponse<TransactionSubmitResponse>>(response);
             });
 
@@ -87,9 +87,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             var response = await mapiClientMock.Object.SubmitTransaction(txRaw);
             Assert.NotNull(response);
             Assert.Equal("matterpool", response.Result.ProviderName);
-            Assert.NotNull(response.Result.Payload);
+            Assert.NotNull(response.Result.JsonPayload);
 
-            var submit = response.Result.Cargo;
+            var submit = response.Result.Payload;
             Assert.Equal(207, submit.CurrentHighestBlockHeight);
             Assert.Equal("71a7374389afaec80fcabbbf08dcd82d392cf68c9a13fe29da1a0c853facef01", submit.CurrentHighestBlockHash);
             Assert.Equal(DateTime.Parse("2020-01-15T11:40:29.826"), submit.Timestamp);

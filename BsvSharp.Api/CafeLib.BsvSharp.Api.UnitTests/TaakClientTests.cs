@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Mapi.Extensions;
-using CafeLib.BsvSharp.Mapi.MatterPool;
 using CafeLib.BsvSharp.Mapi.Taal;
 using CafeLib.Core.Numerics;
 using Xunit;
@@ -28,7 +27,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             Assert.NotNull(response);
             Assert.Equal("taal", response.Result.ProviderName);
 
-            var feeQuote = response.Result.Cargo;
+            var feeQuote = response.Result.Payload;
             Assert.True(feeQuote.Expiry > DateTime.UtcNow);
             Assert.True(Math.Abs((feeQuote.Timestamp - DateTime.UtcNow).TotalMinutes) < 1);
             Assert.True(feeQuote.CurrentHighestBlockHeight > 630000);
@@ -48,16 +47,16 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             var response = await _taal.GetTransactionStatus(txHash);
             Assert.NotNull(response);
             Assert.Equal("taal", response.Result.ProviderName);
-            Assert.NotNull(response.Result.Payload);
+            Assert.NotNull(response.Result.JsonPayload);
 
-            var status = response.Result.Cargo;
+            var status = response.Result.Payload;
             Assert.NotNull(status);
-            Assert.Equal("failure", status.ReturnResult);
-            Assert.True(status.ResultDescription.Length > 0);
+            Assert.Equal("success", status.ReturnResult);
+            Assert.Null(status.ResultDescription);
             Assert.True(Math.Abs((status.Timestamp - DateTime.UtcNow).TotalMinutes) < 1);
             Assert.True(new PublicKey(status.MinerId).IsValid);
-            Assert.Null(status.BlockHash);
-            Assert.True(status.Confirmations == 0);
+            Assert.Equal("0000000000000000011e0221844b65bfbbc2599bbd7f71ca0f914a53d90fa8b6", status.BlockHash);
+            Assert.Equal(81187, status.Confirmations);
         }
 
         //[Theory]
