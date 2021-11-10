@@ -1,10 +1,10 @@
 @echo off
 setlocal
-if '%root%' == '' set root=..\..
+if '%root%' == '' set root=..
 
 :: Type
 set type=BsvSharp
-set location=Enterprise\%type%
+set location=%type%
 
 :: Settings
 call %root%\build\buildenv %*

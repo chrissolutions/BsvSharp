@@ -8,15 +8,8 @@ if ERRORLEVEL 1 goto exit
 
 :: Setup domains.
 set libs=
-set libs=%libs% Core
-set libs=%libs% Cryptography
-set libs=%libs% Data
-set libs=%libs% Authorization
-set libs=%libs% Network
-set libs=%libs% Blazor
-set libs=%libs% Mobile
-set libs=%libs% Enterprise\BsvSharp
-set libs=%libs% Enterprise\BsvSharp.Api
+set libs=%libs% BsvSharp
+set libs=%libs% BsvSharp.Api
 
 for %%X in (%libs%) do (
     set rc=0
