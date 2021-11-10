@@ -51,7 +51,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
 
             var status = response.Result.Payload;
             Assert.NotNull(status);
-            Assert.Equal("success", status.ReturnResult);
+            Assert.Equal("failure", status.ReturnResult);
             Assert.True(status.ResultDescription.Length > 0);
             Assert.True(Math.Abs((status.Timestamp - DateTime.UtcNow).TotalMinutes) < 1);
             Assert.True(new PublicKey(status.MinerId).IsValid);
@@ -77,7 +77,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
                 }";
 
                 var response = JsonConvert.DeserializeObject<TransactionSubmitResponse>(json) ?? throw new ArgumentNullException();
-                response.ProviderName = _matterPool.Name;
+                response.ProviderName = mapiClientMock.Object.Name;
                 response.Payload = JsonConvert.DeserializeObject<TransactionSubmit>(response.JsonPayload) ?? throw new ArgumentNullException();
                 response.ProviderId = response.Payload.MinerId;
                 return GetType().CreateInstance<ApiResponse<TransactionSubmitResponse>>(response);

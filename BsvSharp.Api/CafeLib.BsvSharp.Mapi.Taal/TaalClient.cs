@@ -13,7 +13,7 @@ namespace CafeLib.BsvSharp.Mapi.Taal
         private const string ClientName = "taal";
         private const string DefaultApiKey = "Taal.ApiKey";
 
-        private string ApiKey { get; }
+        internal string ApiKey { get; }
 
         public TaalClient()
             : this(GetApiKey(), BaseUrl)
