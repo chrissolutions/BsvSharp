@@ -35,7 +35,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
 
         private static readonly Utxo UtxoWith1Coin = new Utxo
         {
-            TxHash = new UInt256("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
+            TxHash = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
             Index = 1,
             ScriptPubKey = new P2PkhLockBuilder(FromAddress).ToScript(),
             Amount = RootService.Network.Consensus.SatoshisPerCoin
@@ -43,7 +43,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
 
         private static readonly Utxo UtxoWith1MillionSatoshis = new Utxo
         {
-            TxHash = new UInt256("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
+            TxHash = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
             Index = 0,
             ScriptPubKey = new P2PkhLockBuilder(FromAddress).ToScript(),
             Amount = 1000000L
@@ -51,7 +51,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
 
         private static readonly Utxo UtxoWith100000Satoshis = new Utxo 
         {
-            TxHash = new UInt256("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
+            TxHash = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
             Index = 0,
             ScriptPubKey = new P2PkhLockBuilder(FromAddress).ToScript(),
             Amount = 100000
@@ -63,7 +63,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         [InlineData("0000000000000000000000000000000000000000000000000000000000000001")]
         public void Verify_TxId_Test(string txId)
         {
-            var txIn = new TxIn(new UInt256(txId), 0, 1000L);
+            var txIn = new TxIn(UInt256.FromHex(txId), 0, 1000L);
             Assert.Equal(txId, txIn.TxHash.ToString());
         }
 

@@ -31,7 +31,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         public void Decode()
         {
             var address = new PublicKey(true);
-            var e = new UInt160("c2eaba3b9c29575322c6e24fdc1b49bdfe405bad", true);
+            var e = UInt160.FromHex("c2eaba3b9c29575322c6e24fdc1b49bdfe405bad", true);
             var s1 = Encoders.Base58Check.Encode(RootService.Network.PublicKeyAddress.ToArray().Concat(e));
             var s2 = Encoders.Base58Check.Encode(RootService.Network.ScriptAddress.ToArray().Concat(e));
             //e.Span.CopyTo(address.Span);
@@ -106,7 +106,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             Assert.Equal(Opcode.OP_DUP, builder.Ops[0].Opcode);
             Assert.Equal(Opcode.OP_HASH160, builder.Ops[1].Opcode);
             Assert.Equal((Opcode)20, builder.Ops[2].Opcode);
-            Assert.Equal("f4c03610e60ad15100929cc23da2f3a799af1725", builder.Ops[2].Operand.GetDataBytes().ToHexString().ToLowerInvariant());
+            Assert.Equal("f4c03610e60ad15100929cc23da2f3a799af1725", builder.Ops[2].Operand.GetDataBytes().ToHex().ToLowerInvariant());
             Assert.Equal(Opcode.OP_EQUALVERIFY, builder.Ops[3].Opcode);
             Assert.Equal(Opcode.OP_CHECKSIG, builder.Ops[4].Opcode);
             Assert.Equal(asm, builder.ToScript().ToAssemblyString());

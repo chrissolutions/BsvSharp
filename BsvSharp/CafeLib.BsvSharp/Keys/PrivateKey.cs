@@ -97,7 +97,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="hex"></param>
         /// <param name="compressed"></param>
         public PrivateKey(string hex, bool compressed = true)
-            : this(new UInt256(hex, true), compressed)
+            : this(UInt256.FromHex(hex, true), compressed)
         {
         }
 
@@ -130,7 +130,7 @@ namespace CafeLib.BsvSharp.Keys
 
         public byte[] ToArray() => _keyData;
 
-        public static PrivateKey FromHex(string hex, bool compressed = true) => new(new UInt256(hex, true), compressed);
+        public static PrivateKey FromHex(string hex, bool compressed = true) => new(UInt256.FromHex(hex, true), compressed);
         public static PrivateKey FromBase58(string base58) => new Base58PrivateKey(base58).GetKey();
         public static PrivateKey FromWif(string wif) => new Base58PrivateKey(wif).GetKey();
         public static PrivateKey FromRandom() => new();
@@ -197,7 +197,7 @@ namespace CafeLib.BsvSharp.Keys
             return sig != null && publicKey.Verify(hash, sig);
         }
 
-        public string ToHex() => _keyData.ToStringFirstByteFirst();
+        public string ToHex() => _keyData.ToString();
         public Base58PrivateKey ToBase58(NetworkType? networkType = null) => new(this, networkType);
         public override string ToString() => ToBase58().ToString();
 
@@ -220,7 +220,7 @@ namespace CafeLib.BsvSharp.Keys
             }
             else
             {
-                _keyData = new UInt256();
+                _keyData = new UInt256(true);
                 data.CopyTo(_keyData.Span);
                 IsCompressed = compressed;
                 IsValid = true;

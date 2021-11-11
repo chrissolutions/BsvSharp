@@ -1,6 +1,5 @@
 ﻿using System;
 using CafeLib.BsvSharp.Encoding;
-using CafeLib.BsvSharp.Numerics;
 using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Network
@@ -18,12 +17,12 @@ namespace CafeLib.BsvSharp.Network
             {
                 SubsidyHalvingInterval = 210000,
                 Bip34Height = 227931,
-                Bip34Hash = new UInt256("000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8"),
+                Bip34Hash = UInt256.FromHex("000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8"),
                 // 000000000000000004c2b624ed5d7756c508d90fd0da2c7c679febfa6c4735f0
                 Bip65Height = 388381,
                 // 00000000000000000379eaa19dce8c9b722d46ae6a57c2f1a988119488b50931
                 Bip66Height = 363725,
-                ProofOfWorkLimit = new UInt256("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+                ProofOfWorkLimit = UInt256.FromHex("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
                 // two weeks
                 ProofOfWorkTargetTimespan = 14 * 24 * 60 * 60,
                 ProofOfWorkTargetSpacing = 10 * 60,
@@ -35,10 +34,10 @@ namespace CafeLib.BsvSharp.Network
                 MinerConfirmationWindow = 2016,
 
                 // The best chain should have at least this much work.
-                MinimumChainWork = new UInt256("000000000000000000000000000000000000000000a0f3064330647e2f6c4828"),
+                MinimumChainWork = UInt256.FromHex("000000000000000000000000000000000000000000a0f3064330647e2f6c4828"),
 
                 // By default assume that the signatures in ancestors of this block are valid.
-                DefaultAssumeValid = new UInt256("000000000000000000e45ad2fbcc5ff3e85f0868dd8f00ad4e92dffabe28f8d2"),
+                DefaultAssumeValid = UInt256.FromHex("000000000000000000e45ad2fbcc5ff3e85f0868dd8f00ad4e92dffabe28f8d2"),
 
                 // August 1, 2017 hard fork
                 UahfHeight = 478558,

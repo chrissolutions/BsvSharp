@@ -88,7 +88,7 @@ namespace CafeLib.BsvSharp.Chain
 
         public UInt256 ComputeHash()
         {
-            return Hashes.Hash256(LeftHash);
+            return Hashes.Hash256(LeftHash.Span);
         }
     }
 }

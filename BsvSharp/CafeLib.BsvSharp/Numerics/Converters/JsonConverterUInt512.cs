@@ -9,7 +9,7 @@ namespace CafeLib.BsvSharp.Numerics.Converters
         public override UInt512 ReadJson(JsonReader reader, Type objectType, UInt512 existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             var s = (string)reader.Value;
-            return new UInt512(s);
+            return UInt512.FromHex(s);
         }
 
         public override void WriteJson(JsonWriter writer, UInt512 value, JsonSerializer serializer)

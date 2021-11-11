@@ -165,7 +165,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             var mnemonic = new Mnemonic(words, Languages.English);
             Assert.NotNull(mnemonic); // If checksum doesn't match returns null.
             Assert.True(mnemonic.Entropy.SequenceEqual(bytes));
-            var seed512 = new UInt512(seed, true);
+            var seed512 = UInt512.FromHex(seed, true);
             var seedBip39 = ExtPrivateKey.Bip39Seed(words, "TREZOR");
             Assert.Equal(seed512, seedBip39);
             var privkeyFromWords = ExtPrivateKey.FromWords(words, "TREZOR");
@@ -189,7 +189,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         public void Mnemonic_Test(string password, string entropy, string words, string seed)
         {
             var _ = entropy;
-            var seed512 = new UInt512(seed, true);
+            var seed512 = UInt512.FromHex(seed, true);
             var seedBip39 = ExtPrivateKey.Bip39Seed(words, password);
             Assert.Equal(seed512, seedBip39);
         }

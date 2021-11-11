@@ -82,7 +82,7 @@ namespace CafeLib.BsvSharp.Testnet.UnitTests
 
             var utxo = new Utxo
             {
-                TxHash = new UInt256("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
+                TxHash = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
                 Index = 0,
                 ScriptPubKey = new P2PkhLockBuilder(fromAddress).ToScript(),
                 Amount = 100000

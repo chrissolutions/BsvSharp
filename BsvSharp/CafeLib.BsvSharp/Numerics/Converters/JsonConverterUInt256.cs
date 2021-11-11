@@ -9,7 +9,7 @@ namespace CafeLib.BsvSharp.Numerics.Converters
         public override UInt256 ReadJson(JsonReader reader, Type objectType, UInt256 existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             var s = (string)reader.Value;
-            return new UInt256(s);
+            return UInt256.FromHex(s);
         }
 
         public override void WriteJson(JsonWriter writer, UInt256 value, JsonSerializer serializer)
