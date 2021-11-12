@@ -6,6 +6,7 @@ using CafeLib.BsvSharp.Mapi.Models;
 using CafeLib.BsvSharp.Mapi.Responses;
 using CafeLib.BsvSharp.Mapi.Taal;
 using CafeLib.Core.Extensions;
+using CafeLib.Core.Support;
 using CafeLib.Web.Request;
 using Moq;
 using Newtonsoft.Json;
@@ -86,7 +87,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
                 response.ProviderName = mapiClientMock.Object.Name;
                 response.Payload = JsonConvert.DeserializeObject<TransactionSubmit>(response.JsonPayload) ?? throw new ArgumentNullException();
                 response.ProviderId = response.Payload.MinerId;
-                return GetType().CreateInstance<ApiResponse<TransactionSubmitResponse>>(response);
+                return Creator.CreateInstance<ApiResponse<TransactionSubmitResponse>>(response);
             });
 
             var response = await mapiClientMock.Object.SubmitTransaction(txRaw);

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-
+    <Version Condition=" '$(Version)' == '' ">1.5.1</Version>
     <IsPackable>false</IsPackable>
 
     <LangVersion>8.0</LangVersion>
@@ -17,9 +17,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CafeLib.BsvSharp" Version="1.5.0" />
-    <PackageReference Include="CafeLib.Core" Version="1.5.0" />
-    <PackageReference Include="CafeLib.Web.Request" Version="1.5.0" />
+    <PackageReference Include="CafeLib.BsvSharp" Version="$(Version)" />
+    <PackageReference Include="CafeLib.Core" Version="$(Version)" />
+    <PackageReference Include="CafeLib.Web.Request" Version="$(Version)" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
     <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="xunit" Version="2.4.1" />

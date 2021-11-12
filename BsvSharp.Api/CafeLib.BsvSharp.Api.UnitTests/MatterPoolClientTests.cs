@@ -7,6 +7,7 @@ using CafeLib.BsvSharp.Mapi.Models;
 using CafeLib.BsvSharp.Mapi.Responses;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
+using CafeLib.Core.Support;
 using CafeLib.Web.Request;
 using Moq;
 using Newtonsoft.Json;
@@ -31,7 +32,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             Assert.True(feeQuote.Expiry > DateTime.UtcNow);
             Assert.True(Math.Abs((feeQuote.Timestamp - DateTime.UtcNow).TotalMinutes) < 1);
             Assert.True(feeQuote.CurrentHighestBlockHeight > 630000);
-            Assert.True(new UInt256(feeQuote.CurrentHighestBlockHash).ToBigInteger() > 0);
+            Assert.True(UInt256.FromHex(feeQuote.CurrentHighestBlockHash) > 0);
             Assert.Equal(2, feeQuote.Fees.Length);
             Assert.True(new PublicKey(feeQuote.MinerId).IsValid);
             Assert.True(feeQuote.GetStandardMiningFee().Bytes > 0);
@@ -80,7 +81,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
                 response.ProviderName = mapiClientMock.Object.Name;
                 response.Payload = JsonConvert.DeserializeObject<TransactionSubmit>(response.JsonPayload) ?? throw new ArgumentNullException();
                 response.ProviderId = response.Payload.MinerId;
-                return GetType().CreateInstance<ApiResponse<TransactionSubmitResponse>>(response);
+                return Creator.CreateInstance<ApiResponse<TransactionSubmitResponse>>(response);
             });
 
 

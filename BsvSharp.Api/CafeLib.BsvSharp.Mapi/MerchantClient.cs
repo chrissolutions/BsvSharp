@@ -4,6 +4,7 @@ using CafeLib.BsvSharp.Mapi.Models;
 using CafeLib.BsvSharp.Mapi.Responses;
 using CafeLib.BsvSharp.Network;
 using CafeLib.Core.Extensions;
+using CafeLib.Core.Support;
 using CafeLib.Web.Request;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -78,11 +79,11 @@ namespace CafeLib.BsvSharp.Mapi
                 response.Payload = JsonConvert.DeserializeObject<TCargo>(response.JsonPayload);
                 if (response.Payload == null) throw new MerchantClientException<TMerchantResponse>(response, "missing payload");
                 response.ProviderId = response.Payload.MinerId;
-                return GetType().CreateInstance<TApiResponse>(response);
+                return Creator.CreateInstance<TApiResponse>(response);
             }
             catch (Exception ex)
             {
-                return GetType().CreateInstance<TApiResponse>(ex);
+                return Creator.CreateInstance<TApiResponse>(ex);
             }
         }
 
@@ -99,11 +100,11 @@ namespace CafeLib.BsvSharp.Mapi
                 response.Payload = JsonConvert.DeserializeObject<TCargo>(response.JsonPayload);
                 if (response.Payload == null) throw new MerchantClientException<TMerchantResponse>(response, "missing payload");
                 response.ProviderId = response.Payload.MinerId;
-                return GetType().CreateInstance<TApiResponse>(response);
+                return Creator.CreateInstance<TApiResponse>(response);
             }
             catch (Exception ex)
             {
-                return GetType().CreateInstance<TApiResponse>(ex);
+                return Creator.CreateInstance<TApiResponse>(ex);
             }
         }
 
