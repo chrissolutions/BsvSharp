@@ -7,7 +7,6 @@ using CafeLib.BsvSharp.Network;
 using CafeLib.Web.Request;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Utxo = CafeLib.BsvSharp.Transactions.Utxo;
 
 namespace CafeLib.BsvSharp.Api.Metasv 
 {
@@ -82,10 +81,10 @@ namespace CafeLib.BsvSharp.Api.Metasv
 
         public async Task<Utxo[]> GetAddressUtxos(string address)
         {
-            var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/address/{address}/unspent";
+            var url = $"{Url}/address/{address}/utxo";
             var json = await GetAsync(url);
-            var unspent = JsonConvert.DeserializeObject<Utxo[]>(json);
-            return unspent;
+            var utxos = JsonConvert.DeserializeObject<Utxo[]>(json);
+            return utxos;
         }
 
         public async Task<AddressUtxo[]> GetBulkAddressUtxos(IEnumerable<string> addresses)

@@ -4,8 +4,17 @@ namespace CafeLib.BsvSharp.Api.Models
 {
     public class Utxo
     {
-        [JsonProperty("height")]
-        public int Height;
+        [JsonProperty("flag")]
+        public long Page;
+
+        [JsonProperty("address")]
+        public string Address;
+
+        [JsonProperty("txid")]
+        public string TxId;
+
+        [JsonProperty("outIndex")]
+        public long OutIndex;
 
         [JsonProperty("tx_pos")]
         public int TransactionPosition;
@@ -15,5 +24,8 @@ namespace CafeLib.BsvSharp.Api.Models
 
         [JsonProperty("value")]
         public long Value;
+
+        [JsonProperty("height")]
+        public int Height;
     }
 }
