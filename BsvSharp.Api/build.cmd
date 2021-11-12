@@ -1,10 +1,10 @@
 @echo off
 setlocal
-if '%root%' == '' set root=..\..
+if '%root%' == '' set root=..
 
 :: Type
 set type=BsvSharp.Api
-set location=Enterprise\%type%
+set location=%type%
 set mapi=CafeLib.BsvSharp.Mapi
 
 :: Settings
@@ -20,6 +20,7 @@ set libs=%libs% %solution%.Paymail
 set libs=%libs% %solution%.WhatsOnChain
 set libs=%libs% %mapi%
 set libs=%libs% %mapi%.MatterPool
+set libs=%libs% %mapi%.Taal
 ::
 
 :: Run script to build the libraries
