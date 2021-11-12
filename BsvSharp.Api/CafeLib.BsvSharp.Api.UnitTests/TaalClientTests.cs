@@ -37,8 +37,6 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             var feeQuote = response.Result.Payload;
             Assert.True(feeQuote.Expiry > DateTime.UtcNow);
             Assert.True(Math.Abs((feeQuote.Timestamp - DateTime.UtcNow).TotalMinutes) < 1);
-            Assert.Equal(0, feeQuote.CurrentHighestBlockHeight);
-            Assert.Equal("", feeQuote.CurrentHighestBlockHash);
             Assert.Equal(2, feeQuote.Fees.Length);
             Assert.True(new PublicKey(feeQuote.MinerId).IsValid);
             Assert.True(feeQuote.GetStandardMiningFee().Bytes > 0);
