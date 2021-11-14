@@ -19,10 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CafeLib.BsvSharp.Mapi.Matte
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CafeLib.BsvSharp.Mapi.Taal", "CafeLib.BsvSharp.Mapi.Taal\CafeLib.BsvSharp.Mapi.Taal.csproj", "{551C2799-E8B2-4D02-875A-C2A6212735AA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CafeLib.BsvSharp.Api.Metasv", "CafeLib.BsvSharp.Api.Metasv\CafeLib.BsvSharp.Api.Metasv.csproj", "{B24D4C1D-7802-4019-8193-9EDCE6D346E0}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CafeLib.BsvSharp.Api.Models", "CafeLib.BsvSharp.Api.Models\CafeLib.BsvSharp.Api.Models.csproj", "{DFA74CBA-8601-4059-9364-09BFD5D04E8B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,14 +57,6 @@ Global
 		{551C2799-E8B2-4D02-875A-C2A6212735AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{551C2799-E8B2-4D02-875A-C2A6212735AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{551C2799-E8B2-4D02-875A-C2A6212735AA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B24D4C1D-7802-4019-8193-9EDCE6D346E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B24D4C1D-7802-4019-8193-9EDCE6D346E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B24D4C1D-7802-4019-8193-9EDCE6D346E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B24D4C1D-7802-4019-8193-9EDCE6D346E0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DFA74CBA-8601-4059-9364-09BFD5D04E8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DFA74CBA-8601-4059-9364-09BFD5D04E8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DFA74CBA-8601-4059-9364-09BFD5D04E8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DFA74CBA-8601-4059-9364-09BFD5D04E8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
