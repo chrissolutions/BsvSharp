@@ -1,0 +1,132 @@
+﻿<div class="uk-child-width-expand@s"
+     uk-grid
+     style="margin-top: 50px; overflow: hidden">
+    <div class="uk-grid-item-match" style="text-align: center; height: 50%">
+        <div class="uk-card uk-card-default uk-card-body uk-card-small cardColour">
+
+            <h3>Generate Mnemonic</h3>
+
+            <div>
+                <div class="input-container">
+                    <input type="text"
+                           id="mnemonicText"
+                           style="word-wrap: break-word"
+                           @bind="@_words" />
+
+                    <span class="uk-margin-small-right iconRight"
+                          uk-icon="refresh"
+                          style="cursor: pointer"
+                          @onclick="GenerateMnemonic"
+                          id="newMnemonic"></span>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="uk-card uk-card-default uk-card-body uk-margin-top uk-card-small cardColour">
+                <h3>HD Private Key</h3>
+
+                <div class="input-container">
+                    <input type="text"
+                           id="hdPrivateKeyText"
+                           style="word-wrap: break-word"
+                           @bind="@_extPrivateKeyText"
+                           readonly />
+                    <span class="uk-margin-small-right iconRight"
+                          uk-icon="copy"
+                          @onclick="CopyExtPrivateKey"
+                          style="cursor: pointer"></span>
+                </div>
+
+            </div>
+        </div>
+
+        <p id="sliderText">Choose derivation path... (@_keyPath)</p>
+        <div class="slidecontainer">
+            <input type="range"
+                   min="0"
+                   max="99"
+                   value="0"
+                   @oninput="@(async args => await DerivationPath(args.Value?.ToString() ?? "0"))" />
+        </div>
+
+        <div class="uk-card uk-card-default uk-card-body uk-margin-top uk-card-small cardColour">
+
+            <h3>Private Key</h3>
+
+            <div class="input-container">
+                <input type="text"
+                       id="privateKeyText"
+                       style="word-wrap: break-word"
+                       @bind="@_privateKeyText"
+                       readonly />
+                <span class="uk-margin-small-right iconRight"
+                      uk-icon="copy"
+                      @onclick="CopyPrivateKey"
+                      style="cursor: pointer"></span>
+            </div>
+
+        </div>
+
+        <div class="uk-card uk-card-default uk-card-body uk-margin-top uk-card-small cardColour">
+
+            <h3>Public Key</h3>
+
+            <div class="input-container">
+                <input type="text"
+                       id="publicKeyText"
+                       style="word-wrap: break-word"
+                       @bind="@_publicKeyText"
+                       readonly />
+                <span class="uk-margin-small-right iconRight"
+                      uk-icon="copy"
+                      @onclick="CopyPublicKey"
+                      style="cursor: pointer"></span>
+            </div>
+
+        </div>
+
+        <div class="uk-card uk-card-default uk-card-body uk-margin-top uk-card-small cardColour">
+
+            <h3>Address</h3>
+
+            <div class="input-container">
+                <input type="text"
+                       id="addressText"
+                       style="word-wrap: break-word; cursor: pointer"
+                       @bind="@_addressText"
+                       readonly />
+                <span class="uk-margin-small-right iconRight"
+                      uk-icon="copy"
+                      @onclick="CopyAddress"></span>
+            </div>
+
+        </div>
+
+        <div class="uk-card uk-card-default uk-card-body uk-margin-top uk-card-small cardColour"
+             style="margin-bottom: 5%">
+
+            <h3>Balance</h3>
+
+            <div class="input-container">
+                <input type="text"
+                       id="balance"
+                       style="word-wrap: break-word"
+                       @bind="@_balanceText"
+                       readonly />
+                <span class="uk-margin-small-right iconRight"
+                      uk-icon="refresh"
+                      @onclick="RefreshBalance"
+                      style="cursor: pointer"></span>
+            </div>
+        </div>
+    </div>
+
+    <div id="bitcoinArtImg" style="margin-left: 10vw; width: 30%">
+        <img data-src="img/bitcoinArt.svg" width="360" alt="" uk-img />		 
+        <div id="qrDiv" style="margin-top: 8vh;max-width: 360px;height: 300px;">
+          <div id="qrcode" style="position: relative; width: 60%; margin-left: 30px">
+          </div>
+        </div>
+    </div>
+</div>

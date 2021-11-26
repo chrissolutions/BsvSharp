@@ -1,0 +1,33 @@
+﻿@page "/about"
+
+<div>
+    <h1>About BsvSharp</h1>
+
+    <p>
+        As the name implies, <a href="https://github.com/chrissolutions/BsvSharp">BsvSharp</a> is a BSV library written in C#. Its primary aim of BsvSharp is to enable BSV application development in C#. Most of the current BSV tools support development in JavaScript, Java, and of course C++. The only tool that supports BSV development is C# is KzBSV.
+    </p>
+    <p>
+        BsvSharp is a fork of version 0.2.0 of the <a href="https://github.com/kzbsv/KzBsv">KzBSV</a> library developed by TonesNotes and prior to the development of BsvSharp the intent was to use KzBSV.  Unfortunately, KzBSV was incomplete in some areas and it could not fulfill a requirement of use within Blazor.       As the name implies, BsvSharp is a BSV library written in C#. Its primary aim of BscSharp is to enable BSV application development in C#. Most of the current BSV tools support development in JavaScript, Java, and of course C++. The only tool that supports BSV development is C# is KzBSV.
+    </p>
+    <p>
+        A big reason why JavaScript is favored by BSV application developers over C# is the ability to use JavaScript to develop front ends for client-based applications.  However, using Blazor and via WebAssembly, it is now possible to write client-based applications using C#.
+    </p>
+    <p>
+        KzBSV uses the System.Security.Cryptography library but due to sandbox constraints, the library is not supported in Blazor.  Fortunately, there is a solution to this predicament.  BsvSharp incorporates the BouncyCastle library that provides cryptographic algorithms used by BSV without any reliance on System.Security.Cryptography.
+    </p>
+    <p>
+        The version of <a href="https://www.bouncycastle.org">BouncyCastle</a> was ported from <a href="https://github.com/MetacoSA/NBitcoin/tree/v2.0.0.0">NBitcoin version 2.0.0</a>.  NBitcoin is a .NET version of the BitcoinJ library.  NBitcoin is a mature library that follows the Bitcoin Core protocol and contain much of the technical debt and constraints associated with the BTC Core protocol.  Fortunately, the BouncyCastle portion was well isolated and does not include any of the technical debt of BTC Core.
+    </p>
+    <p>
+        Other parts of BsvSharp was derived from <a href="https://github.com/twostack/dartsv">dartsv</a>.  The dartsv library, developed by Stephan February of <a href="https://www.twostack.org">TwoStack.org</a>, is a Dart language implementation of BSV.
+    </p>
+    <p>
+        BsvSharp leverages existing BSV implementation to produce a C# library that can work across all environments.
+    </p>
+    <p>
+        BsvSharp which began as a learning exercise and has been integrated into <a href="https://github.com/chrissolutions/cafelib">CafeLib</a> toolset.
+    </p>
+</div>
+
+@code {
+}
