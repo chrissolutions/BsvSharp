@@ -12,7 +12,7 @@ BsvSharp leverages these implementations to produce a C# library that works acro
 
 BsvSharp is packaged as part of the [CafeLib](https://github.com/chrissolutions/CafeLib) library.  CafeLib is a collection of C# libraries used for application development.  BsvSharp is located in the [Enterprise](https://github.com/chrissolutions/CafeLib/tree/main/Enterprise) folder of CafeLib
 
-CafeLib is deployed as set of nuget packages found on [nuget.org](https://www.nuget.org/packages?q=CafeLib).  The current version of the CafeLib libraries is 1.6.0
+CafeLib is deployed as set of nuget packages found on [nuget.org](https://www.nuget.org/packages?q=CafeLib).  The current version of the CafeLib libraries is 1.6.1
 
 ### BsvSharp.Api
 
