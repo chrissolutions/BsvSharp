@@ -36,4 +36,8 @@
     <PackageReference Include="CafeLib.Web.Request" Version="$(Version)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CafeLib.BsvSharp.Mapi\CafeLib.BsvSharp.Mapi.csproj" />
+  </ItemGroup>
+
 </Project>

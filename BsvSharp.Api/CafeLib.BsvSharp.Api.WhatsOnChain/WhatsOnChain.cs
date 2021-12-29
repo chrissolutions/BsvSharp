@@ -16,7 +16,7 @@ using Newtonsoft.Json.Linq;
 
 namespace CafeLib.BsvSharp.Api.WhatsOnChain 
 {
-    public class WhatsOnChain : BasicApiRequest
+    public class WhatsOnChain : MerchantClient
     {
         public string Network { get; }
 
