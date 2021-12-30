@@ -44,7 +44,7 @@ namespace CafeLib.BsvSharp.Mapi
         /// </summary>
         /// <param name="txHash">transaction hash</param>
         /// <returns>request response</returns>
-        public virtual async Task<ApiResponse<TransactionStatusResponse>> GetTransactionStatus(string txHash)
+        public virtual async Task<ApiResponse<TransactionStatusResponse>> QueryTransactionStatus(string txHash)
         {
             var url = $"{Url}/mapi/tx/{txHash}";
             return await GetRequest<ApiResponse<TransactionStatusResponse>, TransactionStatusResponse, TransactionStatus>(url);

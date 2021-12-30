@@ -10,7 +10,6 @@ using CafeLib.BsvSharp.Api.WhatsOnChain.Models;
 using CafeLib.BsvSharp.Api.WhatsOnChain.Models.Mapi;
 using CafeLib.BsvSharp.Mapi;
 using CafeLib.BsvSharp.Network;
-using CafeLib.Core.Extensions;
 using CafeLib.Web.Request;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -19,11 +18,12 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
 {
     public class WhatsOnChain : MerchantClient
     {
-        public string Network { get; }
+        private const string BaseUrl = "https://mapi.taal.com";
+        private const string ClientName = "taal";
 
         public WhatsOnChain(NetworkType networkType = NetworkType.Main)
+            : base(ClientName, BaseUrl, networkType)
         {
-            Network = networkType.GetDescriptor();
             Headers.Add("Content-Type", WebContentType.Json);
             Headers.Add("User-Agent", typeof(WhatsOnChain).Namespace);
         }
@@ -163,6 +163,7 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
 
         #region Mapi
 
+        [Obsolete("Use GetFeeQuote")]
         public async Task<Quotes> GetFeeQuotes()
         {
             const string url = "https://api.whatsonchain.com/v1/bsv/main/mapi/feeQuotes";
