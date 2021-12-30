@@ -176,11 +176,30 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         #region Mapi
 
         [Fact]
+        public async Task GetFeeQuote_Test()
+        {
+            var response = await Api.GetFeeQuote();
+            Assert.True(response.IsSuccessful);
+            var quote = response.Result;
+            Assert.NotNull(quote);
+            Assert.NotNull(quote.Payload);
+            Assert.Equal("taal", quote.ProviderName);
+        }
+
+        [Fact]
         public async Task GetFeeQuotes_Test()
         {
-            var quotes = await Api.GetFeeQuotes();
-            Assert.NotEmpty(quotes.ProviderQuotes);
-            Assert.Contains(quotes.ProviderQuotes, quote => quote.ProviderName == "taal");
+            try
+            {
+                var quotes = await Api.GetFeeQuotes();
+                Assert.NotEmpty(quotes.ProviderQuotes);
+                Assert.Contains(quotes.ProviderQuotes, quote => quote.ProviderName == "taal");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //throw;
+            }
         }
 
         [Theory]
