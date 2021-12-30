@@ -5,11 +5,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using CafeLib.BsvSharp.Api.WhatsOnChain.Models;
 using CafeLib.BsvSharp.Api.WhatsOnChain.Models.Mapi;
 using CafeLib.BsvSharp.Mapi;
 using CafeLib.BsvSharp.Network;
+using CafeLib.Core.Support;
 using CafeLib.Web.Request;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -63,12 +65,11 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
             return addressInfo;
         }
 
-        public async Task<Utxo[]> GetAddressUtxos(string address)
+        public async Task<ApiResponse<Utxo[]>> GetAddressUtxos(string address)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/address/{address}/unspent";
-            var json = await GetAsync(url);
-            var unspent = JsonConvert.DeserializeObject<Utxo[]>(json);
-            return unspent;
+            var response = await GetRequest<Utxo[]>(url);
+            return response;
         }
 
         public async Task<AddressUtxo[]> GetBulkAddressUtxos(IEnumerable<string> addresses)
@@ -164,20 +165,18 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
         #region Mapi
 
         [Obsolete("Use GetFeeQuote")]
-        public async Task<Quotes> GetFeeQuotes()
+        public async Task<ApiResponse<Quote>> GetFeeQuotes()
         {
             const string url = "https://api.whatsonchain.com/v1/bsv/main/mapi/feeQuotes";
-            var json = await GetAsync(url);
-            var quotes = JsonConvert.DeserializeObject<Quotes>(json);
-            return quotes;
+            var response = await GetRequest<Quote>(url);
+            return response;
         }
 
-        public async Task<TransactionStatus> GetTransactionStatus(string txHash)
+        public async Task<ApiResponse<TransactionStatus>> GetTransactionStatus(string txHash)
         {
             var url = $"https://mapi.taal.com/mapi/tx/{txHash}";
-            var json = await GetAsync(url);
-            var status = JsonConvert.DeserializeObject<TransactionStatus>(json);
-            return status;
+            var response = await GetRequest<TransactionStatus>(url);
+            return response;
         }
 
         #endregion
@@ -299,5 +298,41 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
         }
 
         #endregion
+
+        #region Helpers
+
+        private async Task<ApiResponse<TResult>> GetRequest<TResult>(string url)
+        {
+            try
+            {
+                var json = await GetAsync(url);
+                var response = JsonConvert.DeserializeObject<TResult>(json);
+                if (response == null) throw new WebException("null response");
+                return Creator.CreateInstance<ApiResponse<TResult>>(response);
+            }
+            catch (Exception ex)
+            {
+                return Creator.CreateInstance<ApiResponse<TResult>>(ex);
+            }
+        }
+
+        private async Task<TApiResponse> PostRequest<TApiResponse, TResult>(string url, JToken body)
+            where TApiResponse : ApiResponse<TResult>
+        {
+            try
+            {
+                var json = await PostAsync(url, body);
+                var response = JsonConvert.DeserializeObject<TResult>(json);
+                if (response == null) throw new WebException("null response");
+                return Creator.CreateInstance<TApiResponse>(response);
+            }
+            catch (Exception ex)
+            {
+                return Creator.CreateInstance<TApiResponse>(ex);
+            }
+        }
+
+        #endregion
+
     }
 }
