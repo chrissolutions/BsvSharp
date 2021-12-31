@@ -230,7 +230,7 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
 
         #region Transaction
 
-        public async Task<Response> BroadcastTransaction(string txRaw)
+        public async Task<ApiResponse> BroadcastTransaction(string txRaw)
         {
             try
             {
@@ -238,11 +238,11 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
                 var jsonText = $@"{{""txHex"": ""{txRaw}""}}";
                 var jsonBody = JToken.Parse(jsonText);
                 await PostAsync(url, jsonBody);
-                return new Response();
+                return new ApiResponse();
             }
             catch (Exception ex)
             {
-                return new Response(ex);
+                return new ApiResponse(ex);
             }
         }
 
