@@ -73,7 +73,6 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/addresses/unspent";
             var jsonText = $@"{{""addresses"": {JsonConvert.SerializeObject(addresses)}}}";
             var jsonBody = JToken.Parse(jsonText);
-
             var response = await PostRequest<AddressUtxo[]>(url, jsonBody);
             return response;
         }
@@ -82,28 +81,25 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
 
         #region Block
 
-        public async Task<Block> GetBlockByHash(string blockHash)
+        public async Task<ApiResponse<Block>> GetBlockByHash(string blockHash)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/block/hash/{blockHash}";
-            var json = await GetAsync(url);
-            var block = JsonConvert.DeserializeObject<Block>(json);
-            return block;
+            var response = await GetRequest<Block>(url);
+            return response;
         }
 
-        public async Task<Block> GetBlockByHeight(long blockHeight)
+        public async Task<ApiResponse<Block>> GetBlockByHeight(long blockHeight)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/block/height/{blockHeight}";
-            var json = await GetAsync(url);
-            var block = JsonConvert.DeserializeObject<Block>(json);
-            return block;
+            var response = await GetRequest<Block>(url);
+            return response;
         }
 
-        public async Task<string[]> GetBlockPage(string blockHash, long pageNumber)
+        public async Task<ApiResponse<string[]>> GetBlockPage(string blockHash, long pageNumber)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/block/hash/{blockHash}/page/{pageNumber}";
-            var json = await GetAsync(url);
-            var transactions = JsonConvert.DeserializeObject<string[]>(json);
-            return transactions;
+            var response = await GetRequest<string[]>(url);
+            return response;
         }
 
         #endregion
@@ -207,14 +203,13 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
             return unspent;
         }
 
-        public async Task<ScriptUtxo[]> GetBulkScriptUtxos(IEnumerable<string> hashes)
+        public async Task<ApiResponse<ScriptUtxo[]>> GetBulkScriptUtxos(IEnumerable<string> hashes)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/scripts/unspent";
             var jsonText = $@"{{""scripts"": {JsonConvert.SerializeObject(hashes)}}}";
             var jsonBody = JToken.Parse(jsonText);
-            var json = await PostAsync(url, jsonBody);
-            var utxos = JsonConvert.DeserializeObject<ScriptUtxo[]>(json);
-            return utxos;
+            var response = await PostRequest<ScriptUtxo[]>(url, jsonBody);
+            return response;
         }
 
         public async Task<History[]> GetScriptHistory(string scriptHash)

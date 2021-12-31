@@ -145,7 +145,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("000000000000000009322213dd454961301f2126b7e73bd01c0bf042641df24c")]
         public async Task GetBlockByHash_Test(string blockHash)
         {
-            var block = await Api.GetBlockByHash(blockHash);
+            var response = await Api.GetBlockByHash(blockHash);
+            Assert.True(response.IsSuccessful);
+            var block = response.Result;
             Assert.Equal(blockHash, block.Hash);
         }
 
@@ -153,7 +155,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData(577267)]
         public async Task GetBlockByHeight_Test(long blockHeight)
         {
-            var block = await Api.GetBlockByHeight(blockHeight);
+            var response = await Api.GetBlockByHeight(blockHeight);
+            Assert.True(response.IsSuccessful);
+            var block = response.Result;
             Assert.Equal(blockHeight, block.Height);
         }
 
@@ -161,12 +165,13 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("000000000000000009322213dd454961301f2126b7e73bd01c0bf042641df24c")]
         public async Task GetBlockPage_Test(string blockHash)
         {
-            var transactions = await Api.GetBlockPage(blockHash, 1);
+            var response = await Api.GetBlockPage(blockHash, 1);
+            Assert.True(response.IsSuccessful);
+            var transactions = response.Result;
             Assert.NotNull(transactions);
             Assert.NotEmpty(transactions);
             Assert.Equal(2063, transactions.Length);
         }
-
 
         #endregion
 
@@ -304,7 +309,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
                 "995ea8d0f752f41cdd99bb9d54cb004709e04c7dc4088bcbbbb9ea5c390a43c3"
             };
 
-            var utxos = await Api.GetBulkScriptUtxos(hashes);
+            var response = await Api.GetBulkScriptUtxos(hashes);
+            Assert.True(response.IsSuccessful);
+            var utxos = response.Result;
             Assert.NotEmpty(utxos);
             Assert.Equal(2, utxos.Length);
         }
