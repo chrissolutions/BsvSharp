@@ -182,7 +182,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [Fact]
         public async Task GetChainInfo_Test()
         {
-            var chainInfo = await Api.GetChainInfo();
+            var response = await Api.GetChainInfo();
+            Assert.True(response.IsSuccessful);
+            var chainInfo = response.Result;
             Assert.NotNull(chainInfo);
             Assert.Equal(NetworkType.Main.GetDescriptor(), chainInfo.Chain);
         }
@@ -190,7 +192,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [Fact]
         public async Task GetCirculatingSupply_Test()
         {
-            var supply = await Api.GetCirculatingSupply();
+            var response = await Api.GetCirculatingSupply();
+            Assert.True(response.IsSuccessful);
+            var supply = response.Result;
             Assert.True(Math.Round(supply, 2) > 18865981.25);
         }
 
