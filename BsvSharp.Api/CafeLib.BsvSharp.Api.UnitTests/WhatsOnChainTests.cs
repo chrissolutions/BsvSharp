@@ -24,7 +24,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [Fact]
         public async Task GetHealth_Test()
         {
-            var health = await Api.GetHealth();
+            var response = await Api.GetHealth();
+            Assert.True(response.IsSuccessful);
+            var health = response.Result;
             Assert.True(health.IsSuccessful);
         }
 

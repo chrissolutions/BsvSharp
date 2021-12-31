@@ -138,18 +138,11 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
 
         #region Health
 
-        public async Task<Health> GetHealth()
+        public async Task<ApiResponse<Health>> GetHealth()
         {
-            try
-            {
-                var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/woc";
-                var _ = await GetAsync(url);
-                return new Health();
-            }
-            catch (WebRequestException e)
-            {
-                return new Health(e);
-            }
+            var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/woc";
+            var response = await GetRequest <Health>(url);
+            return response;
         }
 
         #endregion
