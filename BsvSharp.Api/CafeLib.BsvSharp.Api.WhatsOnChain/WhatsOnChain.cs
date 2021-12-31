@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading.Tasks;
 using CafeLib.BsvSharp.Api.WhatsOnChain.Models;
 using CafeLib.BsvSharp.Api.WhatsOnChain.Models.Mapi;
@@ -32,37 +31,34 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
 
         #region Address
 
-        public async Task<Balance> GetAddressBalance(string address)
+        public async Task<ApiResponse<Balance>> GetAddressBalance(string address)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/address/{address}/balance";
-            var json = await GetAsync(url);
-            var balance = JsonConvert.DeserializeObject<Balance>(json);
-            return balance;
+            var response = await GetRequest<Balance>(url);
+            return response;
         }
 
-        public async Task<AddressBalance[]> GetBulkAddressBalances(IEnumerable<string> addresses)
+        public async Task<ApiResponse<AddressBalance[]>> GetBulkAddressBalances(IEnumerable<string> addresses)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/addresses/balance";
             var jsonText = $@"{{""addresses"": {JsonConvert.SerializeObject(addresses)}}}";
             var jsonBody = JToken.Parse(jsonText);
-            var json = await PostAsync(url, jsonBody);
-            var balances = JsonConvert.DeserializeObject<AddressBalance[]>(json);
-            return balances;
+            var response = await PostRequest<AddressBalance[]>(url, jsonBody);
+            return response;
         }
 
-        public async Task<History[]> GetAddressHistory(string address)
+        public async Task<ApiResponse<History[]>> GetAddressHistory(string address)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/address/{address}/history";
-            var json = await GetAsync(url);
-            return JsonConvert.DeserializeObject<History[]>(json);
+            var response = await GetRequest<History[]>(url);
+            return response;
         }
 
-        public async Task<AddressInfo> GetAddressInfo(string address)
+        public async Task<ApiResponse<AddressInfo>> GetAddressInfo(string address)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/address/{address}/info";
-            var json = await GetAsync(url);
-            var addressInfo = JsonConvert.DeserializeObject<AddressInfo>(json);
-            return addressInfo;
+            var response = await GetRequest<AddressInfo>(url);
+            return response;
         }
 
         public async Task<ApiResponse<Utxo[]>> GetAddressUtxos(string address)
@@ -72,14 +68,14 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
             return response;
         }
 
-        public async Task<AddressUtxo[]> GetBulkAddressUtxos(IEnumerable<string> addresses)
+        public async Task<ApiResponse<AddressUtxo[]>> GetBulkAddressUtxos(IEnumerable<string> addresses)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/addresses/unspent";
             var jsonText = $@"{{""addresses"": {JsonConvert.SerializeObject(addresses)}}}";
             var jsonBody = JToken.Parse(jsonText);
-            var json = await PostAsync(url, jsonBody);
-            var utxos = JsonConvert.DeserializeObject<AddressUtxo[]>(json);
-            return utxos;
+
+            var response = await PostRequest<AddressUtxo[]>(url, jsonBody);
+            return response;
         }
 
         #endregion
@@ -307,7 +303,7 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
             {
                 var json = await GetAsync(url);
                 var response = JsonConvert.DeserializeObject<TResult>(json);
-                if (response == null) throw new WebException("null response");
+                if (response == null) throw new Exception("null response");
                 return Creator.CreateInstance<ApiResponse<TResult>>(response);
             }
             catch (Exception ex)
@@ -316,19 +312,18 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
             }
         }
 
-        private async Task<TApiResponse> PostRequest<TApiResponse, TResult>(string url, JToken body)
-            where TApiResponse : ApiResponse<TResult>
+        private async Task<ApiResponse<TResult>> PostRequest<TResult>(string url, JToken body)
         {
             try
             {
                 var json = await PostAsync(url, body);
                 var response = JsonConvert.DeserializeObject<TResult>(json);
-                if (response == null) throw new WebException("null response");
-                return Creator.CreateInstance<TApiResponse>(response);
+                if (response == null) throw new Exception("null response");
+                return Creator.CreateInstance<ApiResponse<TResult>>(response);
             }
             catch (Exception ex)
             {
-                return Creator.CreateInstance<TApiResponse>(ex);
+                return Creator.CreateInstance<ApiResponse<TResult>>(ex);
             }
         }
 

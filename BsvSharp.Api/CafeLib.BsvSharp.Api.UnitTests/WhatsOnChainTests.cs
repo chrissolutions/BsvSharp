@@ -36,7 +36,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR")]
         public async Task GetAddressBalance_Test(string address)
         {
-            var balance = await Api.GetAddressBalance(address);
+            var response = await Api.GetAddressBalance(address);
+            Assert.True(response.IsSuccessful);
+            var balance = response.Result;
             Assert.Equal(0, balance.Confirmed);
             Assert.Equal(0, balance.Unconfirmed);
         }
@@ -50,7 +52,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
                 "1KGHhLTQaPr4LErrvbAuGE62yPpDoRwrob"
             };
 
-            var balances = await Api.GetBulkAddressBalances(addresses);
+            var response = await Api.GetBulkAddressBalances(addresses);
+            Assert.True(response.IsSuccessful);
+            var balances = response.Result;
             Assert.NotEmpty(balances);
             Assert.Equal(2, balances.Length);
             Assert.Equal(addresses[0], balances.First().Address);
@@ -60,7 +64,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("16ZqP5Tb22KJuvSAbjNkoiZs13mmRmexZA", "6b22c47e7956e5404e05c3dc87dc9f46e929acfd46c8dd7813a34e1218d2f9d1", 563052)]
         public async Task GetAddressHistory_Test(string address, string firstTxHash, long firstHeight)
         {
-            var addressHistory = await Api.GetAddressHistory(address);
+            var response = await Api.GetAddressHistory(address);
+            Assert.True(response.IsSuccessful);
+            var addressHistory = response.Result;
             Assert.NotEmpty(addressHistory);
             Assert.Equal(firstTxHash, addressHistory.First().TxHash);
             Assert.Equal(firstHeight, addressHistory.First().Height);
@@ -70,7 +76,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR", true)]
         public async Task GetAddressInfo_Test(string address, bool isValid)
         {
-            var addressInfo = await Api.GetAddressInfo(address);
+            var response = await Api.GetAddressInfo(address);
+            Assert.True(response.IsSuccessful);
+            var addressInfo = response.Result;
             Assert.Equal(address, addressInfo.Address);
             Assert.Equal(isValid, addressInfo.IsValid);
         }
@@ -79,19 +87,35 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR")]
         public async Task GetAddressUtxos_Spent_Test(string address)
         {
-            var unspentTransactions = await Api.GetAddressUtxos(address);
+            var response = await Api.GetAddressUtxos(address);
+            Assert.True(response.IsSuccessful);
+            var unspentTransactions = response.Result;
             Assert.Empty(unspentTransactions);
         }
 
-        //[Theory]
-        //[InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR", 107297900, 0)]
-        //public async Task GetAddressUtxos_UnspentTest(string address, long value, int position)
-        //{
-        //    var unspentTransactions = await Api.GetAddressUtxos(address);
-        //    Assert.NotEmpty(unspentTransactions);
-        //    Assert.Equal(value, unspentTransactions.First().Value);
-        //    Assert.Equal(position, unspentTransactions.First().TransactionPosition);
-        //}
+        [Theory]
+        [InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR", 107297900, 0)]
+        public async Task GetAddressUtxos_UnspentTest(string address, long value, int position)
+        {
+            var response = await Api.GetAddressUtxos(address);
+            Assert.True(response.IsSuccessful);
+            var unspentTransactions = response.Result;
+            switch (unspentTransactions)
+            {
+                case null:
+                    throw new ArgumentNullException(nameof(unspentTransactions));
+
+                case var _ when unspentTransactions.Any():
+                    Assert.NotEmpty(unspentTransactions);
+                    Assert.Equal(value, unspentTransactions.First().Value);
+                    Assert.Equal(position, unspentTransactions.First().TransactionPosition);
+                    break;
+
+                default:
+                    Assert.Empty(unspentTransactions);
+                    break;
+            }
+        }
 
         [Fact]
         public async Task GetBulkAddressUtxos_Test()
@@ -102,7 +126,10 @@ namespace CafeLib.BsvSharp.Api.UnitTests
                 "1KGHhLTQaPr4LErrvbAuGE62yPpDoRwrob"
             };
 
-            var utxos = await Api.GetBulkAddressUtxos(addresses);
+            var response = await Api.GetBulkAddressUtxos(addresses);
+            Assert.True(response.IsSuccessful);
+
+            var utxos = response.Result;
             Assert.NotEmpty(utxos);
             Assert.Equal(2, utxos.Length);
             Assert.Equal(addresses[0], utxos.First().Address);
@@ -189,24 +216,23 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [Fact]
         public async Task GetFeeQuotes_Test()
         {
-            try
-            {
-                var quotes = await Api.GetFeeQuotes();
-                Assert.NotEmpty(quotes.ProviderQuotes);
-                Assert.Contains(quotes.ProviderQuotes, quote => quote.ProviderName == "taal");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                //throw;
-            }
+#pragma warning disable CS0618
+            var response = await Api.GetFeeQuotes();
+#pragma warning restore CS0618
+            Assert.False(response.IsSuccessful);
+            Assert.Null(response.Result);
+            Assert.IsType<WebRequestException>(response.Exception);
+            Assert.Equal(404, response.GetException<WebRequestException>().Response.StatusCode);
         }
 
         [Theory]
         [InlineData("995ea8d0f752f41cdd99bb9d54cb004709e04c7dc4088bcbbbb9ea5c390a43c3")]
         public async Task GetTxStatus_Test(string txHash)
         {
-            var status = await Api.GetTransactionStatus(txHash);
+            var response = await Api.GetTransactionStatus(txHash);
+            Assert.True(response.IsSuccessful);
+            Assert.NotNull(response.Result);
+            var status = response.Result;
             Assert.NotNull(status.Payload);
             var payload = JsonConvert.DeserializeObject<TransactionPayload>(status.Payload);
             Assert.Equal(txHash, payload?.TxId);
