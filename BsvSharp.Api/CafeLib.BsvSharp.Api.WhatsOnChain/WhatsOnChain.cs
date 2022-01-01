@@ -211,14 +211,13 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
 
         #region Search
 
-        public async Task<SearchResults> GetExplorerLinks(string address)
+        public async Task<ApiResponse<SearchResults>> GetExplorerLinks(string address)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/search/links";
             var jsonText = $@"{{""query"": ""{address}""}}";
             var jsonBody = JToken.Parse(jsonText);
-            var json = await PostAsync(url, jsonBody);
-            var results = JsonConvert.DeserializeObject<SearchResults>(json);
-            return results;
+            var response = await PostRequest<SearchResults>(url, jsonBody);
+            return response;
         }
 
         #endregion

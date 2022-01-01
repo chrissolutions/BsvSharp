@@ -292,13 +292,15 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("1GJ3x5bcEnKMnzNFPPELDfXUCwKEaLHM5H")]
         public async Task GetExplorerLinks(string address)
         {
-            var searchResult = await Api.GetExplorerLinks(address);
+            var response = await Api.GetExplorerLinks(address);
+            Assert.True(response.IsSuccessful);
+            Assert.NotNull(response.Result);
+            var searchResult = response.Result;
             Assert.NotNull(searchResult);
             Assert.NotEmpty(searchResult.Links);
             Assert.Equal("address", searchResult.Links.First().Type);
             Assert.Contains(address, searchResult.Links.First().Url);
         }
-
 
         #endregion
 
