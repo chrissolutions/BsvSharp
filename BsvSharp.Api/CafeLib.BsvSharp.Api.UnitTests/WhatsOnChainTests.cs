@@ -351,7 +351,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("c1d32f28baa27a376ba977f6a8de6ce0a87041157cef0274b20bfda2b0d8df96")]
         public async Task GetTransactionByHash_Test(string hash)
         {
-            var tx = await Api.GetTransactionByHash(hash);
+            var response = await Api.GetTransactionByHash(hash);
+            Assert.True(response.IsSuccessful);
+            var tx = response.Result;
             Assert.Equal(hash, tx.Hash);
         }
 
@@ -360,7 +362,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("4c9e510077f5e5a961211100c0ed20173fdeae0e3575551e44b74581f74e7719", 16)]
         public async Task GetTransactionMerkleProof_Test(string hash, int count)
         {
-            var tree = await Api.GetTransactionMerkleProof(hash);
+            var response = await Api.GetTransactionMerkleProof(hash);
+            Assert.True(response.IsSuccessful);
+            var tree = response.Result;
             Assert.NotNull(tree);
             Assert.Equal(count, tree.Nodes.First().Branches.Length);
         }

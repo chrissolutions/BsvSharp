@@ -249,12 +249,11 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
             return tx;
         }
 
-        public async Task<Transaction> GetTransactionByHash(string txid)
+        public async Task<ApiResponse<Transaction>> GetTransactionByHash(string txid)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/tx/hash/{txid}";
-            var json = await GetAsync(url);
-            var tx = JsonConvert.DeserializeObject<Transaction>(json);
-            return tx;
+            var response = await GetRequest<Transaction>(url);
+            return response;
         }
 
         public async Task<Transaction[]> GetBulkTransactionDetails(IEnumerable<string> txIds)
@@ -266,12 +265,14 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
             return utxos;
         }
 
-        public async Task<MerkleProof> GetTransactionMerkleProof(string txId)
+        public async Task<ApiResponse<MerkleProof>> GetTransactionMerkleProof(string txId)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/tx/{txId}/proof";
-            var json = await GetAsync(url);
-            var proof = JsonConvert.DeserializeObject<MerkleNode[]>(json);
-            return new MerkleProof {Nodes = proof};
+            var response = await GetRequest<MerkleNode[]>(url);
+            var proof = new MerkleProof { Nodes = response.Result };
+            return response.IsSuccessful 
+                ? new ApiResponse<MerkleProof>(proof) 
+                : new ApiResponse<MerkleProof>(response.Exception);
         }
 
         #endregion
