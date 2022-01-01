@@ -167,20 +167,18 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
 
         #region Mempool
 
-        public async Task<Mempool> GetMempoolInfo()
+        public async Task<ApiResponse<Mempool>> GetMempoolInfo()
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/mempool/info";
-            var json = await GetAsync(url);
-            var mempool = JsonConvert.DeserializeObject<Mempool>(json);
-            return mempool;
+            var response = await GetRequest<Mempool>(url);
+            return response;
         }
 
-        public async Task<string[]> GetMempoolTransactions()
+        public async Task<ApiResponse<string[]>> GetMempoolTransactions()
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/mempool/raw";
-            var json = await GetAsync(url);
-            var transactions = JsonConvert.DeserializeObject<string[]>(json);
-            return transactions;
+            var response = await GetRequest<string[]>(url);
+            return response;
         }
 
         #endregion

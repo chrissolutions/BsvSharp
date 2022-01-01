@@ -265,7 +265,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [Fact]
         public async Task GetMempoolInfo_Test()
         {
-            var mempool = await Api.GetMempoolInfo();
+            var response = await Api.GetMempoolInfo();
+            Assert.True(response.IsSuccessful);
+            var mempool = response.Result;
             Assert.NotNull(mempool);
             Assert.True(mempool.Bytes > 0);
         }
@@ -273,7 +275,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [Fact]
         public async Task GetMempoolTransactions_Test()
         {
-            var transactions = await Api.GetMempoolTransactions();
+            var response = await Api.GetMempoolTransactions();
+            Assert.True(response.IsSuccessful);
+            var transactions = response.Result;
             Assert.NotNull(transactions);
             Assert.NotEmpty(transactions);
         }
