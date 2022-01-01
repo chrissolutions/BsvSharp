@@ -183,12 +183,11 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
 
         #region Script
 
-        public async Task<Utxo[]> GetScriptUtxos(string scriptHash)
+        public async Task<ApiResponse<Utxo[]>> GetScriptUtxos(string scriptHash)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/script/{scriptHash}/unspent";
-            var json = await GetAsync(url);
-            var unspent = JsonConvert.DeserializeObject<Utxo[]>(json);
-            return unspent;
+            var response = await GetRequest<Utxo[]>(url);
+            return response;
         }
 
         public async Task<ApiResponse<ScriptUtxo[]>> GetBulkScriptUtxos(IEnumerable<string> hashes)
@@ -200,25 +199,24 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
             return response;
         }
 
-        public async Task<History[]> GetScriptHistory(string scriptHash)
+        public async Task<ApiResponse<History[]>> GetScriptHistory(string scriptHash)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/script/{scriptHash}/history";
-            var json = await GetAsync(url);
-            return JsonConvert.DeserializeObject<History[]>(json);
+            var response = await GetRequest<History[]>(url);
+            return response;
         }
 
         #endregion
 
         #region Search
 
-        public async Task<SearchResults> GetExplorerLinks(string address)
+        public async Task<ApiResponse<SearchResults>> GetExplorerLinks(string address)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/search/links";
             var jsonText = $@"{{""query"": ""{address}""}}";
             var jsonBody = JToken.Parse(jsonText);
-            var json = await PostAsync(url, jsonBody);
-            var results = JsonConvert.DeserializeObject<SearchResults>(json);
-            return results;
+            var response = await PostRequest<SearchResults>(url, jsonBody);
+            return response;
         }
 
         #endregion

@@ -292,13 +292,14 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("1GJ3x5bcEnKMnzNFPPELDfXUCwKEaLHM5H")]
         public async Task GetExplorerLinks(string address)
         {
-            var searchResult = await Api.GetExplorerLinks(address);
+            var response = await Api.GetExplorerLinks(address);
+            Assert.True(response.IsSuccessful);
+            var searchResult = response.Result;
             Assert.NotNull(searchResult);
             Assert.NotEmpty(searchResult.Links);
             Assert.Equal("address", searchResult.Links.First().Type);
             Assert.Contains(address, searchResult.Links.First().Url);
         }
-
 
         #endregion
 
@@ -308,7 +309,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("995ea8d0f752f41cdd99bb9d54cb004709e04c7dc4088bcbbbb9ea5c390a43c3")]
         public async Task GetScriptUtxos_Test(string scriptHash)
         {
-            var unspentTransactions = await Api.GetScriptUtxos(scriptHash);
+            var response = await Api.GetScriptUtxos(scriptHash);
+            Assert.True(response.IsSuccessful);
+            var unspentTransactions = response.Result;
             Assert.Empty(unspentTransactions);
         }
 
@@ -332,7 +335,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("995ea8d0f752f41cdd99bb9d54cb004709e04c7dc4088bcbbbb9ea5c390a43c3")]
         public async Task GetScriptHistory_Test(string scriptHash)
         {
-            var scriptHistory = await Api.GetScriptHistory(scriptHash);
+            var response = await Api.GetScriptHistory(scriptHash);
+            Assert.True(response.IsSuccessful);
+            var scriptHistory = response.Result;
             Assert.NotEmpty(scriptHistory);
         }
 
