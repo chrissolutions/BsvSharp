@@ -205,8 +205,10 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [Fact]
         public async Task GetExchangeRate_Test()
         {
-            var rate = await Api.GetExchangeRate();
-            Assert.True(rate > 0 && rate < 1000000);
+            var response = await Api.GetExchangeRate();
+            Assert.True(response.IsSuccessful);
+            var exchangeRate = response.Result;
+            Assert.True(exchangeRate.Rate > 0 && exchangeRate.Rate < 1000000);
         }
 
         #endregion

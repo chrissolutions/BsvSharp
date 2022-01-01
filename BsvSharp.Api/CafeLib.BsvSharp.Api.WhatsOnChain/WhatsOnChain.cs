@@ -124,13 +124,11 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
 
         #region Exchange
 
-        public async Task<decimal> GetExchangeRate()
+        public async Task<ApiResponse<ExchangeRate>> GetExchangeRate()
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/exchangerate";
-            var json = await GetAsync(url);
-
-            var er = JsonConvert.DeserializeObject<ExchangeRate>(json);
-            return er?.Rate ?? decimal.Zero;
+            var response = await GetRequest<ExchangeRate>(url);
+            return response;
         }
 
         #endregion
