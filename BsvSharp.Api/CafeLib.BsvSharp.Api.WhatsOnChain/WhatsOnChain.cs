@@ -239,14 +239,13 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
             }
         }
 
-        public async Task<Transaction> DecodeTransaction(string txRaw)
+        public async Task<ApiResponse<Transaction>> DecodeTransaction(string txRaw)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/tx/decode";
             var jsonContent = JsonConvert.SerializeObject(new { txHex = txRaw });
             var jsonBody = JToken.Parse(jsonContent);
-            var json = await PostAsync(url, jsonBody);
-            var tx = JsonConvert.DeserializeObject<Transaction>(json);
-            return tx;
+            var response = await PostRequest<Transaction>(url, jsonBody);
+            return response;
         }
 
         public async Task<ApiResponse<Transaction>> GetTransactionByHash(string txid)

@@ -375,7 +375,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         )]
         public async Task GetTransactionDecode_Test(string txRaw, string txHash)
         {
-            var tx = await Api.DecodeTransaction(txRaw);
+            var response = await Api.DecodeTransaction(txRaw);
+            Assert.True(response.IsSuccessful);
+            var tx = response.Result;
             Assert.Equal(txHash, tx.TxId);
             Assert.Equal(txHash, tx.Hash);
         }
