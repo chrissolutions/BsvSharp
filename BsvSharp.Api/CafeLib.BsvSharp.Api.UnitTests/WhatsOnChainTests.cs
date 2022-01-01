@@ -12,6 +12,7 @@ using CafeLib.Core.Extensions;
 using CafeLib.Web.Request;
 using Newtonsoft.Json;
 using Xunit;
+// ReSharper disable StringLiteralTypo
 
 namespace CafeLib.BsvSharp.Api.UnitTests 
 {
