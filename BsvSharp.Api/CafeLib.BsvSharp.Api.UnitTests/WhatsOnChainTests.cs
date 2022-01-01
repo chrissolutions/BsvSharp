@@ -12,6 +12,7 @@ using CafeLib.Core.Extensions;
 using CafeLib.Web.Request;
 using Newtonsoft.Json;
 using Xunit;
+// ReSharper disable StringLiteralTypo
 
 namespace CafeLib.BsvSharp.Api.UnitTests 
 {
@@ -294,6 +295,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         {
             var response = await Api.GetExplorerLinks(address);
             Assert.True(response.IsSuccessful);
+            Assert.NotNull(response.Result);
             var searchResult = response.Result;
             Assert.NotNull(searchResult);
             Assert.NotEmpty(searchResult.Links);
