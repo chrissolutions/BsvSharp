@@ -391,7 +391,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
                 "91f68c2c598bc73812dd32d60ab67005eac498bef5f0c45b822b3c9468ba3258"
             };
 
-            var txs = await Api.GetBulkTransactionDetails(txIds);
+            var response = await Api.GetBulkTransactionDetails(txIds);
+            Assert.True(response.IsSuccessful);
+            var txs = response.Result;
             Assert.NotEmpty(txs);
             Assert.Equal(2, txs.Length);
         }

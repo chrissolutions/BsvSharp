@@ -255,13 +255,12 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
             return response;
         }
 
-        public async Task<Transaction[]> GetBulkTransactionDetails(IEnumerable<string> txIds)
+        public async Task<ApiResponse<Transaction[]>> GetBulkTransactionDetails(IEnumerable<string> txIds)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/txs";
             var jsonBody = JToken.FromObject(new { txids = txIds });
-            var json = await PostAsync(url, jsonBody);
-            var utxos = JsonConvert.DeserializeObject<Transaction[]>(json);
-            return utxos;
+            var response = await PostRequest<Transaction[]>(url, jsonBody);
+            return response;
         }
 
         public async Task<ApiResponse<MerkleProof>> GetTransactionMerkleProof(string txId)
