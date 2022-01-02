@@ -29,6 +29,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             Assert.True(response.IsSuccessful);
             var health = response.Result;
             Assert.True(health.IsSuccessful);
+            Assert.Equal("Whats On Chain", health.Message);
         }
 
         #endregion
