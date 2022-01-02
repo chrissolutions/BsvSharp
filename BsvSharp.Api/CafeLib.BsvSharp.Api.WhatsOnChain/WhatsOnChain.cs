@@ -156,10 +156,10 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
         #region Mapi
 
         [Obsolete("Use GetFeeQuote")]
-        public async Task<ApiResponse<Quote>> GetFeeQuotes()
+        public async Task<ApiResponse<Quotes>> GetFeeQuotes()
         {
             const string url = "https://api.whatsonchain.com/v1/bsv/main/mapi/feeQuotes";
-            var response = await GetRequest<Quote>(url);
+            var response = await GetRequest<Quotes>(url);
             return response;
         }
 
