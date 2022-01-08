@@ -45,7 +45,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("3ea6bb35923dbff216aa11084280e0d6d477d78ed8010edac92c3253b3d79024")]
         public async Task GetTransactionStatus_Test(string txHash)
         {
-            var response = await _matterPool.GetTransactionStatus(txHash);
+            var response = await _matterPool.QueryTransactionStatus(txHash);
             Assert.NotNull(response);
             Assert.Equal("matterpool", response.Result.ProviderName);
             Assert.NotNull(response.Result.JsonPayload);

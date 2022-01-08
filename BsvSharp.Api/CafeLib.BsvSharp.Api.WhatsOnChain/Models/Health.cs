@@ -4,10 +4,11 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain.Models
 {
     public class Health
     {
-        public Health()
+        public Health(string message)
         {
             IsSuccessful = true;
             StatusCode = 200;
+            Message = message;
         }
 
         public Health(WebRequestException e)
@@ -18,6 +19,8 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain.Models
         }
 
         public bool IsSuccessful { get; }
+
+        public string Message { get; }
 
         public int StatusCode { get; }
 

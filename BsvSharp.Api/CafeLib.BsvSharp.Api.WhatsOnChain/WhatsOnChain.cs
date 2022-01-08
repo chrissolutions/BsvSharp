@@ -8,153 +8,146 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CafeLib.BsvSharp.Api.WhatsOnChain.Models;
 using CafeLib.BsvSharp.Api.WhatsOnChain.Models.Mapi;
+using CafeLib.BsvSharp.Mapi;
 using CafeLib.BsvSharp.Network;
-using CafeLib.Core.Extensions;
+using CafeLib.Core.Support;
 using CafeLib.Web.Request;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace CafeLib.BsvSharp.Api.WhatsOnChain 
 {
-    public class WhatsOnChain : BasicApiRequest
+    public class WhatsOnChain : MerchantClient
     {
-        public string Network { get; }
+        private const string BaseUrl = "https://mapi.taal.com";
+        private const string ClientName = "taal";
 
         public WhatsOnChain(NetworkType networkType = NetworkType.Main)
+            : base(ClientName, BaseUrl, networkType)
         {
-            Network = networkType.GetDescriptor();
             Headers.Add("Content-Type", WebContentType.Json);
             Headers.Add("User-Agent", typeof(WhatsOnChain).Namespace);
         }
 
         #region Address
 
-        public async Task<Balance> GetAddressBalance(string address)
+        public async Task<ApiResponse<Balance>> GetAddressBalance(string address)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/address/{address}/balance";
-            var json = await GetAsync(url);
-            var balance = JsonConvert.DeserializeObject<Balance>(json);
-            return balance;
+            var response = await GetRequest<Balance>(url);
+            return response;
         }
 
-        public async Task<AddressBalance[]> GetBulkAddressBalances(IEnumerable<string> addresses)
+        public async Task<ApiResponse<AddressBalance[]>> GetBulkAddressBalances(IEnumerable<string> addresses)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/addresses/balance";
             var jsonText = $@"{{""addresses"": {JsonConvert.SerializeObject(addresses)}}}";
             var jsonBody = JToken.Parse(jsonText);
-            var json = await PostAsync(url, jsonBody);
-            var balances = JsonConvert.DeserializeObject<AddressBalance[]>(json);
-            return balances;
+            var response = await PostRequest<AddressBalance[]>(url, jsonBody);
+            return response;
         }
 
-        public async Task<History[]> GetAddressHistory(string address)
+        public async Task<ApiResponse<History[]>> GetAddressHistory(string address)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/address/{address}/history";
-            var json = await GetAsync(url);
-            return JsonConvert.DeserializeObject<History[]>(json);
+            var response = await GetRequest<History[]>(url);
+            return response;
         }
 
-        public async Task<AddressInfo> GetAddressInfo(string address)
+        public async Task<ApiResponse<AddressInfo>> GetAddressInfo(string address)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/address/{address}/info";
-            var json = await GetAsync(url);
-            var addressInfo = JsonConvert.DeserializeObject<AddressInfo>(json);
-            return addressInfo;
+            var response = await GetRequest<AddressInfo>(url);
+            return response;
         }
 
-        public async Task<Utxo[]> GetAddressUtxos(string address)
+        public async Task<ApiResponse<Utxo[]>> GetAddressUtxos(string address)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/address/{address}/unspent";
-            var json = await GetAsync(url);
-            var unspent = JsonConvert.DeserializeObject<Utxo[]>(json);
-            return unspent;
+            var response = await GetRequest<Utxo[]>(url);
+            return response;
         }
 
-        public async Task<AddressUtxo[]> GetBulkAddressUtxos(IEnumerable<string> addresses)
+        public async Task<ApiResponse<AddressUtxo[]>> GetBulkAddressUtxos(IEnumerable<string> addresses)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/addresses/unspent";
             var jsonText = $@"{{""addresses"": {JsonConvert.SerializeObject(addresses)}}}";
             var jsonBody = JToken.Parse(jsonText);
-            var json = await PostAsync(url, jsonBody);
-            var utxos = JsonConvert.DeserializeObject<AddressUtxo[]>(json);
-            return utxos;
+            var response = await PostRequest<AddressUtxo[]>(url, jsonBody);
+            return response;
         }
 
         #endregion
 
         #region Block
 
-        public async Task<Block> GetBlockByHash(string blockHash)
+        public async Task<ApiResponse<Block>> GetBlockByHash(string blockHash)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/block/hash/{blockHash}";
-            var json = await GetAsync(url);
-            var block = JsonConvert.DeserializeObject<Block>(json);
-            return block;
+            var response = await GetRequest<Block>(url);
+            return response;
         }
 
-        public async Task<Block> GetBlockByHeight(long blockHeight)
+        public async Task<ApiResponse<Block>> GetBlockByHeight(long blockHeight)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/block/height/{blockHeight}";
-            var json = await GetAsync(url);
-            var block = JsonConvert.DeserializeObject<Block>(json);
-            return block;
+            var response = await GetRequest<Block>(url);
+            return response;
         }
 
-        public async Task<string[]> GetBlockPage(string blockHash, long pageNumber)
+        public async Task<ApiResponse<string[]>> GetBlockPage(string blockHash, long pageNumber)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/block/hash/{blockHash}/page/{pageNumber}";
-            var json = await GetAsync(url);
-            var transactions = JsonConvert.DeserializeObject<string[]>(json);
-            return transactions;
+            var response = await GetRequest<string[]>(url);
+            return response;
         }
 
         #endregion
 
         #region Chain
 
-        public async Task<ChainInfo> GetChainInfo()
+        public async Task<ApiResponse<ChainInfo>> GetChainInfo()
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/chain/info";
-            var json = await GetAsync(url);
-            var chainInfo = JsonConvert.DeserializeObject<ChainInfo>(json);
-            return chainInfo;
+            var response = await GetRequest<ChainInfo>(url);
+            return response;
         }
 
-        public async Task<double> GetCirculatingSupply()
+        public async Task<ApiResponse<double>> GetCirculatingSupply()
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/circulatingsupply";
-            var json = await GetAsync(url);
-            return Convert.ToDouble(json);
+            var response = await GetRequest<double>(url);
+            return response;
         }
 
         #endregion
 
         #region Exchange
 
-        public async Task<decimal> GetExchangeRate()
+        public async Task<ApiResponse<ExchangeRate>> GetExchangeRate()
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/exchangerate";
-            var json = await GetAsync(url);
-
-            var er = JsonConvert.DeserializeObject<ExchangeRate>(json);
-            return er?.Rate ?? decimal.Zero;
+            var response = await GetRequest<ExchangeRate>(url);
+            return response;
         }
 
         #endregion
 
         #region Health
 
-        public async Task<Health> GetHealth()
+        public async Task<ApiResponse<Health>> GetHealth()
         {
+            var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/woc";
+
             try
             {
-                var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/woc";
-                var _ = await GetAsync(url);
-                return new Health();
+                var result = await GetAsync(url);
+                var health = new Health(result);
+                return Creator.CreateInstance<ApiResponse<Health>>(health);
             }
-            catch (WebRequestException e)
+            catch (Exception ex)
             {
-                return new Health(e);
+                return Creator.CreateInstance<ApiResponse<Health>>(ex);
             }
         }
 
@@ -162,90 +155,84 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
 
         #region Mapi
 
-        public async Task<Quotes> GetFeeQuotes()
+        [Obsolete("Use GetFeeQuote")]
+        public async Task<ApiResponse<Quotes>> GetFeeQuotes()
         {
             const string url = "https://api.whatsonchain.com/v1/bsv/main/mapi/feeQuotes";
-            var json = await GetAsync(url);
-            var quotes = JsonConvert.DeserializeObject<Quotes>(json);
-            return quotes;
+            var response = await GetRequest<Quotes>(url);
+            return response;
         }
 
-        public async Task<TransactionStatus> GetTransactionStatus(string txHash)
+        public async Task<ApiResponse<TransactionStatus>> GetTransactionStatus(string txHash)
         {
             var url = $"https://mapi.taal.com/mapi/tx/{txHash}";
-            var json = await GetAsync(url);
-            var status = JsonConvert.DeserializeObject<TransactionStatus>(json);
-            return status;
+            var response = await GetRequest<TransactionStatus>(url);
+            return response;
         }
 
         #endregion
 
         #region Mempool
 
-        public async Task<Mempool> GetMempoolInfo()
+        public async Task<ApiResponse<Mempool>> GetMempoolInfo()
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/mempool/info";
-            var json = await GetAsync(url);
-            var mempool = JsonConvert.DeserializeObject<Mempool>(json);
-            return mempool;
+            var response = await GetRequest<Mempool>(url);
+            return response;
         }
 
-        public async Task<string[]> GetMempoolTransactions()
+        public async Task<ApiResponse<string[]>> GetMempoolTransactions()
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/mempool/raw";
-            var json = await GetAsync(url);
-            var transactions = JsonConvert.DeserializeObject<string[]>(json);
-            return transactions;
+            var response = await GetRequest<string[]>(url);
+            return response;
         }
 
         #endregion
 
         #region Script
 
-        public async Task<Utxo[]> GetScriptUtxos(string scriptHash)
+        public async Task<ApiResponse<Utxo[]>> GetScriptUtxos(string scriptHash)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/script/{scriptHash}/unspent";
-            var json = await GetAsync(url);
-            var unspent = JsonConvert.DeserializeObject<Utxo[]>(json);
-            return unspent;
+            var response = await GetRequest<Utxo[]>(url);
+            return response;
         }
 
-        public async Task<ScriptUtxo[]> GetBulkScriptUtxos(IEnumerable<string> hashes)
+        public async Task<ApiResponse<ScriptUtxo[]>> GetBulkScriptUtxos(IEnumerable<string> hashes)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/scripts/unspent";
             var jsonText = $@"{{""scripts"": {JsonConvert.SerializeObject(hashes)}}}";
             var jsonBody = JToken.Parse(jsonText);
-            var json = await PostAsync(url, jsonBody);
-            var utxos = JsonConvert.DeserializeObject<ScriptUtxo[]>(json);
-            return utxos;
+            var response = await PostRequest<ScriptUtxo[]>(url, jsonBody);
+            return response;
         }
 
-        public async Task<History[]> GetScriptHistory(string scriptHash)
+        public async Task<ApiResponse<History[]>> GetScriptHistory(string scriptHash)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/script/{scriptHash}/history";
-            var json = await GetAsync(url);
-            return JsonConvert.DeserializeObject<History[]>(json);
+            var response = await GetRequest<History[]>(url);
+            return response;
         }
 
         #endregion
 
         #region Search
 
-        public async Task<SearchResults> GetExplorerLinks(string address)
+        public async Task<ApiResponse<SearchResults>> GetExplorerLinks(string address)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/search/links";
             var jsonText = $@"{{""query"": ""{address}""}}";
             var jsonBody = JToken.Parse(jsonText);
-            var json = await PostAsync(url, jsonBody);
-            var results = JsonConvert.DeserializeObject<SearchResults>(json);
-            return results;
+            var response = await PostRequest<SearchResults>(url, jsonBody);
+            return response;
         }
 
         #endregion
 
         #region Transaction
 
-        public async Task<Response> BroadcastTransaction(string txRaw)
+        public async Task<ApiResponse> BroadcastTransaction(string txRaw)
         {
             try
             {
@@ -253,49 +240,83 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
                 var jsonText = $@"{{""txHex"": ""{txRaw}""}}";
                 var jsonBody = JToken.Parse(jsonText);
                 await PostAsync(url, jsonBody);
-                return new Response();
+                return new ApiResponse();
             }
             catch (Exception ex)
             {
-                return new Response(ex);
+                return new ApiResponse(ex);
             }
         }
 
-        public async Task<Transaction> DecodeTransaction(string txRaw)
+        public async Task<ApiResponse<Transaction>> DecodeTransaction(string txRaw)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/tx/decode";
             var jsonContent = JsonConvert.SerializeObject(new { txHex = txRaw });
             var jsonBody = JToken.Parse(jsonContent);
-            var json = await PostAsync(url, jsonBody);
-            var tx = JsonConvert.DeserializeObject<Transaction>(json);
-            return tx;
+            var response = await PostRequest<Transaction>(url, jsonBody);
+            return response;
         }
 
-        public async Task<Transaction> GetTransactionByHash(string txid)
+        public async Task<ApiResponse<Transaction>> GetTransactionByHash(string txid)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/tx/hash/{txid}";
-            var json = await GetAsync(url);
-            var tx = JsonConvert.DeserializeObject<Transaction>(json);
-            return tx;
+            var response = await GetRequest<Transaction>(url);
+            return response;
         }
 
-        public async Task<Transaction[]> GetBulkTransactionDetails(IEnumerable<string> txIds)
+        public async Task<ApiResponse<Transaction[]>> GetBulkTransactionDetails(IEnumerable<string> txIds)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/txs";
             var jsonBody = JToken.FromObject(new { txids = txIds });
-            var json = await PostAsync(url, jsonBody);
-            var utxos = JsonConvert.DeserializeObject<Transaction[]>(json);
-            return utxos;
+            var response = await PostRequest<Transaction[]>(url, jsonBody);
+            return response;
         }
 
-        public async Task<MerkleProof> GetTransactionMerkleProof(string txId)
+        public async Task<ApiResponse<MerkleProof>> GetTransactionMerkleProof(string txId)
         {
             var url = $"https://api.whatsonchain.com/v1/bsv/{Network}/tx/{txId}/proof";
-            var json = await GetAsync(url);
-            var proof = JsonConvert.DeserializeObject<MerkleNode[]>(json);
-            return new MerkleProof {Nodes = proof};
+            var response = await GetRequest<MerkleNode[]>(url);
+            var proof = new MerkleProof { Nodes = response.Result };
+            return response.IsSuccessful 
+                ? new ApiResponse<MerkleProof>(proof) 
+                : new ApiResponse<MerkleProof>(response.Exception);
         }
 
         #endregion
+
+        #region Helpers
+
+        private async Task<ApiResponse<TResult>> GetRequest<TResult>(string url)
+        {
+            try
+            {
+                var json = await GetAsync(url);
+                var response = JsonConvert.DeserializeObject<TResult>(json);
+                if (response == null) throw new Exception("null response");
+                return Creator.CreateInstance<ApiResponse<TResult>>(response);
+            }
+            catch (Exception ex)
+            {
+                return Creator.CreateInstance<ApiResponse<TResult>>(ex);
+            }
+        }
+
+        private async Task<ApiResponse<TResult>> PostRequest<TResult>(string url, JToken body)
+        {
+            try
+            {
+                var json = await PostAsync(url, body);
+                var response = JsonConvert.DeserializeObject<TResult>(json);
+                if (response == null) throw new Exception("null response");
+                return Creator.CreateInstance<ApiResponse<TResult>>(response);
+            }
+            catch (Exception ex)
+            {
+                return Creator.CreateInstance<ApiResponse<TResult>>(ex);
+            }
+        }
+
+        #endregion
+
     }
 }

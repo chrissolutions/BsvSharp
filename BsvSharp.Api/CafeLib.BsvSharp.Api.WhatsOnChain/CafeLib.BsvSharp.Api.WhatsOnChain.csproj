@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Description>Bitcoin SV API library for WhatsOnChain services.</Description>
-    <Version Condition=" '$(Version)' == '' ">1.5.1</Version>
+    <Version Condition=" '$(Version)' == '' ">1.6.1</Version>
     <Copyright>© 2021 Chris Solutions</Copyright>
     <PackageReleaseNotes></PackageReleaseNotes>
     <PackageIcon>cafelib.png</PackageIcon>
@@ -34,6 +34,10 @@
   <ItemGroup>
     <PackageReference Include="CafeLib.BsvSharp" Version="$(Version)" />
     <PackageReference Include="CafeLib.Web.Request" Version="$(Version)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CafeLib.BsvSharp.Mapi\CafeLib.BsvSharp.Mapi.csproj" />
   </ItemGroup>
 
 </Project>

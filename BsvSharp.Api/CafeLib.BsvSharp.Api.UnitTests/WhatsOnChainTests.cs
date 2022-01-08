@@ -12,6 +12,7 @@ using CafeLib.Core.Extensions;
 using CafeLib.Web.Request;
 using Newtonsoft.Json;
 using Xunit;
+// ReSharper disable StringLiteralTypo
 
 namespace CafeLib.BsvSharp.Api.UnitTests 
 {
@@ -24,8 +25,11 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [Fact]
         public async Task GetHealth_Test()
         {
-            var health = await Api.GetHealth();
+            var response = await Api.GetHealth();
+            Assert.True(response.IsSuccessful);
+            var health = response.Result;
             Assert.True(health.IsSuccessful);
+            Assert.Equal("Whats On Chain", health.Message);
         }
 
         #endregion
@@ -36,7 +40,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR")]
         public async Task GetAddressBalance_Test(string address)
         {
-            var balance = await Api.GetAddressBalance(address);
+            var response = await Api.GetAddressBalance(address);
+            Assert.True(response.IsSuccessful);
+            var balance = response.Result;
             Assert.Equal(0, balance.Confirmed);
             Assert.Equal(0, balance.Unconfirmed);
         }
@@ -50,7 +56,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
                 "1KGHhLTQaPr4LErrvbAuGE62yPpDoRwrob"
             };
 
-            var balances = await Api.GetBulkAddressBalances(addresses);
+            var response = await Api.GetBulkAddressBalances(addresses);
+            Assert.True(response.IsSuccessful);
+            var balances = response.Result;
             Assert.NotEmpty(balances);
             Assert.Equal(2, balances.Length);
             Assert.Equal(addresses[0], balances.First().Address);
@@ -60,7 +68,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("16ZqP5Tb22KJuvSAbjNkoiZs13mmRmexZA", "6b22c47e7956e5404e05c3dc87dc9f46e929acfd46c8dd7813a34e1218d2f9d1", 563052)]
         public async Task GetAddressHistory_Test(string address, string firstTxHash, long firstHeight)
         {
-            var addressHistory = await Api.GetAddressHistory(address);
+            var response = await Api.GetAddressHistory(address);
+            Assert.True(response.IsSuccessful);
+            var addressHistory = response.Result;
             Assert.NotEmpty(addressHistory);
             Assert.Equal(firstTxHash, addressHistory.First().TxHash);
             Assert.Equal(firstHeight, addressHistory.First().Height);
@@ -70,7 +80,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR", true)]
         public async Task GetAddressInfo_Test(string address, bool isValid)
         {
-            var addressInfo = await Api.GetAddressInfo(address);
+            var response = await Api.GetAddressInfo(address);
+            Assert.True(response.IsSuccessful);
+            var addressInfo = response.Result;
             Assert.Equal(address, addressInfo.Address);
             Assert.Equal(isValid, addressInfo.IsValid);
         }
@@ -79,19 +91,35 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR")]
         public async Task GetAddressUtxos_Spent_Test(string address)
         {
-            var unspentTransactions = await Api.GetAddressUtxos(address);
+            var response = await Api.GetAddressUtxos(address);
+            Assert.True(response.IsSuccessful);
+            var unspentTransactions = response.Result;
             Assert.Empty(unspentTransactions);
         }
 
-        //[Theory]
-        //[InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR", 107297900, 0)]
-        //public async Task GetAddressUtxos_UnspentTest(string address, long value, int position)
-        //{
-        //    var unspentTransactions = await Api.GetAddressUtxos(address);
-        //    Assert.NotEmpty(unspentTransactions);
-        //    Assert.Equal(value, unspentTransactions.First().Value);
-        //    Assert.Equal(position, unspentTransactions.First().TransactionPosition);
-        //}
+        [Theory]
+        [InlineData("1PgZT1K9gKVtoAjCFnmQsviThu7oYDSCTR", 107297900, 0)]
+        public async Task GetAddressUtxos_UnspentTest(string address, long value, int position)
+        {
+            var response = await Api.GetAddressUtxos(address);
+            Assert.True(response.IsSuccessful);
+            var unspentTransactions = response.Result;
+            switch (unspentTransactions)
+            {
+                case null:
+                    throw new ArgumentNullException(nameof(unspentTransactions));
+
+                case var _ when unspentTransactions.Any():
+                    Assert.NotEmpty(unspentTransactions);
+                    Assert.Equal(value, unspentTransactions.First().Value);
+                    Assert.Equal(position, unspentTransactions.First().TransactionPosition);
+                    break;
+
+                default:
+                    Assert.Empty(unspentTransactions);
+                    break;
+            }
+        }
 
         [Fact]
         public async Task GetBulkAddressUtxos_Test()
@@ -102,7 +130,10 @@ namespace CafeLib.BsvSharp.Api.UnitTests
                 "1KGHhLTQaPr4LErrvbAuGE62yPpDoRwrob"
             };
 
-            var utxos = await Api.GetBulkAddressUtxos(addresses);
+            var response = await Api.GetBulkAddressUtxos(addresses);
+            Assert.True(response.IsSuccessful);
+
+            var utxos = response.Result;
             Assert.NotEmpty(utxos);
             Assert.Equal(2, utxos.Length);
             Assert.Equal(addresses[0], utxos.First().Address);
@@ -118,7 +149,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("000000000000000009322213dd454961301f2126b7e73bd01c0bf042641df24c")]
         public async Task GetBlockByHash_Test(string blockHash)
         {
-            var block = await Api.GetBlockByHash(blockHash);
+            var response = await Api.GetBlockByHash(blockHash);
+            Assert.True(response.IsSuccessful);
+            var block = response.Result;
             Assert.Equal(blockHash, block.Hash);
         }
 
@@ -126,7 +159,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData(577267)]
         public async Task GetBlockByHeight_Test(long blockHeight)
         {
-            var block = await Api.GetBlockByHeight(blockHeight);
+            var response = await Api.GetBlockByHeight(blockHeight);
+            Assert.True(response.IsSuccessful);
+            var block = response.Result;
             Assert.Equal(blockHeight, block.Height);
         }
 
@@ -134,12 +169,13 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("000000000000000009322213dd454961301f2126b7e73bd01c0bf042641df24c")]
         public async Task GetBlockPage_Test(string blockHash)
         {
-            var transactions = await Api.GetBlockPage(blockHash, 1);
+            var response = await Api.GetBlockPage(blockHash, 1);
+            Assert.True(response.IsSuccessful);
+            var transactions = response.Result;
             Assert.NotNull(transactions);
             Assert.NotEmpty(transactions);
             Assert.Equal(2063, transactions.Length);
         }
-
 
         #endregion
 
@@ -148,7 +184,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [Fact]
         public async Task GetChainInfo_Test()
         {
-            var chainInfo = await Api.GetChainInfo();
+            var response = await Api.GetChainInfo();
+            Assert.True(response.IsSuccessful);
+            var chainInfo = response.Result;
             Assert.NotNull(chainInfo);
             Assert.Equal(NetworkType.Main.GetDescriptor(), chainInfo.Chain);
         }
@@ -156,7 +194,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [Fact]
         public async Task GetCirculatingSupply_Test()
         {
-            var supply = await Api.GetCirculatingSupply();
+            var response = await Api.GetCirculatingSupply();
+            Assert.True(response.IsSuccessful);
+            var supply = response.Result;
             Assert.True(Math.Round(supply, 2) > 18865981.25);
         }
 
@@ -167,8 +207,10 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [Fact]
         public async Task GetExchangeRate_Test()
         {
-            var rate = await Api.GetExchangeRate();
-            Assert.True(rate > 0 && rate < 1000000);
+            var response = await Api.GetExchangeRate();
+            Assert.True(response.IsSuccessful);
+            var exchangeRate = response.Result;
+            Assert.True(exchangeRate.Rate > 0 && exchangeRate.Rate < 1000000);
         }
 
         #endregion
@@ -176,18 +218,36 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         #region Mapi
 
         [Fact]
+        public async Task GetFeeQuote_Test()
+        {
+            var response = await Api.GetFeeQuote();
+            Assert.True(response.IsSuccessful);
+            var quote = response.Result;
+            Assert.NotNull(quote);
+            Assert.NotNull(quote.Payload);
+            Assert.Equal("taal", quote.ProviderName);
+        }
+
+        [Fact]
         public async Task GetFeeQuotes_Test()
         {
-            var quotes = await Api.GetFeeQuotes();
-            Assert.NotEmpty(quotes.ProviderQuotes);
-            Assert.Contains(quotes.ProviderQuotes, quote => quote.ProviderName == "taal");
+#pragma warning disable CS0618
+            var response = await Api.GetFeeQuotes();
+#pragma warning restore CS0618
+            Assert.False(response.IsSuccessful);
+            Assert.Null(response.Result);
+            Assert.IsType<WebRequestException>(response.Exception);
+            Assert.Equal(404, response.GetException<WebRequestException>().Response.StatusCode);
         }
 
         [Theory]
         [InlineData("995ea8d0f752f41cdd99bb9d54cb004709e04c7dc4088bcbbbb9ea5c390a43c3")]
         public async Task GetTxStatus_Test(string txHash)
         {
-            var status = await Api.GetTransactionStatus(txHash);
+            var response = await Api.GetTransactionStatus(txHash);
+            Assert.True(response.IsSuccessful);
+            Assert.NotNull(response.Result);
+            var status = response.Result;
             Assert.NotNull(status.Payload);
             var payload = JsonConvert.DeserializeObject<TransactionPayload>(status.Payload);
             Assert.Equal(txHash, payload?.TxId);
@@ -209,7 +269,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [Fact]
         public async Task GetMempoolInfo_Test()
         {
-            var mempool = await Api.GetMempoolInfo();
+            var response = await Api.GetMempoolInfo();
+            Assert.True(response.IsSuccessful);
+            var mempool = response.Result;
             Assert.NotNull(mempool);
             Assert.True(mempool.Bytes > 0);
         }
@@ -217,7 +279,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [Fact]
         public async Task GetMempoolTransactions_Test()
         {
-            var transactions = await Api.GetMempoolTransactions();
+            var response = await Api.GetMempoolTransactions();
+            Assert.True(response.IsSuccessful);
+            var transactions = response.Result;
             Assert.NotNull(transactions);
             Assert.NotEmpty(transactions);
         }
@@ -230,13 +294,15 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("1GJ3x5bcEnKMnzNFPPELDfXUCwKEaLHM5H")]
         public async Task GetExplorerLinks(string address)
         {
-            var searchResult = await Api.GetExplorerLinks(address);
+            var response = await Api.GetExplorerLinks(address);
+            Assert.True(response.IsSuccessful);
+            Assert.NotNull(response.Result);
+            var searchResult = response.Result;
             Assert.NotNull(searchResult);
             Assert.NotEmpty(searchResult.Links);
             Assert.Equal("address", searchResult.Links.First().Type);
             Assert.Contains(address, searchResult.Links.First().Url);
         }
-
 
         #endregion
 
@@ -246,7 +312,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("995ea8d0f752f41cdd99bb9d54cb004709e04c7dc4088bcbbbb9ea5c390a43c3")]
         public async Task GetScriptUtxos_Test(string scriptHash)
         {
-            var unspentTransactions = await Api.GetScriptUtxos(scriptHash);
+            var response = await Api.GetScriptUtxos(scriptHash);
+            Assert.True(response.IsSuccessful);
+            var unspentTransactions = response.Result;
             Assert.Empty(unspentTransactions);
         }
 
@@ -259,7 +327,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
                 "995ea8d0f752f41cdd99bb9d54cb004709e04c7dc4088bcbbbb9ea5c390a43c3"
             };
 
-            var utxos = await Api.GetBulkScriptUtxos(hashes);
+            var response = await Api.GetBulkScriptUtxos(hashes);
+            Assert.True(response.IsSuccessful);
+            var utxos = response.Result;
             Assert.NotEmpty(utxos);
             Assert.Equal(2, utxos.Length);
         }
@@ -268,7 +338,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("995ea8d0f752f41cdd99bb9d54cb004709e04c7dc4088bcbbbb9ea5c390a43c3")]
         public async Task GetScriptHistory_Test(string scriptHash)
         {
-            var scriptHistory = await Api.GetScriptHistory(scriptHash);
+            var response = await Api.GetScriptHistory(scriptHash);
+            Assert.True(response.IsSuccessful);
+            var scriptHistory = response.Result;
             Assert.NotEmpty(scriptHistory);
         }
 
@@ -280,7 +352,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("c1d32f28baa27a376ba977f6a8de6ce0a87041157cef0274b20bfda2b0d8df96")]
         public async Task GetTransactionByHash_Test(string hash)
         {
-            var tx = await Api.GetTransactionByHash(hash);
+            var response = await Api.GetTransactionByHash(hash);
+            Assert.True(response.IsSuccessful);
+            var tx = response.Result;
             Assert.Equal(hash, tx.Hash);
         }
 
@@ -289,7 +363,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         [InlineData("4c9e510077f5e5a961211100c0ed20173fdeae0e3575551e44b74581f74e7719", 16)]
         public async Task GetTransactionMerkleProof_Test(string hash, int count)
         {
-            var tree = await Api.GetTransactionMerkleProof(hash);
+            var response = await Api.GetTransactionMerkleProof(hash);
+            Assert.True(response.IsSuccessful);
+            var tree = response.Result;
             Assert.NotNull(tree);
             Assert.Equal(count, tree.Nodes.First().Branches.Length);
         }
@@ -300,7 +376,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         )]
         public async Task GetTransactionDecode_Test(string txRaw, string txHash)
         {
-            var tx = await Api.DecodeTransaction(txRaw);
+            var response = await Api.DecodeTransaction(txRaw);
+            Assert.True(response.IsSuccessful);
+            var tx = response.Result;
             Assert.Equal(txHash, tx.TxId);
             Assert.Equal(txHash, tx.Hash);
         }
@@ -314,7 +392,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests
                 "91f68c2c598bc73812dd32d60ab67005eac498bef5f0c45b822b3c9468ba3258"
             };
 
-            var txs = await Api.GetBulkTransactionDetails(txIds);
+            var response = await Api.GetBulkTransactionDetails(txIds);
+            Assert.True(response.IsSuccessful);
+            var txs = response.Result;
             Assert.NotEmpty(txs);
             Assert.Equal(2, txs.Length);
         }
