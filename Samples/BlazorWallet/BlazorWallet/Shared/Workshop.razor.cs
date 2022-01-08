@@ -90,7 +90,7 @@ namespace BlazorWallet.Shared
         private async Task RefreshBalance()
         {
             var balance = await _whatsOnChain.GetAddressBalance(_addressText);
-            _balanceText = $"Confirmed = {balance.Confirmed}; Unconfirmed = {balance.Unconfirmed}";
+            _balanceText = $"Confirmed = {balance.Result.Confirmed}; Unconfirmed = {balance.Result.Unconfirmed}";
         }
 
         private async Task CopyExtPrivateKey()

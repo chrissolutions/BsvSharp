@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Description>Bitcoin SV API library for WhatsOnChain services.</Description>
-    <Version Condition=" '$(Version)' == '' ">1.6.0</Version>
+    <Version Condition=" '$(Version)' == '' ">1.7.0</Version>
     <Copyright>© 2021 Chris Solutions</Copyright>
     <PackageReleaseNotes></PackageReleaseNotes>
     <PackageIcon>cafelib.png</PackageIcon>

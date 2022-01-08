@@ -8,7 +8,7 @@ namespace CafeLib.BsvSharp.Mapi
     {
         Task<ApiResponse<FeeQuoteResponse>> GetFeeQuote();
 
-        Task<ApiResponse<TransactionStatusResponse>> GetTransactionStatus(string txHash);
+        Task<ApiResponse<TransactionStatusResponse>> QueryTransactionStatus(string txHash);
 
         Task<ApiResponse<TransactionSubmitResponse>> SubmitTransaction(string txRaw);
     }

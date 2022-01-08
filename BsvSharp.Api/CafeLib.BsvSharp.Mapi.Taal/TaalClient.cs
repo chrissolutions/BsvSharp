@@ -1,6 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using CafeLib.BsvSharp.Mapi.Responses;
 using CafeLib.BsvSharp.Network;
 using CafeLib.Web.Request;
