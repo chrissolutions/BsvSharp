@@ -83,7 +83,7 @@ namespace BlazorWallet.Shared
 
         private async Task GenerateQrCode()
         {
-            await _qrCode.GenerateAsync(_address);
+            await _qrCode.Generate(_address);
         }
 
         private async Task RefreshBalance()
@@ -128,7 +128,7 @@ namespace BlazorWallet.Shared
         {
             if (firstRender)
             {
-                _qrCode = await QrCodeProxy.CreateObject<QrCode>("qrcode");
+                _qrCode = await QrCodeProxy.CreateObject("qrcode");
             }
         }
 
