@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Threading.Tasks;
+using CafeLib.Blazor.Interop;
 using CafeLib.BsvSharp.Keys;
 using Microsoft.JSInterop;
 
 namespace BlazorWallet.Interop
 {
-    public class QrCode
+    public class QrCode : JsInteropObject
     {
-        private readonly IJSObjectReference _jsInstance;
-
         private QrCode(IJSObjectReference jsInstance)
+            : base(jsInstance)
         {
-            _jsInstance = jsInstance ?? throw new ArgumentNullException(nameof(jsInstance));
         }
 
-        public async Task GenerateAsync(Address address)
+        public async Task Generate(Address address)
         {
-            await _jsInstance.InvokeVoidAsync("makeCode", address.ToString());
+            await Instance.InvokeVoidAsync("makeCode", address.ToString());
         }
     }
 }
