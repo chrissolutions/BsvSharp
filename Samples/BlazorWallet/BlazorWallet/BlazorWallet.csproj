@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CafeLib.Blazor" Version="$(Version)" />
+    <PackageReference Include="CafeLib.Blazor" Version="1.7.1" />
     <PackageReference Include="CafeLib.BsvSharp" Version="$(Version)" />
     <PackageReference Include="CafeLib.BsvSharp.Api.WhatsOnChain" Version="$(Version)" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.10" />

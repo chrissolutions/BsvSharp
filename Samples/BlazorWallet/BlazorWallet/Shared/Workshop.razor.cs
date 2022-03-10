@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using BlazorWallet.Interop;
-using CafeLib.Blazor.Interop;
 using CafeLib.BsvSharp.Api.WhatsOnChain;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
@@ -16,7 +15,7 @@ namespace BlazorWallet.Shared
         [Inject] private IJSRuntime JsRuntime { get; set; }
 
         private QrCode _qrCode;
-        private readonly WhatsOnChain _whatsOnChain = new WhatsOnChain();
+        private readonly WhatsOnChain _whatsOnChain = new();
 
         private Mnemonic _mnemonic;
         private string _words = "";
@@ -129,7 +128,7 @@ namespace BlazorWallet.Shared
         {
             if (firstRender)
             {
-                _qrCode = (await QrCodeProxy.CreateReferenceAsync("qrcode")).CreateObject<QrCode>();
+                _qrCode = await QrCodeProxy.CreateObject<QrCode>("qrcode");
             }
         }
 
