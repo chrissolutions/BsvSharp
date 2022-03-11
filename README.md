@@ -10,13 +10,14 @@ Other parts of BsvSharp was derived from the <a href="https://github.com/twostac
 
 BsvSharp leverages these implementations to produce a C# library that works across all environments and runs on the Web, Desktop and Mobile platforms.
 
-BsvSharp is packaged as part of the [CafeLib](https://github.com/chrissolutions/CafeLib) library.  CafeLib is a collection of C# libraries used for application development.  BsvSharp is located in the [Enterprise](https://github.com/chrissolutions/CafeLib/tree/main/Enterprise) folder of CafeLib
+BsvSharp uses the [CafeLib](https://github.com/chrissolutions/CafeLib) library.  CafeLib is a collection of C# libraries used for application development and is now located in its own [GitHub Repository](https://github.com/chrissolutions/BsvSharp).
 
-CafeLib is deployed as set of nuget packages found on [nuget.org](https://www.nuget.org/packages?q=CafeLib).  The current version of the CafeLib libraries is 1.7.0
+CafeLib is deployed as set of nuget packages found on [nuget.org](https://www.nuget.org/packages?q=CafeLib).  The current version of the CafeLib libraries is 1.7.0. The current version of CafeLib.Blazor is 1.8.0.
 
 ### BsvSharp.Api
 
-Accompanying BsvSharp is [BsvSharp.Api](https://github.com/chrissolutions/CafeLib/tree/main/Enterprise/BsvSharp.Api).  This folder contains wrappers to the following BSV API libraries:
+Accompanying BsvSharp is [BsvSharp.Api](https://github.com/chrissolutions/BsvSharp/tree/main/BsvSharp.Api).
+This folder contains wrappers to the following BSV API libraries:
 
 - CoinGecko
 - CoinMarketCap
@@ -30,4 +31,4 @@ Accompanying BsvSharp is [BsvSharp.Api](https://github.com/chrissolutions/CafeLi
 
 ### Sample
 
-The [Samples](https://github.com/chrissolutions/CafeLib/tree/main/Samples) directory of the CafeLib repository contains a BsvSharp sample called BlazorWallet.  BlazorWallet is derived from the [Satolearn](https://satolearn.com) Wallet Workshop sample written in JavaScript and uses the [MoneyButton's BSV JavaScript library](https://github.com/moneybutton/bsv).  This sample inspired a desire for wanting to have  the ability to write BSV applications in C# and Blazor.  BlazorWallet a real-world example of how .NET developers can build a BSV application in C# and to run in Blazor WebAssembly.
+The [Samples](https://github.com/chrissolutions/BsvSharp/tree/main/Samples) directory of the BsvSharp repository contains a sample called BlazorWallet.  BlazorWallet is derived from the [Satolearn](https://satolearn.com) Wallet Workshop sample written in JavaScript using the [MoneyButton's BSV JavaScript library](https://github.com/moneybutton/bsv).  This sample inspired a desire to want to have the ability to write BSV applications in C# and Blazor.  BlazorWallet provides a real-world example of how .NET developers can build a BSV application in C# and to run in Blazor WebAssembly.
