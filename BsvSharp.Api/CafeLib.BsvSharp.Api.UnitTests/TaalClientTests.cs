@@ -27,7 +27,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         #region Mapi
 
         [Fact]
-        public async Task GetFeeQuotes_Test()
+        public async Task GetFeeQuote_Test()
         {
             var response = await Api.GetFeeQuote();
             Assert.NotNull(response);
