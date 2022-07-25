@@ -19,7 +19,7 @@ public static readonly IDictionary<string, string> Components = new Dictionary<s
 // Get arguments.
 vars.build = Argument<string>("build", "");
 vars.config = Argument<string>("config", "Debug");
-vars.apikey = Argument<string>("apikey", null);
+vars.nugetKey = Argument<string>("nugetKey", null);
 vars.nugetServer = Argument<string>("nugetServer", "C:/Nuget/repo");
 vars.nugetDebug = Argument<bool>("nugetDebug", false);
 vars.nugetSkipDup = Argument<bool>("nugetSkipDup", false);

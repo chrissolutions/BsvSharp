@@ -21,12 +21,11 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
     {
         private const string BaseUrl = "https://mapi.taal.com";
         private const string ClientName = "taal";
+        private const string ApiEnv = "apikey";
 
-        public WhatsOnChain(NetworkType networkType = NetworkType.Main)
-            : base(ClientName, BaseUrl, networkType)
+        public WhatsOnChain(string apiEnv, NetworkType networkType = NetworkType.Main)
+            : base(ClientName, BaseUrl, apiEnv, networkType)
         {
-            Headers.Add("Content-Type", WebContentType.Json);
-            Headers.Add("User-Agent", typeof(WhatsOnChain).Namespace);
         }
 
         #region Address

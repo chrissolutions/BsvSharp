@@ -16,15 +16,27 @@ namespace CafeLib.BsvSharp.Mapi
         public string Network { get; }
         public string Url { get; }
         public string Name { get; }
+        public string ApiKey { get; }
 
         protected MerchantClient(string clientName, string merchantUrl, NetworkType networkType = NetworkType.Main)
+            : this(clientName, merchantUrl, null, networkType)
+        {
+        }
+
+        protected MerchantClient(string clientName, string merchantUrl, string apiEnv, NetworkType networkType = NetworkType.Main)
         {
             Name = clientName;
             Url = merchantUrl;
             Network = networkType.GetDescriptor();
 
             Headers.Add("Content-Type", WebContentType.Json);
-            Headers.Add("User-Agent", typeof(MerchantClient).Namespace);
+            Headers.Add("User-Agent", GetType().Namespace);
+
+            if (!string.IsNullOrWhiteSpace(apiEnv))
+            {
+                ApiKey = Environment.GetEnvironmentVariable(apiEnv);
+                Headers.Add("Authorization", $"Bearer {ApiKey}");
+            }
         }
 
         #region Mapi
