@@ -234,7 +234,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             var quote = response.Result;
             Assert.NotNull(quote);
             Assert.NotNull(quote.Payload);
-            Assert.Equal("taal", quote.ProviderName);
+            Assert.Equal("WhatsOnChain", quote.ProviderName);
         }
 
         [Fact]

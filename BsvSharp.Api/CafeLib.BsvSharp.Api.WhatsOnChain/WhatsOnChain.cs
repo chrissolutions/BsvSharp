@@ -20,11 +20,15 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
     public class WhatsOnChain : MerchantClient
     {
         private const string BaseUrl = "https://mapi.taal.com";
-        private const string ClientName = "taal";
-        private const string ApiEnv = "apikey";
+        private const string ClientName = "WhatsOnChain";
 
-        public WhatsOnChain(string apiEnv, NetworkType networkType = NetworkType.Main)
-            : base(ClientName, BaseUrl, apiEnv, networkType)
+        /// <summary>
+        /// WhatsOnChain constructor.
+        /// </summary>
+        /// <param name="apiEnvKey">Name of environment variable assigned to the API key</param>
+        /// <param name="networkType">Bitcoin network type</param>
+        public WhatsOnChain(string apiEnvKey, NetworkType networkType = NetworkType.Main)
+            : base(ClientName, BaseUrl, apiEnvKey, networkType)
         {
         }
 
