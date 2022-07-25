@@ -50,7 +50,7 @@ Task("ConstructCommands")
             cmd.Options["component"] = component.Key;
             cmd.Options["buildversion"] = component.Value;
             cmd.Options["config"] = vars.config;
-            if (vars.apikey != null) cmd.Options["apikey"] = vars.apikey;
+            if (vars.nugetKey != null) cmd.Options["nugetKey"] = vars.nugetKey;
             if (vars.nugetServer != null) cmd.Options["nugetServer"] = vars.nugetServer;
             if (vars.nugetDebug != null) cmd.Options["nugetDebug"] = vars.nugetDebug.ToString().ToLower();
             if (vars.nugetSkipDup != null) cmd.Options["nugetSkipDup"] = vars.nugetSkipDup.ToString().ToLower();

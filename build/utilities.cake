@@ -176,7 +176,7 @@ public class Builder
                 Project = project.Path.ToString(),
                 Version = vars.version,
                 Configuration = vars.config,
-                ApiKey = vars.apikey,
+                ApiKey = vars.nugetKey,
                 Server = vars.nugetServer,
                 Debug = vars.nugetDebug,
                 SkipDuplicate = vars.nugetSkipDup
