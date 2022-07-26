@@ -283,15 +283,15 @@ namespace CafeLib.BsvSharp.Transactions
         /// <summary>
         /// Spend from Utxo
         /// </summary>
-        /// <param name="txHash">utxo transaction hash</param>
+        /// <param name="txId">utxo transaction id</param>
         /// <param name="outputIndex">utxo index</param>
         /// <param name="amount">amount</param>
         /// <param name="scriptPubKey">script pub key</param>
         /// <param name="scriptBuilder">signed unlock script</param>
         /// <returns>transaction</returns>
-        public Transaction SpendFrom(UInt256 txHash, int outputIndex, Amount amount, Script scriptPubKey, SignedUnlockBuilder scriptBuilder = null)
+        public Transaction SpendFrom(UInt256 txId, int outputIndex, Amount amount, Script scriptPubKey, SignedUnlockBuilder scriptBuilder = null)
         {
-            var txIn = new TxIn(txHash, outputIndex, amount, scriptPubKey, scriptBuilder);
+            var txIn = new TxIn(txId, outputIndex, amount, scriptPubKey, scriptBuilder);
             Inputs.Add(txIn);
             UpdateChangeOutput();
             return this;
@@ -315,9 +315,9 @@ namespace CafeLib.BsvSharp.Transactions
         /// <returns>transaction</returns>
         public Transaction SpendFromUtxo(Utxo utxo, SignedUnlockBuilder scriptBuilder, bool checkInputExist = false)
         {
-            return checkInputExist && InputExists(utxo.TxHash, utxo.Index)
+            return checkInputExist && InputExists(utxo.TxId, utxo.Index)
                 ? this
-                : SpendFrom(utxo.TxHash, utxo.Index, utxo.Amount, utxo.ScriptPubKey, scriptBuilder);
+                : SpendFrom(utxo.TxId, utxo.Index, utxo.Amount, utxo.ScriptPubKey, scriptBuilder);
         }
 
         /// <summary>
@@ -348,12 +348,18 @@ namespace CafeLib.BsvSharp.Transactions
         }
 
         /// <summary>
+        /// Obtain the hex representation of the public key.
+        /// </summary>
+        /// <returns></returns>
+        public string ToHex() => Encoders.Hex.Encode(Serialize());
+
+        /// <summary>
         /// ToString
         /// </summary>
         /// <returns>transaction string representation</returns>
         public override string ToString()
         {
-            return TxHash.ToString();
+            return ToHex();
         }
 
         /// <summary>
