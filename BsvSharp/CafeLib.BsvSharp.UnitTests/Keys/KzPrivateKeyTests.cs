@@ -33,7 +33,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         {
             const string hex = "906977a061af29276e40bf377042ffbde414e496ae2260bbf1fa9d085637bfff";
             const string b58 = "L24Rq5hPWMexw5mQi7tchYw6mhtr5ApiHZMN8KJXCkskEv7bTV61";
-            const string publicKey = "17JarKo61PkpuZG3GyofzGmFSCskGRBUT3";
+            const string publicKeyAddress = "17JarKo61PkpuZG3GyofzGmFSCskGRBUT3";
 
             var key1 = new PrivateKey(hex);
             var key2 = PrivateKey.FromBase58(b58);
@@ -42,8 +42,8 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             var pubKey2 = key2.CreatePublicKey();
 
             Assert.Equal(pubKey1, pubKey2);
-            Assert.Equal(publicKey, pubKey1.ToString());
-            Assert.Equal(publicKey, pubKey2.ToString());
+            Assert.Equal(publicKeyAddress, pubKey1.ToAddress().ToString());
+            Assert.Equal(publicKeyAddress, pubKey2.ToAddress().ToString());
         }
     }
 }

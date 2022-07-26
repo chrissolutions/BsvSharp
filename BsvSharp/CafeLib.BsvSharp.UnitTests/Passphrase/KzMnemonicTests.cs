@@ -142,7 +142,7 @@ namespace CafeLib.BsvSharp.UnitTests.Passphrase
             var address = hdPublicKey.PublicKey.ToAddress();
 
             Assert.Equal("L4qUUQ5egQ31LC2gGCP4wmuauM9RbLtKhPfk5AJTFemDapDSWH1E", privateKey.ToString());
-            Assert.Equal("12ApBetoCb4CH6ye4K8ro52iBpGHRkdKMr", publicKey.ToString());
+            Assert.Equal("12ApBetoCb4CH6ye4K8ro52iBpGHRkdKMr", publicKey.ToAddress().ToString());
             Assert.Equal("12ApBetoCb4CH6ye4K8ro52iBpGHRkdKMr", address.ToString());
         }
 
