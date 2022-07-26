@@ -34,7 +34,7 @@ namespace CafeLib.BsvSharp.Mapi
             Headers.Add("Content-Type", WebContentType.Json);
             Headers.Add("User-Agent", GetType().Namespace);
 
-            AddAuthorizationKey(Environment.GetEnvironmentVariable(apiEnv));
+            AddAuthorizationKey(Environment.GetEnvironmentVariable(apiEnv ?? ""));
         }
 
         #endregion
