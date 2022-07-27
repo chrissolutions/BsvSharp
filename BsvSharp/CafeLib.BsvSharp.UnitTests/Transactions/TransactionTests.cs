@@ -115,8 +115,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
                 .SendChangeTo(new Address("1BoUFgA8ZnSFxARg9BgrXgmtZLj2ssrYuw"));
 
             var txStr = tx.ToString();
-
-            Assert.Equal(txHex, tx.ToString());
+            Assert.Equal(txHex, txStr);
         }
 
         [Fact]
