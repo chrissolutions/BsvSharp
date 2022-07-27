@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Buffers;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Encoding;
@@ -20,7 +19,6 @@ using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Transactions
 {
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class Transaction : ITxId, IDataSerializer
     {
         private ScriptBuilder _changeScriptBuilder;

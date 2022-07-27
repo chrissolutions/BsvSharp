@@ -57,7 +57,7 @@ namespace CafeLib.BsvSharp.Builders
         public long Length => IsRaw ? Operand.Data.Length : Operand.Length;
 
         public static implicit operator OperandBuilder(Operand op)
-            => new() { IsFinal = true, Operand = op};
+            => new() { IsFinal = true, Operand = op };
 
         public bool TryCopyTo(ref ByteSpan span)
         {

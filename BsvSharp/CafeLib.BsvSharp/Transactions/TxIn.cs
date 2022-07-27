@@ -90,7 +90,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <summary>
         /// TxIn default constructor.
         /// </summary>
-        public TxIn()
+        internal TxIn()
         {
         }
 
@@ -149,7 +149,7 @@ namespace CafeLib.BsvSharp.Transactions
         }
 
        internal bool Sign(Transaction tx, PrivateKey privateKey, SignatureHashEnum sighashType = SignatureHashEnum.All | SignatureHashEnum.ForkId)
-        {
+       {
             var sigHash = new SignatureHashType(sighashType);
             var signatureHash = TransactionSignatureChecker.ComputeSignatureHash(UtxoScript, tx, tx.Inputs.IndexOf(this), sigHash, Amount);
             var signature = privateKey.SignTxSignature(signatureHash, sigHash);
