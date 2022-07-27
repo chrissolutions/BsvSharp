@@ -188,12 +188,12 @@ namespace CafeLib.BsvSharp.Scripting
         /// <returns></returns>
         public readonly IEnumerable<Operand> Decode()
         {
-            var ros = new ReadOnlyByteSequence(Data);
+            var sequence = new ReadOnlyByteSequence(Data);
 
-            while (ros.Length > 0)
+            while (sequence.Length > 0)
             {
                 var op = new Operand();
-                if (op.TryReadOperand(ref ros))
+                if (op.TryReadOperand(ref sequence))
                 {
                     yield return op;
                 }
