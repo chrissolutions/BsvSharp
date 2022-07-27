@@ -120,7 +120,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="utxoScript"></param>
         /// <param name="scriptBuilder"></param>
         public TxIn(UInt256 prevTxId, int outIndex, Amount amount, Script utxoScript, ScriptBuilder scriptBuilder)
-            : this(prevTxId, outIndex, amount, utxoScript, SequenceFinal -1, scriptBuilder)
+            : this(prevTxId, outIndex, amount, utxoScript, SequenceFinal, scriptBuilder)
         {
         }
 
