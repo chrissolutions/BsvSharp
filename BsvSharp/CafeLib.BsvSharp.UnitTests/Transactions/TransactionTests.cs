@@ -96,10 +96,10 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
             Assert.True(transaction.IsCoinbase);
         }
 
-        //[Fact]
+        [Fact]
         public void Raw_Transaction()
         {
-            const string txHex = "01000000013acb1933b924795545b45d12be478240f005ce32b3802f61714cca8c895159970200000000ffffffff0208070000000000001976a914556047d5ca688f1b6c51c8abc08aa8b16b941d9588ac160d0000000000001976a914767b244a0f1f3af0e7387e872782bbbe2c6fb86a88ac00000000";
+            const string txHex = "01000000013acb1933b924795545b45d12be478240f005ce32b3802f61714cca8c895159970200000000feffffff0208070000000000001976a914556047d5ca688f1b6c51c8abc08aa8b16b941d9588ac780c0000000000001976a914767b244a0f1f3af0e7387e872782bbbe2c6fb86a88ac00000000";
 
             var utxo = new Utxo
             {

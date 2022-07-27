@@ -281,7 +281,7 @@ namespace CafeLib.BsvSharp.Transactions
         }
 
         /// <summary>
-        /// Spend from Utxo
+        /// Spend from transaction
         /// </summary>
         /// <param name="txId">utxo transaction id</param>
         /// <param name="outputIndex">utxo index</param>
@@ -321,7 +321,7 @@ namespace CafeLib.BsvSharp.Transactions
         }
 
         /// <summary>
-        /// 
+        /// Spend to recipiant address
         /// </summary>
         /// <param name="recipient"></param>
         /// <param name="sats"></param>

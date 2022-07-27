@@ -3,7 +3,6 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
-using System.Diagnostics.CodeAnalysis;
 using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
@@ -23,14 +22,13 @@ namespace CafeLib.BsvSharp.Transactions
     /// Not used for making dynamic changes (building scripts).
     /// See <see cref="Transaction"/> when dynamically building a transaction input.
     /// </summary>
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class TxIn : ITxId, IDataSerializer
     {
         /// <summary>
         /// This is the ScriptPub of the referenced Prevout.
         /// Used to sign and verify this input.
         /// </summary>
-        private readonly ScriptBuilder _scriptBuilder;
+        private ScriptBuilder _scriptBuilder;
 
         /// <summary>
         /// Setting nSequence to this value for every input in a transaction disables nLockTime.
@@ -145,7 +143,7 @@ namespace CafeLib.BsvSharp.Transactions
         {
             writer.Write(Encoders.HexReverse.Decode(TxId));
             writer.Write(Index);
-            writer.Write(UtxoScript);
+            writer.Write(_scriptBuilder);
             writer.Write(SequenceNumber);
             return writer;
         }
@@ -176,7 +174,7 @@ namespace CafeLib.BsvSharp.Transactions
 
             var script = new Script();
             if (!script.TryReadScript(ref r)) return false;
-            UtxoScript = script;
+            _scriptBuilder = script;
 
             if (!r.TryReadLittleEndian(out uint sequenceNumber)) return false;
             SequenceNumber = sequenceNumber;
