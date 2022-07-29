@@ -690,7 +690,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <returns>fee estimate</returns>
         private Amount EstimateFee()
         {
-            var estimatedSize = EstimateSize();
+            var estimatedSize = BsvEstimateSize();
             var available = GetUnspentAmount();
 
             var fee = new Amount((long)Math.Ceiling((double)estimatedSize / 1000 * _feePerKb));
@@ -720,6 +720,24 @@ namespace CafeLib.BsvSharp.Transactions
 
             // <---- HOW DO WE CALCULATE SCRIPT FROM JUST AN ADDRESS !? AND LENGTH ???
             Outputs.ForEach(x => result += Encoders.Hex.Decode(x.Script.ToHexString()).Length + 9);
+            return result;
+        }
+
+        /// <summary>
+        /// Determine size estimate.
+        /// </summary>
+        /// <returns></returns>
+        private int BsvEstimateSize()
+        {
+            // size of version + size of locktime
+            var result = _consensus.MaximumExtraSize;
+            result += new VarInt(Inputs.Length).Length;
+            result += new VarInt(Outputs.Length).Length;
+
+            var writer = new ByteDataWriter();
+            Inputs.ForEach(x => x.WriteTo(writer));
+            Outputs.ForEach(x => x.WriteTo(writer));
+            result += writer.ToArray().Length;
             return result;
         }
 

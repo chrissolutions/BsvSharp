@@ -109,10 +109,11 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
                 Amount = new Amount(5263L)
             };
 
-            var tx = new Transaction()
-                .SpendFromUtxo(utxo)
-                .SpendTo(new Address("18nRmzxrygHmsh5DQuVFYDZXGwcZ3CbVuk"), 1800L)
-                .SendChangeTo(new Address("1BoUFgA8ZnSFxARg9BgrXgmtZLj2ssrYuw"));
+            var tx = new Transaction();
+                tx.SpendFromUtxo(utxo);
+                tx.SpendTo(new Address("18nRmzxrygHmsh5DQuVFYDZXGwcZ3CbVuk"), 1800L);
+                tx.SendChangeTo(new Address("1BoUFgA8ZnSFxARg9BgrXgmtZLj2ssrYuw"));
+                tx.WithFeePerKb(500);
 
             var txStr = tx.ToString();
             Assert.Equal(txHex, txStr);
