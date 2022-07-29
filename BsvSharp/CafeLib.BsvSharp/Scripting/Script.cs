@@ -89,16 +89,16 @@ namespace CafeLib.BsvSharp.Scripting
             }
         }
 
-        public void Write(BinaryWriter s)
+        public void Write(BinaryWriter writer)
         {
             if (Data.IsEmpty)
             {
-                s.Write(-1);
+                writer.Write(-1);
             }
             else
             {
-                s.Write(Data.Length);
-                s.Write(Data.Span);
+                writer.Write(Data.Length);
+                writer.Write(Data.Span);
             }
         }
 
