@@ -33,8 +33,8 @@ namespace CafeLib.BsvSharp.Transactions
         public uint LockTime { get; private set; }
         public Address ChangeAddress { get; private set; }
 
-        public TxInCollection Inputs { get; } //this transaction's inputs
-        public TxOutCollection Outputs { get; } //this transaction's outputs
+        public TxInList Inputs { get; } //this transaction's inputs
+        public TxOutList Outputs { get; } //this transaction's outputs
 
         //if we have a Transaction with one input, and a prevTransactionId of zero, it's a coinbase.
         public bool IsCoinbase => Inputs.Count == 1 && Inputs[0].TxHash == UInt256.Zero;
@@ -46,8 +46,8 @@ namespace CafeLib.BsvSharp.Transactions
             var network = RootService.GetNetwork(networkType);
             _consensus = network.Consensus;
             _feePerKb = network.Consensus.FeePerKilobyte;
-            Inputs = new TxInCollection();
-            Outputs = new TxOutCollection();
+            Inputs = new TxInList();
+            Outputs = new TxOutList();
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="lockTime">lock time</param>
         /// <param name="fee">transaction fee</param>
         /// <param name="option">options</param>
-        public Transaction(int version, TxInCollection vin, TxOutCollection vout, uint lockTime, long fee = 0L, TransactionOption option = 0)
+        public Transaction(int version, TxInList vin, TxOutList vout, uint lockTime, long fee = 0L, TransactionOption option = 0)
         {
             Version = version;
             Inputs = vin;
@@ -121,7 +121,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// </summary>
         /// <param name="inputs">input collection</param>
         /// <returns>transaction</returns>
-        public Transaction AddInputs(TxInCollection inputs)
+        public Transaction AddInputs(TxInList inputs)
         {
             Inputs.AddRange(inputs);
             UpdateChangeOutput();
@@ -159,7 +159,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// </summary>
         /// <param name="outputs">output collection</param>
         /// <returns>transaction</returns>
-        public Transaction AddOutputs(TxOutCollection outputs)
+        public Transaction AddOutputs(TxOutList outputs)
         {
             Outputs.AddRange(outputs);
             UpdateChangeOutput();
@@ -641,6 +641,36 @@ namespace CafeLib.BsvSharp.Transactions
         /// </summary>
         private void UpdateChangeOutput()
         {
+            /*
+                Transaction.prototype._updateChangeOutput = function () {
+                  if (!this._changeScript) {
+                    return
+                  }
+                  this._clearSignatures()
+                  if (!_.isUndefined(this._changeIndex)) {
+                    this._removeOutput(this._changeIndex)
+                  }
+                  this._changeIndex = this.outputs.length
+                  this._addOutput(new Output({
+                    script: this._changeScript,
+                    satoshis: 0
+                  }))
+                  var available = this._getUnspentValue()
+                  var fee = this.getFee()
+                  var changeAmount = available - fee
+                  this._removeOutput(this._changeIndex)
+                  this._changeIndex = undefined
+                  if (changeAmount >= Transaction.DUST_AMOUNT) {
+                    this._changeIndex = this.outputs.length
+                    this._addOutput(new Output({
+                      script: this._changeScript,
+                      satoshis: changeAmount
+                    }))
+                  }
+                }
+             */
+
+
             if (ChangeAddress == null) return;
 
             if (_changeScriptBuilder == null) return;
@@ -691,15 +721,15 @@ namespace CafeLib.BsvSharp.Transactions
         private Amount EstimateFee()
         {
             var estimatedSize = BsvEstimateSize();
-            var available = GetUnspentAmount();
+            //var available = GetUnspentAmount();
+
+            //var fee = new Amount((long)Math.Ceiling((double)estimatedSize / 1000 * _feePerKb));
+            //if (available > fee)
+            //{
+            //    estimatedSize += _consensus.ChangeOutputMaxSize;
+            //}
 
             var fee = new Amount((long)Math.Ceiling((double)estimatedSize / 1000 * _feePerKb));
-            if (available > fee)
-            {
-                estimatedSize += _consensus.ChangeOutputMaxSize;
-            }
-
-            fee = new Amount((long)Math.Ceiling((double)estimatedSize / 1000 * _feePerKb));
             return fee;
         }
 
@@ -733,9 +763,11 @@ namespace CafeLib.BsvSharp.Transactions
             var result = _consensus.MaximumExtraSize;
             result += new VarInt(Inputs.Length).Length;
             result += new VarInt(Outputs.Length).Length;
+            result += _consensus.ScriptMaxSize * Inputs.Count;
+
 
             var writer = new ByteDataWriter();
-            Inputs.ForEach(x => x.WriteTo(writer));
+            //Inputs.ForEach(x => x.WriteTo(writer));
             Outputs.ForEach(x => x.WriteTo(writer));
             result += writer.ToArray().Length;
             return result;
@@ -745,20 +777,20 @@ namespace CafeLib.BsvSharp.Transactions
         /// Sort inputs in accordance to BIP69.
         /// </summary>
         /// <param name="inputs"></param>
-        private void SortInputs(TxInCollection inputs)
+        private void SortInputs(TxInList inputs)
         {
             Inputs.Clear();
-            Inputs.AddRange(new TxInCollection(inputs.OrderBy(x => x.TxId).ToArray()));
+            Inputs.AddRange(new TxInList(inputs.OrderBy(x => x.TxId).ToArray()));
         }
 
         /// <summary>
         /// Sort outputs in accordance to BIP69.
         /// </summary>
         /// <param name="outputs"></param>
-        private void SortOutputs(TxOutCollection outputs)
+        private void SortOutputs(TxOutList outputs)
         {
             Outputs.Clear();
-            Outputs.AddRange(new TxOutCollection(outputs.OrderBy(x => x.Amount).ToArray()));
+            Outputs.AddRange(new TxOutList(outputs.OrderBy(x => x.Amount).ToArray()));
         }
 
         private void DoSerializationChecks()
