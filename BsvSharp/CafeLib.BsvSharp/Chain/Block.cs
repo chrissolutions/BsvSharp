@@ -22,11 +22,11 @@ namespace CafeLib.BsvSharp.Chain
     /// </summary>
     public class Block : BlockHeader
     {
-        public TxCollection Txs { get; private set; }
+        public TransactionList Txs { get; private set; }
 
         public Block()
         {
-            Txs = new TxCollection();
+            Txs = new TransactionList();
         }
 
         public Block
@@ -41,7 +41,7 @@ namespace CafeLib.BsvSharp.Chain
         )
             : base(version, hashPrevBlock, hashMerkleRoot, time, bits, nonce)
         {
-            Txs = new TxCollection(txs);
+            Txs = new TransactionList(txs);
         }
 
         public bool TryReadBlock(ref ReadOnlyByteSequence ros)
@@ -57,7 +57,7 @@ namespace CafeLib.BsvSharp.Chain
             if (!TryReadBlockHeader(ref r)) return false;
             if (!r.TryReadVariant(out var count)) return false;
 
-            Txs = new TxCollection();
+            Txs = new TransactionList();
             for (var i = 0; i < count; i++)
             {
                 var t = new Transaction();

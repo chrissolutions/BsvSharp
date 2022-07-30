@@ -18,40 +18,4 @@ namespace CafeLib.BsvSharp.Transactions
         {
         }
     }
-
-    public class TxInList : TxIdList<TxIn>
-    {
-        public TxInList()
-        {
-        }
-
-        public TxInList(IEnumerable<TxIn> list)
-            : base(list)
-        {
-        }
-    }
-
-    public class TxOutList : TxIdList<TxOut>
-    {
-        public TxOutList()
-        {
-        }
-
-        public TxOutList(IEnumerable<TxOut> list)
-            : base(list)
-        {
-        }
-    }
-
-    public class TxCollection : TxIdList<Transaction>
-    {
-        public TxCollection()
-        {
-        }
-
-        public TxCollection(IEnumerable<Transaction> collection)
-            : base(collection)
-        {
-        }
-    }
 }
