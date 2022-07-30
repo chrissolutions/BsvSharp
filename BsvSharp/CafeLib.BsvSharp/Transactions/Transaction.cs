@@ -639,7 +639,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <summary>
         /// Update the transaction change output.
         /// </summary>
-        private void UpdateChangeOutput()
+        private void BsvUpdateChangeOutput()
         {
             /*
                 Transaction.prototype._updateChangeOutput = function () {
@@ -679,12 +679,38 @@ namespace CafeLib.BsvSharp.Transactions
 
             if (NonChangeRecipientTotals() == InputTotals()) return;
 
+            Outputs.Add(new TxOut(UInt256.Zero, 0, 0L, _changeScriptBuilder, true));
+
             var txOut = GetChangeOutput(_changeScriptBuilder);
             var changeAmount = RecalculateChange();
+
+            Outputs.RemoveAt(Outputs.Length - 1);
 
             ////can't spend negative amount of change :/
             if (changeAmount <= Amount.Zero) return;
             Outputs.Add(new TxOut(txOut.TxHash, 0, changeAmount, _changeScriptBuilder, true));
+        }
+
+        /// <summary>
+        /// Update the transaction change output.
+        /// </summary>
+        private void UpdateChangeOutput()
+        {
+            BsvUpdateChangeOutput();
+            //if (ChangeAddress == null) return;
+
+            //if (_changeScriptBuilder == null) return;
+
+            //RemoveChangeOutputs();
+
+            //if (NonChangeRecipientTotals() == InputTotals()) return;
+
+            //var txOut = GetChangeOutput(_changeScriptBuilder);
+            //var changeAmount = RecalculateChange();
+
+            //////can't spend negative amount of change :/
+            //if (changeAmount <= Amount.Zero) return;
+            //Outputs.Add(new TxOut(txOut.TxHash, 0, changeAmount, _changeScriptBuilder, true));
         }
 
         private void RemoveChangeOutputs() => Outputs.Where(x => x.IsChangeOutput).ForEach(x => Outputs.Remove(x));
@@ -760,11 +786,14 @@ namespace CafeLib.BsvSharp.Transactions
         private int BsvEstimateSize()
         {
             // size of version + size of locktime
-            var result = _consensus.MaximumExtraSize;
+            var result = 8; //_consensus.MaximumExtraSize;
             result += new VarInt(Inputs.Length).Length;
             result += new VarInt(Outputs.Length).Length;
             result += _consensus.ScriptMaxSize * Inputs.Count;
 
+            //PublicKeyHashInput.prototype._estimateSize = function() {
+            //    return Input.BASE_SIZE (40) + PublicKeyHashInput.SCRIPT_MAX_SIZE (108)
+            //}
 
             var writer = new ByteDataWriter();
             //Inputs.ForEach(x => x.WriteTo(writer));

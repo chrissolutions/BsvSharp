@@ -135,7 +135,7 @@ namespace CafeLib.BsvSharp.Network
         /// <summary>
         /// Maximum script length in bytes. 
         /// </summary>
-        public int ScriptMaxSize => 149;
+        public int ScriptMaxSize => 148;
         /// <summary>
         /// Threshold for nLockTime: below this value it is interpreted as block number,
         /// otherwise as UNIX timestamp. Threshold is Tue Nov 5 00:53:20 1985 UTC
