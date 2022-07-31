@@ -60,10 +60,10 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                 Amount = 100000
             };
 
-            var tx = new Transaction();
-            tx.SpendFromUtxo(utxo, new P2PkhUnlockBuilder(publicKey));
-            tx.SpendTo(toAddress, 100000L, new P2PkhLockBuilder(toAddress));
-            tx.SignInput(0, privateKey, SignatureHashEnum.All);
+            var tx = new Transaction()
+                .SpendFromUtxo(utxo, new P2PkhUnlockBuilder(publicKey))
+                .SpendTo(toAddress, 100000L, new P2PkhLockBuilder(toAddress))
+                .Sign(0, privateKey, SignatureHashEnum.All);
 
             // we then extract the signature from the first input
             var scriptSig = tx.Inputs[0].ScriptSig;

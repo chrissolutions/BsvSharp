@@ -91,7 +91,7 @@ namespace CafeLib.BsvSharp.Testnet.UnitTests
             var tx = new Transaction();
             tx.SpendFromUtxo(utxo, new P2PkhUnlockBuilder(publicKey));
             tx.SpendTo(toAddress, 100000L, new P2PkhLockBuilder(toAddress));
-            tx.SignInput(0, privateKey, SignatureHashEnum.All);
+            tx.Sign(0, privateKey, SignatureHashEnum.All);
 
             // we then extract the signature from the first input
             var scriptSig = tx.Inputs[0].ScriptSig;

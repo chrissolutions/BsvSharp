@@ -243,12 +243,11 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         [Fact]
         public void Verify_Dust_Output()
         {   
-            var tx = new Transaction();
-                tx.SpendFromUtxo(UtxoWith1Coin, new P2PkhUnlockBuilder(PrivateKeyFromWif.CreatePublicKey()));
-                tx.SpendTo(ToAddress, 546, new P2PkhLockBuilder(ToAddress));
-                tx.SendChangeTo(ChangeAddress, new P2PkhLockBuilder(ChangeAddress));
-            
-            tx.SignInput(0, PrivateKeyFromWif);
+            var tx = new Transaction()
+                .SpendFromUtxo(UtxoWith1Coin, new P2PkhUnlockBuilder(PrivateKeyFromWif.CreatePublicKey()))
+                .SpendTo(ToAddress, 546, new P2PkhLockBuilder(ToAddress))
+                .SendChangeTo(ChangeAddress, new P2PkhLockBuilder(ChangeAddress))
+                .Sign(0, PrivateKeyFromWif);
 
             Assert.True(tx.Verify());
             Assert.NotNull(tx.Serialize());
@@ -257,12 +256,11 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         [Fact]
         public void Verify_Dust_As_OpReturn()
         {
-            var tx = new Transaction();
-            tx.SpendFromUtxo(UtxoWith1Coin, new P2PkhUnlockBuilder(PrivateKeyFromWif.CreatePublicKey()));
-            tx.AddData("not dust!".Utf8ToBytes());
-            tx.SendChangeTo(ChangeAddress, new P2PkhLockBuilder(ChangeAddress));
-
-            tx.SignInput(0, PrivateKeyFromWif);
+            var tx = new Transaction()
+                .SpendFromUtxo(UtxoWith1Coin, new P2PkhUnlockBuilder(PrivateKeyFromWif.CreatePublicKey()))
+                .AddData("not dust!".Utf8ToBytes())
+                .SendChangeTo(ChangeAddress, new P2PkhLockBuilder(ChangeAddress))
+                .Sign(PrivateKeyFromWif);
 
             Assert.True(tx.Verify());
             Assert.NotNull(tx.Serialize());
