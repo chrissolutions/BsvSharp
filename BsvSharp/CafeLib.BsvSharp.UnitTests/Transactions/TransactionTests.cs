@@ -120,6 +120,30 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         }
 
         [Fact]
+        public void Spend_Transaction_500000_From_UtxoWith1MillionSatoshis()
+        {
+            var utxo = new Utxo
+            {
+                TxId = UtxoWith1MillionSatoshis.TxId,
+                Index = 0,
+                ScriptPubKey = new Script("76a91434f23a48e5b7c103ce7abfeb707406f0a255646288ac"),
+                Amount = new Amount(1000000L)
+            };
+
+            var tx = new Transaction()
+                .SpendFrom(UtxoWith1MillionSatoshis.TxId,
+                            UtxoWith1MillionSatoshis.Index,
+                            UtxoWith1MillionSatoshis.Amount,
+                            UtxoWith1MillionSatoshis.ScriptPubKey)
+                .SpendTo(new Address("mrU9pEmAx26HcbKVrABvgL7AwA5fjNFoDc"), 500000L)
+                .SendChangeTo(new Address("mgBCJAsvzgT2qNNeXsoECg2uPKrUsZ76up"))
+                .WithFeePerKb(500);
+
+            Assert.Equal(2, tx.Outputs.Count);
+            Assert.Equal(499887L, tx.Outputs[1].Amount.Satoshis);
+        }
+
+        [Fact]
         public void Spend_Transaction()
         {
             var changeScriptBuilder = new P2PkhLockBuilder(ChangeAddress);
