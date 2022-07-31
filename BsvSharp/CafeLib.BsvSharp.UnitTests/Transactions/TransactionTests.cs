@@ -97,6 +97,26 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         }
 
         [Fact]
+        public void Spend_Transaction()
+        {
+            var changeScriptBuilder = new P2PkhLockBuilder(ChangeAddress);
+
+            var tx = new Transaction()
+                .SpendFrom(UtxoWith1MillionSatoshis.TxId,
+                                      UtxoWith1MillionSatoshis.Index,
+                                      UtxoWith1MillionSatoshis.Amount,
+                                      UtxoWith1MillionSatoshis.ScriptPubKey)
+                .SpendTo(ToAddress, 500000L, new P2PkhLockBuilder(ToAddress))
+                .SendChangeTo(ChangeAddress, changeScriptBuilder)
+                .WithFeePerKb(100000)
+                .SignInput(0, PrivateKeyFromWif);
+
+            Assert.Equal(2, tx.Outputs.Count);
+            Assert.Equal(477400L, tx.Outputs[1].Amount.Satoshis);
+            Assert.Equal(changeScriptBuilder.ToScript().ToString(), tx.Outputs[1].Script.ToString());
+        }
+
+        [Fact]
         public void Spend_Transaction_With_500sats_FeePerKb()
         {
             const string txHex = "01000000013acb1933b924795545b45d12be478240f005ce32b3802f61714cca8c895159970200000000ffffffff0208070000000000001976a914556047d5ca688f1b6c51c8abc08aa8b16b941d9588ac160d0000000000001976a914767b244a0f1f3af0e7387e872782bbbe2c6fb86a88ac00000000";
@@ -109,14 +129,13 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
                 Amount = new Amount(5263L)
             };
 
-            var tx = new Transaction();
-                tx.SpendFromUtxo(utxo);
-                tx.SpendTo(new Address("18nRmzxrygHmsh5DQuVFYDZXGwcZ3CbVuk"), 1800L);
-                tx.SendChangeTo(new Address("1BoUFgA8ZnSFxARg9BgrXgmtZLj2ssrYuw"));
-                tx.WithFeePerKb(500);
+            var tx = new Transaction()
+                .SpendFromUtxo(utxo)
+                .SpendTo(new Address("18nRmzxrygHmsh5DQuVFYDZXGwcZ3CbVuk"), 1800L)
+                .SendChangeTo(new Address("1BoUFgA8ZnSFxARg9BgrXgmtZLj2ssrYuw"))
+                .WithFeePerKb(500);
 
-            var txStr = tx.ToString();
-            Assert.Equal(txHex, txStr);
+            Assert.Equal(txHex, tx.ToString());
         }
 
         [Fact]
@@ -133,27 +152,6 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
 
             Assert.Equal(2, tx.Outputs.Count);
             Assert.Equal(499887L, tx.Outputs[1].Amount.Satoshis);
-        }
-
-        [Fact]
-        public void Spend_Transaction()
-        {
-            var changeScriptBuilder = new P2PkhLockBuilder(ChangeAddress);
-
-            var transaction = new Transaction();
-                transaction.SpendFrom(UtxoWith1MillionSatoshis.TxId,
-                                      UtxoWith1MillionSatoshis.Index, 
-                                      UtxoWith1MillionSatoshis.Amount, 
-                                      UtxoWith1MillionSatoshis.ScriptPubKey);
-                transaction.SpendTo(ToAddress, 500000L, new P2PkhLockBuilder(ToAddress));
-                transaction.SendChangeTo(ChangeAddress, changeScriptBuilder);
-                transaction.WithFeePerKb(100000);
-
-            transaction.SignInput(0, PrivateKeyFromWif);
-
-            Assert.Equal(2, transaction.Outputs.Count);
-            Assert.Equal(477400L, transaction.Outputs[1].Amount.Satoshis);
-            Assert.Equal(changeScriptBuilder.ToScript().ToString(), transaction.Outputs[1].Script.ToString());
         }
 
         [Fact]

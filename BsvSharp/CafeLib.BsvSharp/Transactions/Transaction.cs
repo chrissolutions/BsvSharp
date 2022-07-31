@@ -461,7 +461,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="nTxIn"></param>
         /// <param name="privateKey"></param>
         /// <param name="sighashType"></param>
-        public void SignInput(int nTxIn, PrivateKey privateKey, SignatureHashEnum sighashType = SignatureHashEnum.Unsupported)
+        public Transaction SignInput(int nTxIn, PrivateKey privateKey, SignatureHashEnum sighashType = SignatureHashEnum.Unsupported)
         {
             if (nTxIn + 1 > Inputs.Count)
             {
@@ -474,6 +474,7 @@ namespace CafeLib.BsvSharp.Transactions
             }
 
             Inputs[nTxIn].Sign(this, privateKey, sighashType);
+            return this;
         }
 
         /// <summary>
