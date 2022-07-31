@@ -639,38 +639,8 @@ namespace CafeLib.BsvSharp.Transactions
         /// <summary>
         /// Update the transaction change output.
         /// </summary>
-        private void BsvUpdateChangeOutput()
+        private void UpdateChangeOutput()
         {
-            /*
-                Transaction.prototype._updateChangeOutput = function () {
-                  if (!this._changeScript) {
-                    return
-                  }
-                  this._clearSignatures()
-                  if (!_.isUndefined(this._changeIndex)) {
-                    this._removeOutput(this._changeIndex)
-                  }
-                  this._changeIndex = this.outputs.length
-                  this._addOutput(new Output({
-                    script: this._changeScript,
-                    satoshis: 0
-                  }))
-                  var available = this._getUnspentValue()
-                  var fee = this.getFee()
-                  var changeAmount = available - fee
-                  this._removeOutput(this._changeIndex)
-                  this._changeIndex = undefined
-                  if (changeAmount >= Transaction.DUST_AMOUNT) {
-                    this._changeIndex = this.outputs.length
-                    this._addOutput(new Output({
-                      script: this._changeScript,
-                      satoshis: changeAmount
-                    }))
-                  }
-                }
-             */
-
-
             if (ChangeAddress == null) return;
 
             if (_changeScriptBuilder == null) return;
@@ -689,28 +659,6 @@ namespace CafeLib.BsvSharp.Transactions
             ////can't spend negative amount of change :/
             if (changeAmount <= Amount.Zero) return;
             Outputs.Add(new TxOut(txOut.TxHash, 0, changeAmount, _changeScriptBuilder, true));
-        }
-
-        /// <summary>
-        /// Update the transaction change output.
-        /// </summary>
-        private void UpdateChangeOutput()
-        {
-            BsvUpdateChangeOutput();
-            //if (ChangeAddress == null) return;
-
-            //if (_changeScriptBuilder == null) return;
-
-            //RemoveChangeOutputs();
-
-            //if (NonChangeRecipientTotals() == InputTotals()) return;
-
-            //var txOut = GetChangeOutput(_changeScriptBuilder);
-            //var changeAmount = RecalculateChange();
-
-            //////can't spend negative amount of change :/
-            //if (changeAmount <= Amount.Zero) return;
-            //Outputs.Add(new TxOut(txOut.TxHash, 0, changeAmount, _changeScriptBuilder, true));
         }
 
         private void RemoveChangeOutputs() => Outputs.Where(x => x.IsChangeOutput).ForEach(x => Outputs.Remove(x));
