@@ -456,11 +456,23 @@ namespace CafeLib.BsvSharp.Transactions
         }
 
         /// <summary>
+        /// Sign transaction.
+        /// </summary>
+        /// <param name="privateKey"></param>
+        /// <param name="sighashType"></param>
+        /// <returns>transaction</returns>
+        public Transaction Sign(PrivateKey privateKey, SignatureHashEnum sighashType = SignatureHashEnum.Unsupported)
+        {
+            return SignInput(0, privateKey, sighashType);
+        }
+
+        /// <summary>
         /// Sign input transaction.
         /// </summary>
         /// <param name="nTxIn"></param>
         /// <param name="privateKey"></param>
         /// <param name="sighashType"></param>
+        /// <returns>transaction</returns>
         public Transaction SignInput(int nTxIn, PrivateKey privateKey, SignatureHashEnum sighashType = SignatureHashEnum.Unsupported)
         {
             if (nTxIn + 1 > Inputs.Count)

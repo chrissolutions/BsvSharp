@@ -109,7 +109,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
                 .SpendTo(ToAddress, 500000L, new P2PkhLockBuilder(ToAddress))
                 .SendChangeTo(ChangeAddress, changeScriptBuilder)
                 .WithFeePerKb(100000)
-                .SignInput(0, PrivateKeyFromWif);
+                .Sign(PrivateKeyFromWif);
 
             Assert.Equal(2, tx.Outputs.Count);
             Assert.Equal(477400L, tx.Outputs[1].Amount.Satoshis);
@@ -284,23 +284,22 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         [Fact]
         public void Recalculate_Change_Amount()
         {
-            var transaction = new Transaction();
-            transaction.SpendFromUtxo(UtxoWith100000Satoshis);
-            transaction.SpendTo(ToAddress, 50000L, new P2PkhLockBuilder(ToAddress));
-            transaction.SendChangeTo(ChangeAddress, new P2PkhLockBuilder(ChangeAddress));
-            transaction.WithFee(Amount.Zero);
-
-            transaction.SignInput(0, PrivateKeyFromWif);
+            var tx = new Transaction()
+                .SpendFromUtxo(UtxoWith100000Satoshis)
+                .SpendTo(ToAddress, 50000L, new P2PkhLockBuilder(ToAddress))
+                .SendChangeTo(ChangeAddress, new P2PkhLockBuilder(ChangeAddress))
+                .WithFee(Amount.Zero)
+                .Sign(PrivateKeyFromWif);
 
             var changeLocker = new P2PkhLockBuilder(ChangeAddress);
-            Assert.Equal(new Amount(50000), transaction.GetChangeOutput(changeLocker).Amount);
+            Assert.Equal(new Amount(50000), tx.GetChangeOutput(changeLocker).Amount);
 
-            transaction = transaction.SpendTo(ToAddress, 20000L);
-            transaction.SignInput(0, PrivateKeyFromWif);
+            tx = tx.SpendTo(ToAddress, 20000L)
+                .Sign(PrivateKeyFromWif);
 
-            Assert.Equal(3, transaction.Outputs.Length);
-            Assert.Equal(new Amount(30000), transaction.Outputs[2].Amount);
-            Assert.Equal(changeLocker.ToScript().ToString(), transaction.Outputs[2].Script.ToString());
+            Assert.Equal(3, tx.Outputs.Length);
+            Assert.Equal(new Amount(30000), tx.Outputs[2].Amount);
+            Assert.Equal(changeLocker.ToScript().ToString(), tx.Outputs[2].Script.ToString());
         }
 
         [Fact]
