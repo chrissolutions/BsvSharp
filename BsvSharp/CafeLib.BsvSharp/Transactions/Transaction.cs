@@ -695,57 +695,23 @@ namespace CafeLib.BsvSharp.Transactions
         /// <returns>fee estimate</returns>
         private Amount EstimateFee()
         {
-            var estimatedSize = BsvEstimateSize();
-            //var available = GetUnspentAmount();
-
-            //var fee = new Amount((long)Math.Ceiling((double)estimatedSize / 1000 * _feePerKb));
-            //if (available > fee)
-            //{
-            //    estimatedSize += _consensus.ChangeOutputMaxSize;
-            //}
-
+            var estimatedSize = EstimateSize();
             var fee = new Amount((long)Math.Ceiling((double)estimatedSize / 1000 * _feePerKb));
             return fee;
         }
 
         /// <summary>
-        /// Determine size estimate.
+        /// Estimate transaction size.
         /// </summary>
         /// <returns></returns>
         private int EstimateSize()
         {
-            var result = _consensus.MaximumExtraSize;
-
-            //_txnInputs.forEach((input) {
-            //    result += SCRIPT_MAX_SIZE; 
-            //});
-
-            //Note: we're only spending P2PKH atm.
-            result += _consensus.ScriptMaxSize * Inputs.Count;
-
-            // <---- HOW DO WE CALCULATE SCRIPT FROM JUST AN ADDRESS !? AND LENGTH ???
-            Outputs.ForEach(x => result += Encoders.Hex.Decode(x.Script.ToHexString()).Length + 9);
-            return result;
-        }
-
-        /// <summary>
-        /// Determine size estimate.
-        /// </summary>
-        /// <returns></returns>
-        private int BsvEstimateSize()
-        {
-            // size of version + size of locktime
-            var result = 8; //_consensus.MaximumExtraSize;
+            var result = sizeof(int) + sizeof(int); // size of version + size of locktime
             result += new VarInt(Inputs.Length).Length;
             result += new VarInt(Outputs.Length).Length;
-            result += _consensus.ScriptMaxSize * Inputs.Count;
-
-            //PublicKeyHashInput.prototype._estimateSize = function() {
-            //    return Input.BASE_SIZE (40) + PublicKeyHashInput.SCRIPT_MAX_SIZE (108)
-            //}
+            result += _consensus.ScriptMaxSize * Inputs.Count; //P2PKH script size.
 
             var writer = new ByteDataWriter();
-            //Inputs.ForEach(x => x.WriteTo(writer));
             Outputs.ForEach(x => x.WriteTo(writer));
             result += writer.ToArray().Length;
             return result;
