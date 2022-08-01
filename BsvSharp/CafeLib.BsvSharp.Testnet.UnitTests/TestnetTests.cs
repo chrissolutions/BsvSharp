@@ -23,7 +23,7 @@ namespace CafeLib.BsvSharp.Testnet.UnitTests
         public void Create_Testnet_Address_From_Wif_PrivateKey()
         {
             var privateKey = PrivateKey.FromWif("92VYMmwFLXRwXn5688edGxYYgMFsc3fUXYhGp17WocQhU6zG1kd");
-            var publicKey = privateKey.CreatePublicKey();
+            var publicKey = PublicKey.FromPrivateKey(privateKey);
             var address = publicKey.ToAddress();
             Assert.Equal(NetworkType.Test, address.NetworkType);
             Assert.Equal("moiAvLUw16qgrwhFGo1eDnXHC2wPMYiv7Y", address.ToString());

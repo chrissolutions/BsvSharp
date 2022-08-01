@@ -165,9 +165,14 @@ namespace CafeLib.BsvSharp.Keys
                 Invalidate();
         }
 
-        private void Invalidate()
+        /// <summary>
+        /// Create public key from private key
+        /// </summary>
+        /// <param name="privateKey">private key</param>
+        /// <returns>public key</returns>
+        public static PublicKey FromPrivateKey(PrivateKey privateKey)
         {
-            _keyData = null;
+            return privateKey.CreatePublicKey();
         }
 
         /// <summary>
@@ -176,7 +181,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="hash"></param>
         /// <param name="signatureEncoded"></param>
         /// <returns></returns>
-        public PublicKey RecoverKey(UInt256 hash, ReadOnlyByteSpan signatureEncoded)
+        public static PublicKey RecoverKey(UInt256 hash, ReadOnlyByteSpan signatureEncoded)
         {
             if (signatureEncoded.Length < 65)
                 throw new ArgumentException("Signature truncated, expected 65 bytes and got " + signatureEncoded.Length);
@@ -209,9 +214,14 @@ namespace CafeLib.BsvSharp.Keys
         /// Create public key from hex string.
         /// </summary>
         /// <param name="hex">hex string</param>
-        /// <returns></returns>
+        /// <returns>public key</returns>
         public static PublicKey FromHex(string hex) => new(hex);
 
+        /// <summary>
+        /// Create public key from base58 string.
+        /// </summary>
+        /// <param name="base58">base58 string</param>
+        /// <returns>public key</returns>
         public static PublicKey FromBase58(string base58) => new(Encoders.Hex.Encode(Encoders.Base58.Decode(base58)));
 
         /// <summary>
@@ -240,7 +250,7 @@ namespace CafeLib.BsvSharp.Keys
         public static PublicKey FromSignedHash(UInt256 hash, ReadOnlyByteSpan signature)
         {
             var key = new PublicKey();
-            return key.RecoverKey(hash, signature);
+            return RecoverKey(hash, signature);
         }
 
         /// <summary>
@@ -348,6 +358,14 @@ namespace CafeLib.BsvSharp.Keys
         public static bool operator !=(PublicKey x, PublicKey y) => !(x == y);
 
         #region Helpers
+
+        /// <summary>
+        /// Invalidate the public key.
+        /// </summary>
+        private void Invalidate()
+        {
+            _keyData = null;
+        }
 
         /// <summary>
         /// Get the public key from the elliptical curve key.
