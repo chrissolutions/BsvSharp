@@ -45,5 +45,15 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             Assert.Equal(publicKeyAddress, pubKey1.ToAddress().ToString());
             Assert.Equal(publicKeyAddress, pubKey2.ToAddress().ToString());
         }
+
+        [Fact]
+        public void PrivateKey_From_To_Wif_Test()
+        {
+            var wifLivenetUncompressed = "5JxgQaFM1FMd38cd14e3mbdxsdSa9iM2BV6DHBYsvGzxkTNQ7Un";
+            var privateKey = PrivateKey.FromWif(wifLivenetUncompressed);
+            var wifKey = WifPrivateKey.FromPrivateKey(privateKey);
+            var wifStr = wifKey.ToString();
+            Assert.Equal(wifLivenetUncompressed, wifStr);
+        }
     }
 }
