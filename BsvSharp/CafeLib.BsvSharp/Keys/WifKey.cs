@@ -40,10 +40,9 @@ namespace CafeLib.BsvSharp.Keys
         {
             _versionData = new byte[version.Length + data.Length + Convert.ToInt32(isCompressed)];
             _versionLength = version.Length;
-            var lastByte = data[^1];
             version.CopyTo(Version);
             data.CopyTo(KeyData);
-            KeyData.Data[^1] = isCompressed ? (byte)1 : lastByte;
+            KeyData.Data[^1] = isCompressed ? (byte)1 : data[^1];
         }
 
         protected bool SetString(string b58, int nVersionBytes)
