@@ -49,11 +49,30 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         [Fact]
         public void PrivateKey_From_To_Wif_Test()
         {
-            var wifLivenetUncompressed = "5JxgQaFM1FMd38cd14e3mbdxsdSa9iM2BV6DHBYsvGzxkTNQ7Un";
-            var privateKey = PrivateKey.FromWif(wifLivenetUncompressed);
+            var wifMainnet = "L2Gkw3kKJ6N24QcDuH4XDqt9cTqsKTVNDGz1CRZhk9cq4auDUbJy";
+            var privateKey = PrivateKey.FromWif(wifMainnet);
+
             var wifKey = WifPrivateKey.FromPrivateKey(privateKey);
             var wifStr = wifKey.ToString();
-            Assert.Equal(wifLivenetUncompressed, wifStr);
+            Assert.Equal(wifMainnet, wifStr);
+        }
+
+        [Fact]
+        public void PrivateKey_From_To_Wif_Uncompressed_Test()
+        {
+            var wifMainnetUncompressed = "5JxgQaFM1FMd38cd14e3mbdxsdSa9iM2BV6DHBYsvGzxkTNQ7Un";
+            var wif = new WifPrivateKey("5JxgQaFM1FMd38cd14e3mbdxsdSa9iM2BV6DHBYsvGzxkTNQ7Un");
+
+            var privKey = wif.ToPrivateKey();
+            var privAddress = privKey.ToAddress();
+
+            var b58Key = privKey.ToBase58();
+            var b58Str = b58Key.ToString();
+
+            var privateKey = PrivateKey.FromWif(wifMainnetUncompressed);
+            var wifKey = WifPrivateKey.FromPrivateKey(privateKey);
+            var wifStr = wifKey.ToString();
+            Assert.Equal(wifMainnetUncompressed, wifStr);
         }
     }
 }

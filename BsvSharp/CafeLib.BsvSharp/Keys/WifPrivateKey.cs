@@ -37,7 +37,7 @@ namespace CafeLib.BsvSharp.Keys
         {
             var network = RootService.GetNetwork(networkType);
             NetworkType = network.NodeType;
-            if (!SetString(wif, network.SecretKey.Length) || IsValid)
+            if (!SetString(wif, network.SecretKey.Length) || !IsValid)
             {
                 throw new InvalidKeyException(nameof(wif));
             }
