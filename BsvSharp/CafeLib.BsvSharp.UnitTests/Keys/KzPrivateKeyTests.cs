@@ -60,11 +60,12 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         [Fact]
         public void PrivateKey_From_To_Wif_Uncompressed_Test()
         {
-            var wifMainnetUncompressed = "5JxgQaFM1FMd38cd14e3mbdxsdSa9iM2BV6DHBYsvGzxkTNQ7Un";
-            var wif = new WifPrivateKey("5JxgQaFM1FMd38cd14e3mbdxsdSa9iM2BV6DHBYsvGzxkTNQ7Un");
+            const string wifMainnetUncompressed = "5JxgQaFM1FMd38cd14e3mbdxsdSa9iM2BV6DHBYsvGzxkTNQ7Un";
+            var wif = new WifPrivateKey(wifMainnetUncompressed);
 
             var privKey = wif.ToPrivateKey();
-            var privAddress = privKey.ToAddress();
+            var walletKey = WifPrivateKey.FromPrivateKey(privKey);
+
 
             var b58Key = privKey.ToBase58();
             var b58Str = b58Key.ToString();
