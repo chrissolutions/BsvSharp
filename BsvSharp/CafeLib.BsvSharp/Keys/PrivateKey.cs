@@ -200,6 +200,7 @@ namespace CafeLib.BsvSharp.Keys
         public string ToHex() => _keyData.ToString();
         public Base58PrivateKey ToBase58(NetworkType? networkType = null) => new(this, networkType);
         public override string ToString() => ToBase58().ToString();
+        public WifPrivateKey ToWif(NetworkType? networkType = null) => WifPrivateKey.FromPrivateKey(this, networkType);
 
         public override int GetHashCode() => _keyData.GetHashCode();
         public bool Equals(PrivateKey o) => o is not null && IsCompressed.Equals(o.IsCompressed) && _keyData.Equals(o._keyData);

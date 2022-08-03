@@ -6,6 +6,7 @@
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
 using Xunit;
+// ReSharper disable StringLiteralTypo
 
 namespace CafeLib.BsvSharp.UnitTests.Keys
 {
@@ -17,7 +18,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             const string hex = "906977a061af29276e40bf377042ffbde414e496ae2260bbf1fa9d085637bfff";
             const string b58 = "L24Rq5hPWMexw5mQi7tchYw6mhtr5ApiHZMN8KJXCkskEv7bTV61";
 
-            var key1 = new PrivateKey(hex, true);
+            var key1 = new PrivateKey(hex);
             var key2 = PrivateKey.FromBase58(b58);
             Assert.Equal(key1, key2);
             Assert.Equal(hex, key1.ToHex());
@@ -52,8 +53,9 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             var wifMainnet = "L2Gkw3kKJ6N24QcDuH4XDqt9cTqsKTVNDGz1CRZhk9cq4auDUbJy";
             var privateKey = PrivateKey.FromWif(wifMainnet);
 
-            var wifKey = WifPrivateKey.FromPrivateKey(privateKey);
+            var wifKey = privateKey.ToWif();
             var wifStr = wifKey.ToString();
+            Assert.True(wifKey.IsValid);
             Assert.Equal(wifMainnet, wifStr);
         }
 
@@ -61,14 +63,6 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         public void PrivateKey_From_To_Wif_Uncompressed_Test()
         {
             const string wifMainnetUncompressed = "5JxgQaFM1FMd38cd14e3mbdxsdSa9iM2BV6DHBYsvGzxkTNQ7Un";
-            var wif = new WifPrivateKey(wifMainnetUncompressed);
-
-            var privKey = wif.ToPrivateKey();
-            var walletKey = WifPrivateKey.FromPrivateKey(privKey);
-
-
-            var b58Key = privKey.ToBase58();
-            var b58Str = b58Key.ToString();
 
             var privateKey = PrivateKey.FromWif(wifMainnetUncompressed);
             var wifKey = WifPrivateKey.FromPrivateKey(privateKey);

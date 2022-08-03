@@ -4,7 +4,6 @@
 
 using System;
 using System.Diagnostics;
-using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Services;
 using CafeLib.Core.Numerics;
@@ -13,38 +12,6 @@ namespace CafeLib.BsvSharp.Keys
 {
     public class WifPrivateKey : WifKey
     {
-        #region Constructors
-
-        /// <summary>
-        /// WifPrivateKey default constructor.
-        /// </summary>
-        protected WifPrivateKey() { }
-
-        /// <summary>
-        /// WifPrivateKey constructor.
-        /// </summary>
-        /// <param name="privateKey">private key</param>
-        /// <param name="networkType">network type</param>
-        public WifPrivateKey(PrivateKey privateKey, NetworkType? networkType = null) 
-            => FromPrivateKey(privateKey, networkType);
-
-        /// <summary>
-        /// WifPrivateKey constructor.
-        /// </summary>
-        /// <param name="wif">wallet information format string</param>
-        /// <param name="networkType">network type</param>
-        public WifPrivateKey(string wif, NetworkType? networkType = null)
-        {
-            var network = RootService.GetNetwork(networkType);
-            NetworkType = network.NodeType;
-            if (!SetString(wif, network.SecretKey.Length) || !IsValid)
-            {
-                throw new InvalidKeyException(nameof(wif));
-            }
-        }
-
-        #endregion
-
         public bool IsValid
         {
             get
@@ -57,16 +24,7 @@ namespace CafeLib.BsvSharp.Keys
             }
         }
 
-        public PrivateKey ToPrivateKey()
-        {
-            var data = KeyData;
-            Debug.Assert(data.Length >= UInt256.Length);
-            var isCompressed = data.Length > UInt256.Length && data[UInt256.Length] == 1;
-            var privateKey = new PrivateKey(data[..UInt256.Length], isCompressed);
-            return privateKey;
-        }
-
-        public static WifPrivateKey FromPrivateKey(PrivateKey privateKey, NetworkType? networkType = null)
+        internal static WifPrivateKey FromPrivateKey(PrivateKey privateKey, NetworkType? networkType = null)
         {
             Debug.Assert(privateKey.IsValid);
             var network = RootService.GetNetwork(networkType);
