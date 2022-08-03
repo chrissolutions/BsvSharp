@@ -29,7 +29,6 @@ namespace CafeLib.BsvSharp.Keys
             Debug.Assert(privateKey.IsValid);
             var network = RootService.GetNetwork(networkType);
             var wifKey = new WifPrivateKey { NetworkType = network.NodeType };
-
             var data = privateKey.ToArray();
             wifKey.SetData(network.SecretKey, data, privateKey.IsCompressed);
             return wifKey;

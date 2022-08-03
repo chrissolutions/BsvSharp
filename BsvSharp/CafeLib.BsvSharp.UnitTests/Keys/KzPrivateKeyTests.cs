@@ -50,13 +50,12 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         [Fact]
         public void PrivateKey_From_To_Wif_Test()
         {
-            var wifMainnet = "L2Gkw3kKJ6N24QcDuH4XDqt9cTqsKTVNDGz1CRZhk9cq4auDUbJy";
-            var privateKey = PrivateKey.FromWif(wifMainnet);
+            const string wifMainnet = "L2Gkw3kKJ6N24QcDuH4XDqt9cTqsKTVNDGz1CRZhk9cq4auDUbJy";
 
+            var privateKey = PrivateKey.FromWif(wifMainnet);
             var wifKey = privateKey.ToWif();
-            var wifStr = wifKey.ToString();
             Assert.True(wifKey.IsValid);
-            Assert.Equal(wifMainnet, wifStr);
+            Assert.Equal(wifMainnet, wifKey.ToString());
         }
 
         [Fact]
@@ -66,8 +65,8 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
 
             var privateKey = PrivateKey.FromWif(wifMainnetUncompressed);
             var wifKey = WifPrivateKey.FromPrivateKey(privateKey);
-            var wifStr = wifKey.ToString();
-            Assert.Equal(wifMainnetUncompressed, wifStr);
+            Assert.True(wifKey.IsValid);
+            Assert.Equal(wifMainnetUncompressed, wifKey.ToString());
         }
     }
 }
