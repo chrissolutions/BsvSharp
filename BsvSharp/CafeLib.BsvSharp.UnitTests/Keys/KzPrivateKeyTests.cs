@@ -5,6 +5,7 @@
 
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
+using CafeLib.BsvSharp.Network;
 using Xunit;
 // ReSharper disable StringLiteralTypo
 
@@ -67,6 +68,16 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             var wifKey = WifPrivateKey.FromPrivateKey(privateKey);
             Assert.True(wifKey.IsValid);
             Assert.Equal(wifMainnetUncompressed, wifKey.ToString());
+        }
+
+        [Fact]
+        public void Wif_PrivateKey_To_Testnet_Address_Test()
+        {
+            var privateKey = PrivateKey.FromWif("92VYMmwFLXRwXn5688edGxYYgMFsc3fUXYhGp17WocQhU6zG1kd", NetworkType.Test);
+            var publicKey = PublicKey.FromPrivateKey(privateKey);
+            var address = publicKey.ToAddress(NetworkType.Test);
+            Assert.Equal(NetworkType.Test, address.NetworkType);
+            Assert.Equal("moiAvLUw16qgrwhFGo1eDnXHC2wPMYiv7Y", address.ToString());
         }
     }
 }
