@@ -32,11 +32,11 @@ namespace CafeLib.BsvSharp.Keys
 
         protected void SetData(ReadOnlyByteSpan version, ReadOnlyByteSpan data, bool flag = false)
         {
-            _versionData = new byte[version.Length + data.Length + 1];
+            _versionData = new byte[version.Length + data.Length + Convert.ToInt32(flag)];
             _versionLength = version.Length;
             version.CopyTo(Version);
             data.CopyTo(KeyData);
-            KeyData.Data[^1] = (byte)(flag ? 1 : 0);
+            KeyData.Data[^1] = flag ? (byte)1 : data[^1];
         }
 
         protected bool SetString(string b58, int nVersionBytes)
