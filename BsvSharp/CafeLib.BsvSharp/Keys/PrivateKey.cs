@@ -133,7 +133,7 @@ namespace CafeLib.BsvSharp.Keys
 
         public static PrivateKey FromHex(string hex, bool compressed = true) => new(UInt256.FromHex(hex, true), compressed);
         public static PrivateKey FromBase58(string base58, NetworkType? networkType = null) => new Base58PrivateKey(base58, networkType).GetKey();
-        public static PrivateKey FromWif(string wif, NetworkType? networkType = null) => new Base58PrivateKey(wif, networkType).GetKey();
+        public static PrivateKey FromWif(string wif) => WifPrivateKey.FromString(wif).ToPrivateKey();
 
         /// <summary>
         /// Derive a new private key.

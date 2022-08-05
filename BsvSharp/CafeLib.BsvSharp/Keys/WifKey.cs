@@ -30,12 +30,6 @@ namespace CafeLib.BsvSharp.Keys
         protected ReadOnlyByteSpan VersionData => _versionData;
         public NetworkType NetworkType { get; protected set; }
 
-        protected void SetData(byte[] versionData, int versionLength = 1)
-        {
-            _versionData = versionData;
-            _versionLength = versionLength;
-        }
-
         protected void SetData(ReadOnlyByteSpan version, ReadOnlyByteSpan data, bool isCompressed)
         {
             _versionData = new byte[version.Length + data.Length + Convert.ToInt32(isCompressed)];
@@ -54,7 +48,20 @@ namespace CafeLib.BsvSharp.Keys
 
             _versionData = data;
             _versionLength = length;
+            NetworkType = FindNetworkType(Version);
             return result;
+        }
+
+        private static NetworkType FindNetworkType(ByteSpan version)
+        {
+            return version switch
+            {
+                _ when version.Data.SequenceEqual(new[] { (byte)0x80 }) => NetworkType.Main,
+                _ when version.Data.SequenceEqual(new[] { (byte)0xef }) => NetworkType.Test,
+                _ when version.Data.SequenceEqual(new[] { (byte)0xef }) => NetworkType.Regression,
+                _ when version.Data.SequenceEqual(new[] { (byte)0xef }) => NetworkType.Scaling,
+                _ => NetworkType.Main
+            };
         }
 
         public override string ToString() => Encoders.Base58Check.Encode(_versionData);
@@ -62,7 +69,7 @@ namespace CafeLib.BsvSharp.Keys
         public override int GetHashCode() => _versionData.GetHashCode();
 
         public bool Equals(WifKey o) => o is not null && _versionData.SequenceEqual(o._versionData);
-        public override bool Equals(object obj) => obj is WifKey WifKey && this == WifKey;
+        public override bool Equals(object obj) => obj is WifKey wifKey && this == wifKey;
 
         public static bool operator ==(WifKey x, WifKey y) => x?.Equals(y) ?? y is null;
         public static bool operator !=(WifKey x, WifKey y) => !(x == y);
