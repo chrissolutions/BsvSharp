@@ -6,6 +6,7 @@
 using System.Linq;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
+using CafeLib.BsvSharp.Keys.Base58;
 using Xunit;
 // ReSharper disable StringLiteralTypo
 
@@ -18,13 +19,13 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         /// </summary>
         private class TestDerivation
         {
-            public string PublicKey { get; set; }
-            public string PrivateKey { get; set; }
+            public string PublicKey { get; init; }
+            public string PrivateKey { get; init; }
 
             /// <summary>
             /// key path
             /// </summary>
-            public string Path { get; set; }
+            public string Path { get; init; }
         }
 
         /// <summary>
@@ -35,17 +36,18 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             /// <summary>
             /// Master seed as hex string.
             /// </summary>
-            public string MasterSeed { get; set; }
+            public string MasterSeed { get; init; }
 
             /// <summary>
             /// Array of Test Derivations
             /// </summary>
-            public TestDerivation[] Derivations { get; set; }
+            public TestDerivation[] Derivations { get; init; }
         }
 
         private readonly TestVector[] _testVectors =
         {
-            new TestVector {
+            new()
+            {
                 MasterSeed = "000102030405060708090a0b0c0d0e0f",
                 Derivations = new [] {
                     new TestDerivation {
@@ -80,7 +82,8 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
                     },
                 }
             },
-            new TestVector {
+            new()
+            {
                 MasterSeed = "fffcf9f6f3f0edeae7e4e1dedbd8d5d2cfccc9c6c3c0bdbab7b4b1aeaba8a5a29f9c999693908d8a8784817e7b7875726f6c696663605d5a5754514e4b484542",
                 Derivations = new [] {
                     new TestDerivation {
@@ -115,7 +118,8 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
                         },
                 }
             },
-            new TestVector {
+            new()
+            {
                 MasterSeed = "4b381541583be4423346c643850da4b320e46a87ae3d2a4e6da11eba819cd4acba45d239319ac14f863b8d5ab5a0d0c64d2e8a1e7d1457df2e5a3c51c73235be",
                 Derivations = new [] {
                     new TestDerivation {

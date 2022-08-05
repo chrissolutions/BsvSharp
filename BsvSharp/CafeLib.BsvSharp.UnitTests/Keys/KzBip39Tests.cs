@@ -6,9 +6,11 @@
 using System.Linq;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
+using CafeLib.BsvSharp.Keys.Base58;
 using CafeLib.BsvSharp.Passphrase;
 using CafeLib.Core.Numerics;
 using Xunit;
+// ReSharper disable StringLiteralTypo
 
 namespace CafeLib.BsvSharp.UnitTests.Keys 
 {
