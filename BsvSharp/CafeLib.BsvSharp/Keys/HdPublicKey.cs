@@ -1,9 +1,4 @@
-﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
-// Distributed under the Open BSV software license, see the accompanying file LICENSE.
-#endregion
-
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using CafeLib.BsvSharp.Extensions;
@@ -13,22 +8,22 @@ using CafeLib.Core.Buffers;
 namespace CafeLib.BsvSharp.Keys
 {
     [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
-    public class ExtPublicKey : ExtKey
+    public class HdPublicKey : HdKey
     {
         public PublicKey PublicKey { get; private set; }
 
-        public ExtPublicKey()
+        public HdPublicKey()
         {
         }
 
-        public ExtPublicKey(ReadOnlyByteSpan code)
+        public HdPublicKey(ReadOnlyByteSpan code)
         {
             Decode(code);
         }
 
-        public static ExtPublicKey FromPrivateKey(ExtPrivateKey privateKey)
+        public static HdPublicKey FromPrivateKey(HdPrivateKey privateKey)
         {
-            return new ExtPublicKey
+            return new HdPublicKey
             {
                 Depth = privateKey.Depth,
                 Fingerprint = privateKey.Fingerprint,
@@ -45,21 +40,21 @@ namespace CafeLib.BsvSharp.Keys
         /// </summary>
         /// <param name="keyPath">key path</param>
         /// <returns>null on derivation failure. Otherwise the derived private key.</returns>
-        public ExtPublicKey Derive(KeyPath keyPath) => DeriveBase(keyPath) as ExtPublicKey;
+        public HdPublicKey Derive(KeyPath keyPath) => DeriveBase(keyPath) as HdPublicKey;
 
         /// <summary>
         /// Derives a child hierarchical deterministic public key specified by a key path.
         /// </summary>
         /// <param name="path">key path</param>
         /// <returns>extended public key</returns>
-        public ExtPublicKey Derive(string path) => DeriveBase(new KeyPath(path)) as ExtPublicKey;
+        public HdPublicKey Derive(string path) => DeriveBase(new KeyPath(path)) as HdPublicKey;
 
         /// <summary>
         /// Derives a child hierarchical deterministic public key specified by a key path.
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        public ExtPublicKey Derive(int index) => DeriveBase(index, false) as ExtPublicKey;
+        public HdPublicKey Derive(int index) => DeriveBase(index, false) as HdPublicKey;
 
         /// <summary>
         /// Derives a child hierarchical deterministic public key specified by a key path.
@@ -67,9 +62,9 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="index"></param>
         /// <param name="hardened"></param>
         /// <returns></returns>
-        protected override ExtKey DeriveBase(int index, bool hardened)
+        protected override HdKey DeriveBase(int index, bool hardened)
         {
-            var cek = new ExtPublicKey 
+            var cek = new HdPublicKey 
             {
                 Depth = (byte)(Depth + 1),
                 Child = (uint)index | (hardened ? HardenedBit : 0),
@@ -94,7 +89,7 @@ namespace CafeLib.BsvSharp.Keys
             key.CopyTo(code.Slice(41, 33));
         }
 
-        public void Decode(ReadOnlyByteSpan code)
+        public override void Decode(ReadOnlyByteSpan code)
         {
             Depth = code[0];
             Fingerprint = BitConverter.ToInt32(code.Slice(1, 4));
@@ -116,12 +111,12 @@ namespace CafeLib.BsvSharp.Keys
 
         public override int GetHashCode() => base.GetHashCode() ^ PublicKey.GetHashCode();
 
-        public bool Equals(ExtPublicKey o) => o is not null && base.Equals(o) && PublicKey == o.PublicKey;
-        public override bool Equals(object obj) => obj is ExtPublicKey key && this == key;
+        public bool Equals(HdPublicKey o) => o is not null && base.Equals(o) && PublicKey == o.PublicKey;
+        public override bool Equals(object obj) => obj is HdPublicKey key && this == key;
 
-        public static bool operator ==(ExtPublicKey x, ExtPublicKey y) => x?.Equals(y) ?? y is null;
-        public static bool operator !=(ExtPublicKey x, ExtPublicKey y) => !(x == y);
+        public static bool operator ==(HdPublicKey x, HdPublicKey y) => x?.Equals(y) ?? y is null;
+        public static bool operator !=(HdPublicKey x, HdPublicKey y) => !(x == y);
 
-        public static explicit operator byte[](ExtPublicKey rhs) => rhs.ToArray();
+        public static explicit operator byte[](HdPublicKey rhs) => rhs.ToArray();
     }
 }

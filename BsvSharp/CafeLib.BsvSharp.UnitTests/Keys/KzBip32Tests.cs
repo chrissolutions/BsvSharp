@@ -137,7 +137,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             foreach (var tv in _testVectors) {
 
                 var seed = tv.MasterSeed.HexToBytes();
-                var m = ExtPrivateKey.MasterBip32(seed);
+                var m = HdPrivateKey.MasterBip32(seed);
 
                 foreach (var d in tv.Derivations)
                 {
@@ -150,7 +150,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
                     Assert.Equal(d.PrivateKey, strPriv);
                     Assert.Equal(d.PublicKey, strPub);
 
-                    var data = new byte[ExtKey.Bip32KeySize];
+                    var data = new byte[HdKey.Bip32KeySize];
                     priv.Encode(data);
                     pub.Encode(data);
 

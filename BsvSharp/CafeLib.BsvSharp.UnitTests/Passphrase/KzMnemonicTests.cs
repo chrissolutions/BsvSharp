@@ -133,7 +133,7 @@ namespace CafeLib.BsvSharp.UnitTests.Passphrase
         public void MnemonicToAddress()
         {
             const string words = "dutch expire chief blue paddle flush upset health catch drill turtle slot";
-            var m = ExtPrivateKey.MasterBip39(words);
+            var m = HdPrivateKey.MasterBip39(words);
             var path = new KeyPath("m/44'/0'/0'");
             var hdPrivateKey = m.Derive(path);
             var privateKey = hdPrivateKey.PrivateKey;

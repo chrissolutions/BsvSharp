@@ -47,7 +47,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         [Fact]
         public void Verify_Script_From_Simple_Transaction()
         {
-            var privateKey = PrivateKey.FromBase58("L24Rq5hPWMexw5mQi7tchYw6mhtr5ApiHZMN8KJXCkskEv7bTV61");
+            var privateKey = PrivateKey.FromWif("L24Rq5hPWMexw5mQi7tchYw6mhtr5ApiHZMN8KJXCkskEv7bTV61");
             var publicKey = privateKey.CreatePublicKey();
             var fromAddress = publicKey.ToAddress();
             var toAddress = new Address("1BpbpfLdY7oBS9gK7aDXgvMgr1DPvNhEB2");

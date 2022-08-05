@@ -10,12 +10,12 @@ namespace CafeLib.BsvSharp.Keys.Base58
         {
         }
 
-        public Base58ExtPrivateKey(ExtPrivateKey privateKey)
+        public Base58ExtPrivateKey(HdPrivateKey privateKey)
         {
             SetKey(privateKey, null);
         }
 
-        public Base58ExtPrivateKey(ExtPrivateKey privateKey, NetworkType networkType)
+        public Base58ExtPrivateKey(HdPrivateKey privateKey, NetworkType networkType)
         {
             SetKey(privateKey, networkType);
         }
@@ -30,19 +30,19 @@ namespace CafeLib.BsvSharp.Keys.Base58
             SetString(b58, networkType);
         }
 
-        internal void SetKey(ExtPrivateKey privateKey, NetworkType? networkType)
+        internal void SetKey(HdPrivateKey privateKey, NetworkType? networkType)
         {
             var prefix = RootService.GetNetwork(networkType).ExtSecretKey;
-            var data = new byte[prefix.Length + ExtKey.Bip32KeySize];
+            var data = new byte[prefix.Length + HdKey.Bip32KeySize];
             prefix.CopyTo(data, 0);
             privateKey.Encode(data.Slice(prefix.Length));
             SetData(data, prefix.Length);
         }
 
-        public ExtPrivateKey GetKey()
+        public HdPrivateKey GetKey()
         {
-            var privateKey = new ExtPrivateKey();
-            if (KeyData.Length == ExtKey.Bip32KeySize)
+            var privateKey = new HdPrivateKey();
+            if (KeyData.Length == HdKey.Bip32KeySize)
             {
                 privateKey.Decode(KeyData);
             }

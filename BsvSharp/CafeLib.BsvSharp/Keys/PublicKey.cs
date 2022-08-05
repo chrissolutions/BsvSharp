@@ -306,7 +306,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="nChild"></param>
         /// <param name="chainCode"></param>
         /// <returns>child public key</returns>
-        public (PublicKey, UInt256 ccChild) Derive(uint nChild, UInt256 chainCode)
+        internal (PublicKey, UInt256 ccChild) Derive(uint nChild, UInt256 chainCode)
         {
             byte[] lr;
             var l = new byte[32];
