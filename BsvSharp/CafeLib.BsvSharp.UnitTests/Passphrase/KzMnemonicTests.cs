@@ -137,7 +137,7 @@ namespace CafeLib.BsvSharp.UnitTests.Passphrase
             var path = new KeyPath("m/44'/0'/0'");
             var hdPrivateKey = m.Derive(path);
             var privateKey = hdPrivateKey.PrivateKey;
-            var hdPublicKey = hdPrivateKey.GetExtPublicKey();
+            var hdPublicKey = hdPrivateKey.GetHdPublicKey();
             var publicKey = hdPublicKey.PublicKey;
             var address = hdPublicKey.PublicKey.ToAddress();
 

@@ -143,7 +143,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
                 {
                     var path = new KeyPath(d.Path);
                     var priv = m.Derive(path);
-                    var pub = priv.GetExtPublicKey();
+                    var pub = priv.GetHdPublicKey();
 
                     var strPriv = priv.ToString();
                     var strPub = pub.ToString();
@@ -166,7 +166,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
                     if (priv.Hardened == false && path.Parent != null)
                     {
                         // Compare with public derivation
-                        var pubkeyNew2 = m.Derive(path.Parent).GetExtPublicKey().Derive((int)path.Last());
+                        var pubkeyNew2 = m.Derive(path.Parent).GetHdPublicKey().Derive((int)path.Last());
                         Assert.True(pubkeyNew2 != null);
                         Assert.Equal(pub, pubkeyNew2);
                     }

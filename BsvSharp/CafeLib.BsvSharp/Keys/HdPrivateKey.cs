@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys.Base58;
@@ -15,7 +14,6 @@ using CafeLib.Cryptography.Cryptsharp;
 
 namespace CafeLib.BsvSharp.Keys
 {
-    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
     public class HdPrivateKey : HdKey
     {
         private const string MasterBip32Key = "Bitcoin seed";
@@ -54,7 +52,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <returns>Returns this key unless required key paths aren't valid for specified key.</returns>
         public HdPrivateKey SetMaster(UInt512 vOut, IEnumerable<KeyPath> required = null)
         {
-            return SetMaster((UInt256)vOut.Span.Slice(0, 32), (UInt256)vOut.Span.Slice(32, 32), required);
+            return SetMaster((UInt256)vOut.Span[..32], (UInt256)vOut.Span.Slice(32, 32), required);
         }
 
         /// <summary>
@@ -164,7 +162,7 @@ namespace CafeLib.BsvSharp.Keys
         /// associated with an extended private key.
         /// </summary>
         /// <returns></returns>
-        public HdPublicKey GetExtPublicKey() => HdPublicKey.FromPrivateKey(this);
+        public HdPublicKey GetHdPublicKey() => HdPublicKey.FromPrivateKey(this);
 
         /// <summary>
         /// Get public key from ExtPrivateKey.
