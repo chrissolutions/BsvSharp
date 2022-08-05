@@ -48,11 +48,11 @@ namespace CafeLib.BsvSharp.Keys
 
             _versionData = data;
             _versionLength = length;
-            NetworkType = FindNetworkType(Version);
+            NetworkType = GetNetworkType(Version);
             return result;
         }
 
-        private static NetworkType FindNetworkType(ByteSpan version)
+        private static NetworkType GetNetworkType(ByteSpan version)
         {
             return version switch
             {
