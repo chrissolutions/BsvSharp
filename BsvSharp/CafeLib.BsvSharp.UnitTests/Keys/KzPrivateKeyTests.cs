@@ -31,14 +31,31 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         }
 
         [Fact]
+        public void FromHexAndWif()
+        {
+            const string hex = "906977a061af29276e40bf377042ffbde414e496ae2260bbf1fa9d085637bfff";
+            const string wif = "L24Rq5hPWMexw5mQi7tchYw6mhtr5ApiHZMN8KJXCkskEv7bTV61";
+
+            var key1 = new PrivateKey(hex);
+            var key2 = PrivateKey.FromWif(wif);
+            Assert.Equal(key1, key2);
+            Assert.Equal(hex, key1.ToHex());
+            Assert.Equal(wif, key1.ToWif().ToString());
+            Assert.Equal(wif, key1.ToString());
+            Assert.Equal(hex, key2.ToHex());
+            Assert.Equal(wif, key2.ToWif().ToString());
+            Assert.Equal(wif, key2.ToString());
+        }
+
+        [Fact]
         public void PublicKey_From_PrivateKey_Test()
         {
             const string hex = "906977a061af29276e40bf377042ffbde414e496ae2260bbf1fa9d085637bfff";
-            const string b58 = "L24Rq5hPWMexw5mQi7tchYw6mhtr5ApiHZMN8KJXCkskEv7bTV61";
+            const string wif = "L24Rq5hPWMexw5mQi7tchYw6mhtr5ApiHZMN8KJXCkskEv7bTV61";
             const string publicKeyAddress = "17JarKo61PkpuZG3GyofzGmFSCskGRBUT3";
 
             var key1 = new PrivateKey(hex);
-            var key2 = PrivateKey.FromBase58(b58);
+            var key2 = PrivateKey.FromWif(wif);
 
             var pubKey1 = key1.CreatePublicKey();
             var pubKey2 = key2.CreatePublicKey();
