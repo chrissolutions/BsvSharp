@@ -66,7 +66,7 @@ namespace CafeLib.BsvSharp.Keys
 
         public override string ToString() => Encoders.Base58Check.Encode(_versionData);
 
-        public override int GetHashCode() => _versionData.GetHashCode();
+        public override int GetHashCode() => ToString().GetHashCode();
 
         public bool Equals(WifKey o) => o is not null && _versionData.SequenceEqual(o._versionData);
         public override bool Equals(object obj) => obj is WifKey wifKey && this == wifKey;
