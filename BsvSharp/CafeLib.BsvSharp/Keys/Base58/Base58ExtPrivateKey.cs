@@ -1,15 +1,10 @@
-﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
-// Distributed under the Open BSV software license, see the accompanying file LICENSE.
-#endregion
-
-using CafeLib.BsvSharp.Extensions;
+﻿using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Services;
 
-namespace CafeLib.BsvSharp.Keys
+namespace CafeLib.BsvSharp.Keys.Base58
 {
-    public class Base58ExtPrivateKey : Base58Data
+    internal class Base58ExtPrivateKey : Base58Data
     {
         public Base58ExtPrivateKey()
         {
@@ -54,7 +49,7 @@ namespace CafeLib.BsvSharp.Keys
             return privateKey;
         }
 
-        public bool SetString(string b58, NetworkType? networkType) 
+        public bool SetString(string b58, NetworkType? networkType)
             => SetString(b58, RootService.GetNetwork(networkType).ExtSecretKey.Length);
     }
 }

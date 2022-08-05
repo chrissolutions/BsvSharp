@@ -1,20 +1,15 @@
-﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
-// Distributed under the Open BSV software license, see the accompanying file LICENSE.
-#endregion
-
-using System;
+﻿using System;
 using System.Linq;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Network;
 using CafeLib.Core.Buffers;
 
-namespace CafeLib.BsvSharp.Keys
+namespace CafeLib.BsvSharp.Keys.Base58
 {
     /// <summary>
     /// Base class for Base58 encoded objects.
     /// </summary>
-    public abstract class Base58Data : IComparable<Base58Data>
+    internal abstract class Base58Data : IComparable<Base58Data>
     {
         private byte[] _versionData;
         private int _versionLength;
@@ -41,9 +36,9 @@ namespace CafeLib.BsvSharp.Keys
 
         protected bool SetString(string b58, int nVersionBytes)
         {
-            var (data, length, result) = 
-                Encoders.Base58Check.TryDecode(b58, out var bytes) && bytes.Length >= nVersionBytes 
-                    ? (bytes, nVersionBytes, true) 
+            var (data, length, result) =
+                Encoders.Base58Check.TryDecode(b58, out var bytes) && bytes.Length >= nVersionBytes
+                    ? (bytes, nVersionBytes, true)
                     : (Array.Empty<byte>(), 0, false);
 
             _versionData = data;

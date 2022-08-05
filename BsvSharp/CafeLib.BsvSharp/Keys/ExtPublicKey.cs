@@ -7,6 +7,7 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using CafeLib.BsvSharp.Extensions;
+using CafeLib.BsvSharp.Keys.Base58;
 using CafeLib.Core.Buffers;
 
 namespace CafeLib.BsvSharp.Keys
@@ -110,7 +111,7 @@ namespace CafeLib.BsvSharp.Keys
             return bytes;
         }
 
-        public Base58ExtPublicKey ToBase58() => new(this);
+        internal Base58ExtPublicKey ToBase58() => new(this);
         public override string ToString() => ToBase58().ToString();
 
         public override int GetHashCode() => base.GetHashCode() ^ PublicKey.GetHashCode();

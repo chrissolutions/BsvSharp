@@ -6,6 +6,7 @@
 using System;
 using System.Linq;
 using CafeLib.BsvSharp.Extensions;
+using CafeLib.BsvSharp.Keys.Base58;
 using CafeLib.BsvSharp.Network;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
@@ -197,7 +198,7 @@ namespace CafeLib.BsvSharp.Keys
         }
 
         public string ToHex() => _keyData.ToString();
-        public Base58PrivateKey ToBase58(NetworkType? networkType = null) => new(this, networkType);
+        internal Base58PrivateKey ToBase58(NetworkType? networkType = null) => new(this, networkType);
         public override string ToString() => ToBase58().ToString();
         public WifPrivateKey ToWif(NetworkType? networkType = null) => WifPrivateKey.FromPrivateKey(this, networkType);
 

@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CafeLib.BsvSharp.Extensions;
+using CafeLib.BsvSharp.Keys.Base58;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
@@ -244,7 +245,7 @@ namespace CafeLib.BsvSharp.Keys
             PrivateKey.SetData(code.Slice(42, UInt256.Length));
         }
 
-        public Base58ExtPrivateKey ToBase58() => new(this);
+        internal Base58ExtPrivateKey ToBase58() => new(this);
         public override string ToString() => ToBase58().ToString();
 
         public override int GetHashCode() => base.GetHashCode() ^ PrivateKey.GetHashCode();

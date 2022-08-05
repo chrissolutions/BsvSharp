@@ -1,15 +1,10 @@
-﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
-// Distributed under the Open BSV software license, see the accompanying file LICENSE.
-#endregion
-
-using CafeLib.BsvSharp.Extensions;
+﻿using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Services;
 
-namespace CafeLib.BsvSharp.Keys
+namespace CafeLib.BsvSharp.Keys.Base58
 {
-    public class Base58ExtPublicKey : Base58Data
+    internal class Base58ExtPublicKey : Base58Data
     {
         public Base58ExtPublicKey(ExtPublicKey pubKey, NetworkType? networkType = null)
             => SetKey(pubKey, networkType);
@@ -29,7 +24,7 @@ namespace CafeLib.BsvSharp.Keys
         public ExtPublicKey GetKey()
         {
             var pubKey = new ExtPublicKey();
-            if (KeyData.Length == ExtKey.Bip32KeySize) 
+            if (KeyData.Length == ExtKey.Bip32KeySize)
             {
                 pubKey.Decode(KeyData);
             }
@@ -38,7 +33,7 @@ namespace CafeLib.BsvSharp.Keys
 
         public static ExtPublicKey GetKey(string base58) => new Base58ExtPublicKey(base58).GetKey();
 
-        internal bool SetString(string b58, NetworkType? networkType) 
+        internal bool SetString(string b58, NetworkType? networkType)
             => SetString(b58, RootService.GetNetwork(networkType).ExtPublicKey.Length);
     }
 }
