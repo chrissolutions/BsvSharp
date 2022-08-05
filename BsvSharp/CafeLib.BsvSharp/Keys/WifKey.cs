@@ -56,10 +56,10 @@ namespace CafeLib.BsvSharp.Keys
         {
             return version switch
             {
-                _ when version.Data.SequenceEqual(new[] { (byte)0x80 }) => NetworkType.Main,
-                _ when version.Data.SequenceEqual(new[] { (byte)0xef }) => NetworkType.Test,
-                _ when version.Data.SequenceEqual(new[] { (byte)0xef }) => NetworkType.Regression,
-                _ when version.Data.SequenceEqual(new[] { (byte)0xef }) => NetworkType.Scaling,
+                _ when version.Data.SequenceEqual(new[] { (byte)NetworkVersion.Main }) => NetworkType.Main,
+                _ when version.Data.SequenceEqual(new[] { (byte)NetworkVersion.Test }) => NetworkType.Test,
+                _ when version.Data.SequenceEqual(new[] { (byte)NetworkVersion.Test }) => NetworkType.Regression,
+                _ when version.Data.SequenceEqual(new[] { (byte)NetworkVersion.Test }) => NetworkType.Scaling,
                 _ => NetworkType.Main
             };
         }

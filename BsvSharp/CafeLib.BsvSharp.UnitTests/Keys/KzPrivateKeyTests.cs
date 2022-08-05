@@ -73,10 +73,16 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         [Fact]
         public void Wif_PrivateKey_To_Testnet_Address_Test()
         {
-            var privateKey = PrivateKey.FromWif("92VYMmwFLXRwXn5688edGxYYgMFsc3fUXYhGp17WocQhU6zG1kd");
+            const string wifKeyText = "92VYMmwFLXRwXn5688edGxYYgMFsc3fUXYhGp17WocQhU6zG1kd";
+            var wifKey = WifPrivateKey.FromString(wifKeyText);
+            var privateKey = PrivateKey.FromWif(wifKeyText);
             var publicKey = PublicKey.FromPrivateKey(privateKey);
-            var address = publicKey.ToAddress(NetworkType.Test);
+            var address = publicKey.ToAddress(wifKey.NetworkType);
+
+            Assert.Equal(NetworkType.Test, wifKey.NetworkType);
             Assert.Equal(NetworkType.Test, address.NetworkType);
+            Assert.Equal(wifKeyText, wifKey.ToString());
+            Assert.Equal(wifKeyText, privateKey.ToWif(wifKey.NetworkType).ToString());
             Assert.Equal("moiAvLUw16qgrwhFGo1eDnXHC2wPMYiv7Y", address.ToString());
         }
     }
