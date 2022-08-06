@@ -8,6 +8,7 @@ using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Signatures;
 using Xunit;
+// ReSharper disable StringLiteralTypo
 
 namespace CafeLib.BsvSharp.UnitTests.Signatures
 {
@@ -72,7 +73,7 @@ namespace CafeLib.BsvSharp.UnitTests.Signatures
         public void VerifyMessage_Test(string address, string privateKey, string message, string signature)
         {
             var addr = new Address(address);
-            var privKey = PrivateKey.FromBase58(privateKey);
+            var privKey = PrivateKey.FromWif(privateKey);
             var sign = new Signature(Encoders.Base64.Decode(signature));
 
             var pubKey = privKey.CreatePublicKey();

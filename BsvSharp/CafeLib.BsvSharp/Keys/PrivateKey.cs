@@ -1,26 +1,16 @@
-﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
-// Distributed under the Open BSV software license, see the accompanying file LICENSE.
-#endregion
-
-using System;
+﻿using System;
 using System.Linq;
 using CafeLib.BsvSharp.Extensions;
-using CafeLib.BsvSharp.Keys.Base58;
 using CafeLib.BsvSharp.Network;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
 using CafeLib.Cryptography.BouncyCastle.Math;
-// ReSharper disable NonReadonlyMemberInGetHashCode
 // ReSharper disable InconsistentNaming
 
 namespace CafeLib.BsvSharp.Keys
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class PrivateKey : IEquatable<PrivateKey>
     {
         private const int KeySize = UInt256.Length;
@@ -129,7 +119,6 @@ namespace CafeLib.BsvSharp.Keys
 
         public static PrivateKey FromRandom() => new(true);
         public static PrivateKey FromHex(string hex, bool compressed = true) => new(UInt256.FromHex(hex, true), compressed);
-        public static PrivateKey FromBase58(string base58, NetworkType? networkType = null) => new Base58PrivateKey(base58, networkType).GetKey();
         public static PrivateKey FromWif(string wif) => WifPrivateKey.FromString(wif).ToPrivateKey();
 
         /// <summary>
@@ -195,11 +184,10 @@ namespace CafeLib.BsvSharp.Keys
         }
 
         public string ToHex() => _keyData.ToString();
-        internal Base58PrivateKey ToBase58(NetworkType? networkType = null) => new(this, networkType);
-        public override string ToString() => ToBase58().ToString();
+        public override string ToString() => ToWif().ToString();
         public WifPrivateKey ToWif(NetworkType? networkType = null) => WifPrivateKey.FromPrivateKey(this, networkType);
 
-        public override int GetHashCode() => _keyData.GetHashCode();
+        public override int GetHashCode() => ToString().GetHashCode();
         public bool Equals(PrivateKey o) => o is not null && IsCompressed.Equals(o.IsCompressed) && _keyData.Equals(o._keyData);
         public override bool Equals(object obj) => obj is PrivateKey key && this == key;
 
