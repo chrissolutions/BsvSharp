@@ -50,6 +50,22 @@ namespace CafeLib.BsvSharp.Testnet.UnitTests
         }
 
         [Fact]
+        public void Create_PrivateKey_Compressed_Test()
+        {
+            var privateKey = PrivateKey.FromRandom();
+            var keyStr = privateKey.ToString();
+            Assert.Equal(RootService.GetNetwork().PrivateKeyCompressed[0], (byte)keyStr[0]);
+        }
+
+        [Fact]
+        public void Create_PrivateKey_Uncompressed_Test()
+        {
+            var privateKey = new PrivateKey();
+            var keyStr = privateKey.ToString();
+            Assert.Equal(RootService.GetNetwork().PrivateKeyUncompressed[0], (byte)keyStr[0]);
+        }
+
+        [Fact]
         public void Create_Script_From_Testnet_Address()
         {
             var address = new Address("mxRN6AQJaDi5R6KmvMaEmZGe3n5ScV9u33");

@@ -14,7 +14,7 @@ namespace CafeLib.BsvSharp.Keys.Base58
 
         public void SetKey(HdPublicKey pubKey, NetworkType? networkType)
         {
-            var prefix = RootService.GetNetwork(networkType).ExtPublicKey;
+            var prefix = RootService.GetNetwork(networkType).HdPublicKey;
             var data = new byte[prefix.Length + HdKey.Bip32KeySize];
             prefix.CopyTo(data, 0);
             pubKey.Encode(data.Slice(prefix.Length));
@@ -34,6 +34,6 @@ namespace CafeLib.BsvSharp.Keys.Base58
         public static HdPublicKey GetKey(string base58) => new Base58ExtPublicKey(base58).GetKey();
 
         internal bool SetString(string b58, NetworkType? networkType)
-            => SetString(b58, RootService.GetNetwork(networkType).ExtPublicKey.Length);
+            => SetString(b58, RootService.GetNetwork(networkType).HdPublicKey.Length);
     }
 }

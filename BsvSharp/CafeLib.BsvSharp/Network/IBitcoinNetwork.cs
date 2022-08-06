@@ -23,6 +23,16 @@ namespace CafeLib.BsvSharp.Network
         NetworkType NodeType { get; }
 
         /// <summary>
+        /// Base58 encoding prefix for compressed private key addresses for the active network.
+        /// </summary>
+        byte[] PrivateKeyCompressed { get; }
+
+        /// <summary>
+        /// Base58 encoding prefix for uncompressed private key addresses for the active network.
+        /// </summary>
+        byte[] PrivateKeyUncompressed { get; }
+
+        /// <summary>
         /// Base58 encoding prefix for public key addresses for the active network.
         /// </summary>
         byte[] PublicKeyAddress { get; }
@@ -38,13 +48,13 @@ namespace CafeLib.BsvSharp.Network
         byte[] SecretKey { get; }
 
         /// <summary>
-        /// Base58 encoding prefix for extended public keys for the active network.
+        /// Base58 encoding prefix for hierarchical deterministic public keys for the active network.
         /// </summary>
-        byte[] ExtPublicKey { get; }
+        byte[] HdPublicKey { get; }
 
         /// <summary>
-        /// Base58 encoding prefix for extended private keys for the active network.
+        /// Base58 encoding prefix for hierarchical deterministic private keys for the active network.
         /// </summary>
-        byte[] ExtSecretKey { get; }
+        byte[] HdSecretKey { get; }
     }
 }

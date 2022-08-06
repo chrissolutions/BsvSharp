@@ -6,7 +6,13 @@
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Network;
+using CafeLib.BsvSharp.Services;
+using System.Collections.Generic;
+using System;
 using Xunit;
+using System.Linq;
+using Xunit.Sdk;
+using CafeLib.BsvSharp.UnitTests.Extensions;
 // ReSharper disable StringLiteralTypo
 
 namespace CafeLib.BsvSharp.UnitTests.Keys
@@ -45,6 +51,29 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             Assert.Equal(hex, key2.ToHex());
             Assert.Equal(wif, key2.ToWif().ToString());
             Assert.Equal(wif, key2.ToString());
+        }
+
+        [Fact]
+        public void Create_PrivateKey_Compressed_Test()
+        {
+            var privateKey = PrivateKey.FromRandom();
+            var keyStr = privateKey.ToString();
+
+            var expectations = new List<Tuple<byte, byte>>()
+            {
+                new(RootService.GetNetwork().PrivateKeyCompressed[0], (byte)keyStr[0]),
+                new(RootService.GetNetwork().PrivateKeyCompressed[1], (byte)keyStr[0])
+            };
+
+            new CustomAssert().Any(expectations, pair => Assert.Equal(pair.Item1, pair.Item2));
+        }
+
+        [Fact]
+        public void Create_PrivateKey_Uncompressed_Test()
+        {
+            var privateKey = new PrivateKey();
+            var keyStr = privateKey.ToString();
+            Assert.Equal(RootService.GetNetwork().PrivateKeyUncompressed[0], (byte)keyStr[0]);
         }
 
         [Fact]

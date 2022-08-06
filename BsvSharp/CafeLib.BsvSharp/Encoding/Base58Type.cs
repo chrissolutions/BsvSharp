@@ -2,11 +2,13 @@
 {
     public enum Base58Type
     {
+        PrivateKeyCompressed,
+        PrivateKeyUncompressed,
         PubkeyAddress,
         ScriptAddress,
         SecretKey,
-        ExtPublicKey,
-        ExtSecretKey,
+        HdPublicKey,
+        HdSecretKey,
 
         MaxBase58Types
     };
