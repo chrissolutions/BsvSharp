@@ -241,7 +241,7 @@ namespace CafeLib.BsvSharp.Keys
         internal Base58HdPrivateKey ToBase58() => new(this);
         public override string ToString() => ToBase58().ToString();
 
-        public override int GetHashCode() => base.GetHashCode() ^ PrivateKey.GetHashCode();
+        public override int GetHashCode() => base.GetHashCode() ^ ToString().GetHashCode();
 
         public bool Equals(HdPrivateKey o) => o is not null && base.Equals(o) && PrivateKey.Equals(o.PrivateKey);
         public override bool Equals(object obj) => obj is HdPrivateKey key && this == key;
