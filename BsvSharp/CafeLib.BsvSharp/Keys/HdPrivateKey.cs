@@ -18,7 +18,7 @@ namespace CafeLib.BsvSharp.Keys
     {
         private const string MasterBip32Key = "Bitcoin seed";
 
-        public PrivateKey PrivateKey { get; private set; } = new();
+        public PrivateKey PrivateKey { get; private set; } = PrivateKey.FromRandom();
 
         /// <summary>
         /// Sets this extended private key to be a master (depth 0) with the given private key and chaincode and verifies required key paths.
