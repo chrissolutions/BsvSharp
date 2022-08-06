@@ -40,13 +40,13 @@ namespace CafeLib.BsvSharp.Testnet.UnitTests
         [Fact]
         public void Convert_Testnet_PrivateKey_To_PublicKey()
         {
-            var privhex = "906977a061af29276e40bf377042ffbde414e496ae2260bbf1fa9d085637bfff";
-            var pubhex = "02a1633cafcc01ebfb6d78e39f687a1f0995c62fc95f51ead10a02ee0be551b5dc";
+            const string privHex = "906977a061af29276e40bf377042ffbde414e496ae2260bbf1fa9d085637bfff";
+            const string pubHex = "02a1633cafcc01ebfb6d78e39f687a1f0995c62fc95f51ead10a02ee0be551b5dc";
 
-            var privateKey = new PrivateKey(privhex);
+            var privateKey = new PrivateKey(privHex);
             var publicKey = privateKey.CreatePublicKey();
             
-            Assert.Equal(pubhex, publicKey.ToHex());
+            Assert.Equal(pubHex, publicKey.ToHex());
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace CafeLib.BsvSharp.Testnet.UnitTests
         {
             var privateKey = PrivateKey.FromRandom();
             var keyStr = privateKey.ToString();
-            Assert.Equal(RootService.GetNetwork().PrivateKeyCompressed[0], (byte)keyStr[0]);
+            Assert.Contains(RootService.GetNetwork().PrivateKeyCompressed, x => x == (byte)keyStr[0]);
         }
 
         [Fact]

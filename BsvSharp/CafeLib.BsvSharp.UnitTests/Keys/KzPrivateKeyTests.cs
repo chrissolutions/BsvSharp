@@ -7,12 +7,8 @@ using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Services;
-using System.Collections.Generic;
-using System;
 using Xunit;
-using System.Linq;
-using Xunit.Sdk;
-using CafeLib.BsvSharp.UnitTests.Extensions;
+
 // ReSharper disable StringLiteralTypo
 
 namespace CafeLib.BsvSharp.UnitTests.Keys
@@ -58,14 +54,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         {
             var privateKey = PrivateKey.FromRandom();
             var keyStr = privateKey.ToString();
-
-            var expectations = new List<Tuple<byte, byte>>()
-            {
-                new(RootService.GetNetwork().PrivateKeyCompressed[0], (byte)keyStr[0]),
-                new(RootService.GetNetwork().PrivateKeyCompressed[1], (byte)keyStr[0])
-            };
-
-            new CustomAssert().Any(expectations, pair => Assert.Equal(pair.Item1, pair.Item2));
+            Assert.Contains(RootService.GetNetwork().PrivateKeyCompressed, x => x == (byte)keyStr[0]);
         }
 
         [Fact]
