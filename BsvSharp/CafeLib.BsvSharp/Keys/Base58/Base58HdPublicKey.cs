@@ -4,12 +4,12 @@ using CafeLib.BsvSharp.Services;
 
 namespace CafeLib.BsvSharp.Keys.Base58
 {
-    internal class Base58ExtPublicKey : Base58Data
+    internal class Base58HdPublicKey : Base58Data
     {
-        public Base58ExtPublicKey(HdPublicKey pubKey, NetworkType? networkType = null)
+        public Base58HdPublicKey(HdPublicKey pubKey, NetworkType? networkType = null)
             => SetKey(pubKey, networkType);
 
-        public Base58ExtPublicKey(string base58, NetworkType? networkType = null)
+        public Base58HdPublicKey(string base58, NetworkType? networkType = null)
             => SetString(base58, networkType);
 
         public void SetKey(HdPublicKey pubKey, NetworkType? networkType)
@@ -31,7 +31,7 @@ namespace CafeLib.BsvSharp.Keys.Base58
             return pubKey;
         }
 
-        public static HdPublicKey GetKey(string base58) => new Base58ExtPublicKey(base58).GetKey();
+        public static HdPublicKey GetKey(string base58) => new Base58HdPublicKey(base58).GetKey();
 
         internal bool SetString(string b58, NetworkType? networkType)
             => SetString(b58, RootService.GetNetwork(networkType).HdPublicKey.Length);

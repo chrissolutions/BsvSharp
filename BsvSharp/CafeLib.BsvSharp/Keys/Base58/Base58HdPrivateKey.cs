@@ -4,28 +4,28 @@ using CafeLib.BsvSharp.Services;
 
 namespace CafeLib.BsvSharp.Keys.Base58
 {
-    internal class Base58ExtPrivateKey : Base58Data
+    internal class Base58HdPrivateKey : Base58Data
     {
-        public Base58ExtPrivateKey()
+        public Base58HdPrivateKey()
         {
         }
 
-        public Base58ExtPrivateKey(HdPrivateKey privateKey)
+        public Base58HdPrivateKey(HdPrivateKey privateKey)
         {
             SetKey(privateKey, null);
         }
 
-        public Base58ExtPrivateKey(HdPrivateKey privateKey, NetworkType networkType)
+        public Base58HdPrivateKey(HdPrivateKey privateKey, NetworkType networkType)
         {
             SetKey(privateKey, networkType);
         }
 
-        public Base58ExtPrivateKey(string b58)
+        public Base58HdPrivateKey(string b58)
         {
             SetString(b58, null);
         }
 
-        public Base58ExtPrivateKey(string b58, NetworkType networkType)
+        public Base58HdPrivateKey(string b58, NetworkType networkType)
         {
             SetString(b58, networkType);
         }

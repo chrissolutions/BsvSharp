@@ -238,7 +238,7 @@ namespace CafeLib.BsvSharp.Keys
             PrivateKey.SetData(code.Slice(42, UInt256.Length));
         }
 
-        internal Base58ExtPrivateKey ToBase58() => new(this);
+        internal Base58HdPrivateKey ToBase58() => new(this);
         public override string ToString() => ToBase58().ToString();
 
         public override int GetHashCode() => base.GetHashCode() ^ PrivateKey.GetHashCode();

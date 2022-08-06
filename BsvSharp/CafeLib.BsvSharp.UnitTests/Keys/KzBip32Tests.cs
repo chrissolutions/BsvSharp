@@ -155,10 +155,10 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
                     pub.Encode(data);
 
                     // Test private key
-                    var b58Key = new Base58ExtPrivateKey(priv);
+                    var b58Key = new Base58HdPrivateKey(priv);
                     Assert.Equal(d.HdPrivateKey, b58Key.ToString());
 
-                    var b58KeyDecodeCheck = new Base58ExtPrivateKey(d.HdPrivateKey);
+                    var b58KeyDecodeCheck = new Base58HdPrivateKey(d.HdPrivateKey);
                     var checkKey = b58KeyDecodeCheck.GetKey();
                     // ensure a base58 decoded pubkey also matches
                     Assert.Equal(checkKey, priv);

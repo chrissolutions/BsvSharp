@@ -171,7 +171,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             var seedBip39 = HdPrivateKey.Bip39Seed(words, "TREZOR");
             Assert.Equal(seed512, seedBip39);
             var privkeyFromWords = HdPrivateKey.FromWords(words, "TREZOR");
-            var privkeyFromB58 = new Base58ExtPrivateKey(b58PrivateKey).GetKey();
+            var privkeyFromB58 = new Base58HdPrivateKey(b58PrivateKey).GetKey();
             Assert.Equal(privkeyFromB58, privkeyFromWords);
         }
 

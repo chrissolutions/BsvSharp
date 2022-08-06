@@ -120,14 +120,10 @@ namespace CafeLib.BsvSharp.Keys
         {
             get
             {
-                if (_publicKey == null)
-                {
-                    _publicKey = this.CreatePublicKey();
-                }
+                if (_publicKey == null) _publicKey = this.CreatePublicKey();
                 return _publicKey;
             }
         }
-
 
         public byte[] ToArray() => _keyData;
 

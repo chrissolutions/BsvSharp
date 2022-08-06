@@ -106,7 +106,7 @@ namespace CafeLib.BsvSharp.Keys
             return bytes;
         }
 
-        internal Base58ExtPublicKey ToBase58() => new(this);
+        internal Base58HdPublicKey ToBase58() => new(this);
         public override string ToString() => ToBase58().ToString();
 
         public override int GetHashCode() => base.GetHashCode() ^ PublicKey.GetHashCode();
