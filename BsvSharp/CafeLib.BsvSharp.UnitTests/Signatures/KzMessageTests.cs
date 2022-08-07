@@ -64,21 +64,15 @@ namespace CafeLib.BsvSharp.UnitTests.Signatures
             "this is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long messagethis is a very long message",
             "HFKBHewleUsotk6fWG0OvWS/E2pP4o5hixdD6ui60in/x4376FBI4DvtJYrljXLNJTG1pBOZG+qRT/7S9WiIBfQ="
         )]
-        //[InlineData(
-        //    "1Q1wVsNNiUo68caU7BfyFFQ8fVBqxC2DSc",
-        //    null,
-        //    "Localbitcoins.com will change the world",
-        //    "IJ/17TjGGUqmEppAliYBUesKHoHzfY4gR4DW0Yg7QzrHUB5FwX1uTJ/H21CF8ncY8HHNB5/lh8kPAOeD5QxV8Xc="
-        //)]
-        public void VerifyMessage_Test(string address, string privateKey, string message, string signature)
+        public void VerifyMessage_Test(string addressText, string privateKey, string message, string signature)
         {
-            var addr = new Address(address);
+            var address = new Address(addressText);
             var privKey = PrivateKey.FromWif(privateKey);
             var sign = new Signature(Encoders.Base64.Decode(signature));
 
             var pubKey = privKey.CreatePublicKey();
-            Assert.Equal(addr.PubKeyHash, pubKey.GetId());
-            Assert.True(addr.PubKeyHash.VerifyMessage(message, signature));
+            Assert.Equal(address.PubKeyHash, pubKey.GetId());
+            Assert.True(address.PubKeyHash.VerifyMessage(message, signature));
             Assert.True(pubKey.VerifyMessage(message, sign));
         }
 
