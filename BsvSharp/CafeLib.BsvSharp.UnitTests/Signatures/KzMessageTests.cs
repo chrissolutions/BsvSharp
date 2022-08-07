@@ -78,19 +78,13 @@ namespace CafeLib.BsvSharp.UnitTests.Signatures
 
             var pubKey = privKey.CreatePublicKey();
             Assert.Equal(addr.PubKeyHash, pubKey.GetId());
+            Assert.True(addr.PubKeyHash.VerifyMessage(message, signature));
             Assert.True(pubKey.VerifyMessage(message, sign));
         }
 
         [Fact]
         public void VerifyMessage_PrivateKey_Null_Test()
         {
-            //[InlineData(
-            //    "1Q1wVsNNiUo68caU7BfyFFQ8fVBqxC2DSc",
-            //    null,
-            //    "Localbitcoins.com will change the world",
-            //    "IJ/17TjGGUqmEppAliYBUesKHoHzfY4gR4DW0Yg7QzrHUB5FwX1uTJ/H21CF8ncY8HHNB5/lh8kPAOeD5QxV8Xc="
-            //)]
-
             const string message = "Localbitcoins.com will change the world";
             const string signature = "IJ/17TjGGUqmEppAliYBUesKHoHzfY4gR4DW0Yg7QzrHUB5FwX1uTJ/H21CF8ncY8HHNB5/lh8kPAOeD5QxV8Xc=";
             var address = new Address("1Q1wVsNNiUo68caU7BfyFFQ8fVBqxC2DSc");

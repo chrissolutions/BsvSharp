@@ -76,14 +76,14 @@ namespace CafeLib.BsvSharp.Extensions
             return rkey != null && rkey == key;
         }
 
-        public static bool VerifyMessage(this UInt160 keyId, UInt256 message, string signature)
+        private static bool VerifyMessage(this UInt160 keyId, ReadOnlyByteSpan message, string signature)
         {
-            var rkey = PublicKey.FromSignedHash(GetMessageHash(message.Span), Encoders.Base64.Decode(signature));
+            var rkey = PublicKey.FromSignedHash(GetMessageHash(message), Encoders.Base64.Decode(signature));
             return rkey != null && rkey.GetId() == keyId;
         }
 
         public static bool VerifyMessage(this UInt160 keyId, string message, string signature)
-            => VerifyMessage(keyId, (UInt256)message.Utf8ToBytes(), signature);
+            => VerifyMessage(keyId, message.Utf8ToBytes(), signature);
 
         #region Helpers
 
