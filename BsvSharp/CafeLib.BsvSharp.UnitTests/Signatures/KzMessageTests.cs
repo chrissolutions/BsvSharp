@@ -83,7 +83,7 @@ namespace CafeLib.BsvSharp.UnitTests.Signatures
         }
 
         [Fact]
-        public void VerifyMessage_PrivateKey_Null_Test()
+        public void VerifyMessage_PubKeyHash_Test()
         {
             const string message = "Localbitcoins.com will change the world";
             const string signature = "IJ/17TjGGUqmEppAliYBUesKHoHzfY4gR4DW0Yg7QzrHUB5FwX1uTJ/H21CF8ncY8HHNB5/lh8kPAOeD5QxV8Xc=";
