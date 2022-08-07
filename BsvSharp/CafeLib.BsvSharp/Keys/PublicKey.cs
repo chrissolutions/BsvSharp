@@ -249,7 +249,6 @@ namespace CafeLib.BsvSharp.Keys
         /// <returns></returns>
         public static PublicKey FromSignedHash(UInt256 hash, ReadOnlyByteSpan signature)
         {
-            var key = new PublicKey();
             return RecoverKey(hash, signature);
         }
 
