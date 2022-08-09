@@ -111,18 +111,6 @@ namespace CafeLib.BsvSharp.Keys
         }
 
         /// <summary>
-        /// Creates a copy of this key.
-        /// </summary>
-        /// <returns></returns>
-        public PublicKey Clone()
-        {
-            var clone = new PublicKey();
-            if (_keyData != null)
-                clone._keyData = _keyData.ToArray();
-            return clone;
-        }
-
-        /// <summary>
         /// True if key is stored in an array of 33 bytes.
         /// False if invalid or uncompressed.
         /// </summary>
@@ -216,13 +204,6 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="hex">hex string</param>
         /// <returns>public key</returns>
         public static PublicKey FromHex(string hex) => new(hex);
-
-        /// <summary>
-        /// Create public key from base58 string.
-        /// </summary>
-        /// <param name="base58">base58 string</param>
-        /// <returns>public key</returns>
-        public static PublicKey FromBase58(string base58) => new(Encoders.Hex.Encode(Encoders.Base58.Decode(base58)));
 
         /// <summary>
         /// Recover public key from message and signature.

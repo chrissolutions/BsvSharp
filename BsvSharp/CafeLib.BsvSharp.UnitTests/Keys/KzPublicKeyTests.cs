@@ -25,16 +25,16 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         }
 
         [Fact]
-        public void TestPublicKeyData()
+        public void PublicKey_Data_Test()
         {
             const string publicHex = "02a1633cafcc01ebfb6d78e39f687a1f0995c62fc95f51ead10a02ee0be551b5dc";
-            var publicKey = new PublicKey(publicHex);
+            var publicKey = PublicKey.FromHex(publicHex);
             var bytes = publicKey.ToArray();
             Assert.Equal(0, publicKey.Data.SequenceCompareTo(bytes));
         }
 
         [Fact]
-        public void TestPublicKeyAddress()
+        public void PublicKey_Address_Test()
         {
             const string privateHex = "906977a061af29276e40bf377042ffbde414e496ae2260bbf1fa9d085637bfff";
             const string publicHex = "02a1633cafcc01ebfb6d78e39f687a1f0995c62fc95f51ead10a02ee0be551b5dc";
