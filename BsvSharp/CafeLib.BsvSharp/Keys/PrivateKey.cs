@@ -183,7 +183,7 @@ namespace CafeLib.BsvSharp.Keys
             return sig != null && publicKey.Verify(hash, sig);
         }
 
-        public string ToHex() => _keyData.ToString();
+        public string ToHex() => _keyData.ToHex(true);
         public override string ToString() => ToWif().ToString();
         public WifPrivateKey ToWif(NetworkType? networkType = null) => WifPrivateKey.FromPrivateKey(this, networkType);
 
@@ -206,7 +206,7 @@ namespace CafeLib.BsvSharp.Keys
             }
             else
             {
-                _keyData = new UInt256(true);
+                _keyData = new UInt256();
                 data.CopyTo(_keyData.Span);
                 IsCompressed = compressed;
                 IsValid = true;
