@@ -338,7 +338,7 @@ namespace CafeLib.BsvSharp.Builders
                 var bytes = ParseCompactValueToBytes(s);
                 if (bytes != null) {
                     sb.Push(bytes);
-                    ps = ps.Slice(1);
+                    ps = ps[1..];
                 } else if (Enum.TryParse("OP_" + s, out Opcode op)) {
                     var args = 1;
                     var data = (byte[])null;

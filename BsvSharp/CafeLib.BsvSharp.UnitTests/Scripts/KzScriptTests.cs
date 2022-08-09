@@ -23,7 +23,7 @@ using Xunit.Abstractions;
 
 namespace CafeLib.BsvSharp.UnitTests.Scripts
 {
-    public class KzScriptTests
+    public partial class KzScriptTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
 
@@ -110,74 +110,6 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             Assert.Equal(Opcode.OP_EQUALVERIFY, builder.Ops[3].Opcode);
             Assert.Equal(Opcode.OP_CHECKSIG, builder.Ops[4].Opcode);
             Assert.Equal(asm, builder.ToScript().ToAssemblyString());
-        }
-
-        /// <summary>
-        /// Test Vector
-        /// </summary>
-        class TV2
-        {
-            /// <summary>
-            /// ScriptSig as hex string.
-            /// </summary>
-            public string sig;
-            /// <summary>
-            /// ScriptPub .
-            /// </summary>
-            public string pub;
-            /// <summary>
-            /// Flags
-            /// </summary>
-            public string flags;
-            /// <summary>
-            /// Result: Error or OK.
-            /// </summary>
-            public string error;
-
-            public Script scriptSig;
-            public Script scriptPub;
-            public ScriptFlags scriptFlags;
-            public ScriptError scriptError;
-            public Opcode[] opcodes;
-            public Opcode? keyopcode;
-
-            public TV2(params string[] args)
-            {
-                sig = args[0];
-                pub = args[1];
-                flags = args[2];
-                error = args[3];
-
-                scriptSig = ScriptBuilder.ParseTestScript(sig).ToScript();
-                scriptPub = ScriptBuilder.ParseTestScript(pub).ToScript();
-                scriptFlags = ScriptInterpreter.ParseFlags(flags);
-                scriptError = ToScriptError(error);
-
-                opcodes = scriptSig.Decode().Select(o => o.Code)
-                    .Concat(scriptPub.Decode().Select(o => o.Code))
-                    .Distinct()
-                    .OrderBy(o => o).ToArray();
-
-                keyopcode = opcodes.Length == 0 ? (Opcode?)null : opcodes.Last();
-            }
-        }
-
-        private static TV2 M2(params string[] args) => args.Length < 4 ? null : new TV2(args);
-
-        private static ScriptError ToScriptError(string error)
-        {
-            if (!Enum.TryParse(error, out ScriptError result))
-            {
-                result = error switch
-                {
-                    "SPLIT_RANGE" => ScriptError.INVALID_SPLIT_RANGE,
-                    "OPERAND_SIZE" => ScriptError.INVALID_OPERAND_SIZE,
-                    "NULLFAIL" => ScriptError.SIG_NULLFAIL,
-                    "MISSING_FORKID" => ScriptError.MUST_USE_FORKID,
-                    _ => ScriptError.UNKNOWN_ERROR
-                };
-            }
-            return result;
         }
 
         [Fact]
