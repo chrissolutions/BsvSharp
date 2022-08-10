@@ -206,10 +206,8 @@ namespace CafeLib.BsvSharp.Scripting
         public void Tuck()
         {
             // (x1 x2 -- x2 x1 x2)
-            var x1 = _array[Count - 2];
-            var x2 = _array[Count - 1];
-            (_array[Count - 2], _array[Count - 1]) = (x2, x1);
-            Push(x2);
+            (_array[Count - 2], _array[Count - 1]) = (_array[Count - 1], _array[Count - 2]);
+            Push(_array[Count - 2]);
         }
 
         public void Roll(int n)
