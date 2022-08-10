@@ -6,191 +6,219 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace CafeLib.BsvSharp.Scripting
 {
     internal class ScriptStack<T> : IEnumerable<T>
     {
-        private Stack<T> _stack;
+        private T[] _array;
+
+        private const int DefaultCapacity = 4;
 
         public ScriptStack()
         {
-            _stack = new Stack<T>();
+            _array = new T[DefaultCapacity];
+        }
+
+        public ScriptStack(int capacity)
+        {
+            _array = new T[capacity];
         }
 
         public int Count { get; private set; }
 
-        public void Clear() => _stack.Clear();
+        public void Clear()
+        {
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                Array.Clear(_array, 0, Count);
+            }
 
-        public T Peek() => _stack.Peek();
+            Count = 0;
+        }
 
-        public T Pop() => _stack.Pop();
+        public void TrimExcess()
+        {
+            var threshold = (int)(_array.Length * 0.9);
+            if (Count < threshold)
+            {
+                Array.Resize(ref _array, Count);
+            }
+        }
 
-        public void Push(T item) => _stack.Push(item);
+        public T Peek()
+        {
+            return _array[Count - 1];
+        }
 
-        public bool Contains(T v) => _stack.Contains(v);
+        public bool TryPeek(out T result)
+        {
+            if (Count == 0)
+            {
+                result = default;
+                return false;
+            }
+            result = _array[Count - 1];
+            return true;
+        }
 
-        public T[] ToArray() => _stack.ToArray();
+        public T Pop()
+        {
+            var item = _array[--Count];
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                _array[Count] = default;     // Free memory quicker.
+            }
+            return item;
+        }
+
+        public bool TryPop(out T result)
+        {
+            if (Count == 0)
+            {
+                result = default;
+                return false;
+            }
+
+            result = _array[--Count];
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                _array[Count] = default;     // Free memory quicker.
+            }
+            return true;
+        }
+
+        public void Push(T item)
+        {
+            if (Count == _array.Length)
+                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+            _array[Count++] = item;
+        }
+
+        public T[] ToArray()
+        {
+            return _array.AsSpan(0, Count).ToArray();
+        }
 
         public void Drop2()
         {
-            // (x1 x2 -- )
-            Pop();
-            Pop();
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                _array[--Count] = default;
+                _array[--Count] = default;
+            }
+            else
+            {
+                Count -= 2;
+            }
         }
 
         public void Dup2()
         {
             // (x1 x2 -- x1 x2 x1 x2)
-            (T, T) temp = new()
-            {
-                Item1 = _stack.ElementAt(_stack.Count - 2),
-                Item2 = _stack.ElementAt(_stack.Count - 1)
-            };
+            if (Count + 2 > _array.Length)
+                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+            _array[Count++] = _array[Count - 3];
+            _array[Count++] = _array[Count - 3];
+        }
 
-            _stack.Push(temp.Item1);
-            _stack.Push(temp.Item2);
+        public bool Contains(T v)
+        {
+            return Count != 0 && Array.LastIndexOf(_array, v, Count - 1) != -1;
         }
 
         public void Dup3()
         {
             // (x1 x2 x3 -- x1 x2 x3 x1 x2 x3)
-            (T, T, T) temp = new()
-            {
-                Item1 = _stack.ElementAt(_stack.Count - 3),
-                Item2 = _stack.ElementAt(_stack.Count - 2),
-                Item3 = _stack.ElementAt(_stack.Count - 1),
-            };
-
-            _stack.Push(temp.Item1);
-            _stack.Push(temp.Item2);
-            _stack.Push(temp.Item3);
+            if (Count + 3 > _array.Length)
+                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+            _array[Count++] = _array[Count - 4];
+            _array[Count++] = _array[Count - 4];
+            _array[Count++] = _array[Count - 4];
         }
 
         public void Over()
         {
             // (x1 x2 -- x1 x2 x1)
-            var item = _stack.ElementAt(_stack.Count - 2);
-            _stack.Push(item);
+            if (Count + 1 > _array.Length)
+                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+            _array[Count++] = _array[Count - 3];
         }
 
         public void Over2()
         {
             // (x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2)
-            (T, T) temp = new()
-            {
-                Item1 = _stack.ElementAt(_stack.Count - 4),
-                Item2 = _stack.ElementAt(_stack.Count - 3)
-            };
-
-            _stack.Push(temp.Item1);
-            _stack.Push(temp.Item2);
+            if (Count + 2 > _array.Length)
+                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+            _array[Count++] = _array[Count - 5];
+            _array[Count++] = _array[Count - 5];
         }
 
         public void Rot()
         {
             // (x1 x2 x3 -- x2 x3 x1)
-            //  x2 x1 x3  after first swap
-            //  x2 x3 x1  after second swap
-            (T, T, T) temp = new()
-            {
-                Item3 = _stack.Pop(),
-                Item2 = _stack.Pop(),
-                Item1 = _stack.Pop(),
-            };
-
-            _stack.Push(temp.Item2);
-            _stack.Push(temp.Item3);
-            _stack.Push(temp.Item1);
+            var x1 = _array[Count - 3];
+            _array[Count - 3] = _array[Count - 2];
+            _array[Count - 2] = _array[Count - 1];
+            _array[Count - 1] = x1;
         }
 
         public void Rot2()
         {
             // (x1 x2 x3 x4 x5 x6 -- x3 x4 x5 x6 x1 x2)
-            (T, T, T, T, T, T) temp = new()
-            {
-                Item6 = _stack.Pop(),
-                Item5 = _stack.Pop(),
-                Item4 = _stack.Pop(),
-                Item3 = _stack.Pop(),
-                Item2 = _stack.Pop(),
-                Item1 = _stack.Pop(),
-            };
-
-            _stack.Push(temp.Item3);
-            _stack.Push(temp.Item4);
-            _stack.Push(temp.Item5);
-            _stack.Push(temp.Item6);
-            _stack.Push(temp.Item1);
-            _stack.Push(temp.Item2);
+            var x1 = _array[Count - 6];
+            var x2 = _array[Count - 5];
+            _array[Count - 6] = _array[Count - 4];
+            _array[Count - 5] = _array[Count - 3];
+            _array[Count - 4] = _array[Count - 2];
+            _array[Count - 3] = _array[Count - 1];
+            _array[Count - 2] = x1;
+            _array[Count - 1] = x2;
         }
 
         public void Swap()
         {
             // (x1 x2 -- x2 x1)
-            (T, T) temp = new()
-            {
-                Item2 = _stack.Pop(),
-                Item1 = _stack.Pop(),
-            };
-
-            _stack.Push(temp.Item1);
-            _stack.Push(temp.Item2);
+            (_array[Count - 2], _array[Count - 1]) = (_array[Count - 1], _array[Count - 2]);
         }
 
         public void Swap2()
         {
             // (x1 x2 x3 x4 -- x3 x4 x1 x2)
-            (T, T, T, T) temp = new()
-            {
-                Item4 = _stack.Pop(),
-                Item3 = _stack.Pop(),
-                Item2 = _stack.Pop(),
-                Item1 = _stack.Pop(),
-            };
-
-            _stack.Push(temp.Item3);
-            _stack.Push(temp.Item4);
-            _stack.Push(temp.Item1);
-            _stack.Push(temp.Item2);
+            var x1 = _array[Count - 4];
+            var x2 = _array[Count - 3];
+            _array[Count - 4] = _array[Count - 2];
+            _array[Count - 3] = _array[Count - 1];
+            _array[Count - 2] = x1;
+            _array[Count - 1] = x2;
         }
 
         public void Nip()
         {
             // (x1 x2 -- x2)
-            (T, T) temp = new()
-            {
-                Item2 = _stack.Pop(),
-                Item1 = _stack.Pop(),
-            };
-
-            _stack.Push(temp.Item2);
+            _array[Count - 2] = _array[Count - 1];
+            Count--;
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+                _array[Count] = default;
         }
 
         public void Tuck()
         {
             // (x1 x2 -- x2 x1 x2)
-            (T, T) temp = new()
-            {
-                Item2 = _stack.Pop(),
-                Item1 = _stack.Pop(),
-            };
-
-            _stack.Push(temp.Item2);
-            _stack.Push(temp.Item1);
-            _stack.Push(temp.Item2);
+            var x1 = _array[Count - 2];
+            var x2 = _array[Count - 1];
+            (_array[Count - 2], _array[Count - 1]) = (x2, x1);
+            Push(x2);
         }
 
         public void Roll(int n)
         {
             // (xn ... x2 x1 x0 - xn-1 ... x2 x1 x0 xn)
-            var array = _stack.ToArray();
             var xni = Count - 1 - n;
-            var xn = array[xni];    
-            Array.Copy(array, xni + 1, array, xni, n);
-            array[Count - 1] = xn;
-            _stack = new Stack<T>(array);
+            var xn = _array[xni];
+            Array.Copy(_array, xni + 1, _array, xni, n);
+            _array[Count - 1] = xn;
         }
 
         public void Pick(int n)
@@ -201,12 +229,13 @@ namespace CafeLib.BsvSharp.Scripting
 
         public IEnumerator<T> GetEnumerator()
         {
-            throw new NotImplementedException();
+            for (var i = 0; i < Count; ++i)
+                yield return _array[i];
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return GetEnumerator();
         }
     }
 }
