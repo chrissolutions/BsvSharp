@@ -9,7 +9,6 @@ using CafeLib.BsvSharp.Scripting;
 
 namespace CafeLib.BsvSharp.Signatures
 {
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public interface ISignatureChecker
     {
         bool CheckSignature(VarType scriptSig, VarType vchPubKey, Script script, ScriptFlags flags);
