@@ -4,6 +4,7 @@
 #endregion
 
 using System;
+// ReSharper disable InconsistentNaming
 
 namespace CafeLib.BsvSharp.Scripting
 {
@@ -120,5 +121,22 @@ namespace CafeLib.BsvSharp.Scripting
         /// Do we accept signature using SIGHASH_FORKID
         /// </summary>
         ENABLE_SIGHASH_FORKID = (1U << 16),
+
+        /// <summary>
+        /// Is Genesis enabled - transactions that is being executed is part of block that uses Geneisis rules.
+        /// </summary>
+        SCRIPT_GENESIS = (1U << 18),
+
+        /// <summary>
+        /// UTXO being used in this script was created *after* Genesis upgrade
+        /// has been activated. This activates new rules (such as original meaning of OP_RETURN)
+        /// This is per (input!) UTXO flag
+        /// </summary>
+        SCRIPT_UTXO_AFTER_GENESIS = (1U << 19),
+
+        /// <summary>
+        /// Not actual flag. Used for marking largest flag value.
+        /// </summary>
+        SCRIPT_FLAG_LAST = (1U << 20)
     }
 }

@@ -67,7 +67,7 @@ namespace CafeLib.BsvSharp.Scripting
         public void Push(T item)
         {
             if (Count == _array.Length)
-                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+                Array.Resize(ref _array, _array.Length == 0 ? DefaultCapacity : 2 * _array.Length);
             _array[Count++] = item;
         }
 
@@ -93,7 +93,7 @@ namespace CafeLib.BsvSharp.Scripting
         {
             // (x1 x2 -- x1 x2 x1 x2)
             if (Count + 2 > _array.Length)
-                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+                Array.Resize(ref _array, _array.Length == 0 ? DefaultCapacity : 2 * _array.Length);
             _array[Count++] = _array[Count - 3];
             _array[Count++] = _array[Count - 3];
         }
@@ -107,7 +107,7 @@ namespace CafeLib.BsvSharp.Scripting
         {
             // (x1 x2 x3 -- x1 x2 x3 x1 x2 x3)
             if (Count + 3 > _array.Length)
-                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+                Array.Resize(ref _array, _array.Length == 0 ? DefaultCapacity : 2 * _array.Length);
             _array[Count++] = _array[Count - 4];
             _array[Count++] = _array[Count - 4];
             _array[Count++] = _array[Count - 4];
@@ -117,7 +117,7 @@ namespace CafeLib.BsvSharp.Scripting
         {
             // (x1 x2 -- x1 x2 x1)
             if (Count + 1 > _array.Length)
-                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+                Array.Resize(ref _array, _array.Length == 0 ? DefaultCapacity : 2 * _array.Length);
             _array[Count++] = _array[Count - 3];
         }
 
@@ -125,7 +125,7 @@ namespace CafeLib.BsvSharp.Scripting
         {
             // (x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2)
             if (Count + 2 > _array.Length)
-                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+                Array.Resize(ref _array, _array.Length == 0 ? DefaultCapacity : 2 * _array.Length);
             _array[Count++] = _array[Count - 5];
             _array[Count++] = _array[Count - 5];
         }
