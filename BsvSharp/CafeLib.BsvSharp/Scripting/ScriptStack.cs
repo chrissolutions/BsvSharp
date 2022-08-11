@@ -21,9 +21,10 @@ namespace CafeLib.BsvSharp.Scripting
             _array = new T[DefaultCapacity];
         }
 
-        public ScriptStack(int capacity)
+        public ScriptStack(ScriptStack<T> stack)
         {
-            _array = new T[capacity];
+            _array = new T[stack.Count];
+            Array.Copy(stack._array, _array, stack.Count);
         }
 
         public int Count { get; private set; }
@@ -47,20 +48,10 @@ namespace CafeLib.BsvSharp.Scripting
             }
         }
 
-        public T Peek()
+        public T Peek(int index = -1)
         {
-            return _array[Count - 1];
-        }
-
-        public bool TryPeek(out T result)
-        {
-            if (Count == 0)
-            {
-                result = default;
-                return false;
-            }
-            result = _array[Count - 1];
-            return true;
+            var position = index < 0 ? -index : index;
+            return _array[Count - position];
         }
 
         public T Pop()
@@ -71,22 +62,6 @@ namespace CafeLib.BsvSharp.Scripting
                 _array[Count] = default;     // Free memory quicker.
             }
             return item;
-        }
-
-        public bool TryPop(out T result)
-        {
-            if (Count == 0)
-            {
-                result = default;
-                return false;
-            }
-
-            result = _array[--Count];
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                _array[Count] = default;     // Free memory quicker.
-            }
-            return true;
         }
 
         public void Push(T item)
