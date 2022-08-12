@@ -59,11 +59,6 @@ namespace CafeLib.BsvSharp.Scripting
                 return SetError(out error, ScriptError.SIG_PUSHONLY);
             }
 
-            if ((flags & ScriptFlags.VERIFY_SIGPUSHONLY) != 0 && !scriptSig.IsPushOnly())
-            {
-                return SetError(out error, ScriptError.SIG_PUSHONLY);
-            }
-
             var evaluator = new ScriptEvaluator();
             return evaluator switch
             {
