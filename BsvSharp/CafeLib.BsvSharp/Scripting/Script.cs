@@ -354,6 +354,11 @@ namespace CafeLib.BsvSharp.Scripting
             return script.Length == 25 && script[0] == 0x76 && script[1] == 0xA9 && script[2] == 0x14 && script[23] == 0x88 && script[24] == 0xAC;
         }
 
+        public static bool IsPay2ScriptHash(ReadOnlyByteSpan script)
+        {
+            return script.Length == 23 && script[0] == (byte)Opcode.OP_HASH160 && script[1] == 0x14 && script[^1] == (byte)Opcode.OP_EQUAL;
+        }
+
         /// <summary>
         /// Template 3 OpRetPush4
         /// OP_0 OP_RETURN [4] ...
