@@ -354,9 +354,9 @@ namespace CafeLib.BsvSharp.Scripting
             return script.Length == 25 && script[0] == 0x76 && script[1] == 0xA9 && script[2] == 0x14 && script[23] == 0x88 && script[24] == 0xAC;
         }
 
-        public static bool IsPay2ScriptHash(ReadOnlyByteSpan script)
+        public bool IsPay2ScriptHash()
         {
-            return script.Length == 23 && script[0] == (byte)Opcode.OP_HASH160 && script[1] == 0x14 && script[^1] == (byte)Opcode.OP_EQUAL;
+            return Data.Length == 23 && Data[0] == (byte)Opcode.OP_HASH160 && Data[1] == 0x14 && Data[^1] == (byte)Opcode.OP_EQUAL;
         }
 
         /// <summary>
@@ -447,7 +447,7 @@ namespace CafeLib.BsvSharp.Scripting
             return result;
         }
 
-        public static (bool unspendable, TemplateId templateId) ParseKnownScriptPubTemplates(ReadOnlySpan<byte> scriptPubBuf0, int? height) {
+        public static (bool unspendable, TemplateId templateId) ParseKnownScriptPubTemplates(ReadOnlyByteSpan scriptPubBuf0, int? height) {
 
             // Check for OP_RETURN outputs, these are unspendable and are flagged with a -1 SpentByTxId value.
             // After Genesis, bare OP_RETURN is spendable (anything that pushes true on sig script can spend.

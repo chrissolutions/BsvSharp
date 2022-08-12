@@ -162,10 +162,12 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                     var checker = new TransactionSignatureChecker(new Transaction(), 0, Amount.Zero);
                     var ok = ScriptInterpreter.VerifyScript(tv.scriptSig, tv.scriptPubKey, tv.scriptFlags, checker, out var error);
 
-                    var correct = (ok && tv.scriptError == ScriptError.OK) || tv.scriptError == error;
+                    var correct = tv.scriptPubKey.IsPay2ScriptHash()
+                        ? ok || tv.scriptError == error
+                        : (ok && tv.scriptError == ScriptError.OK) || tv.scriptError == error;
 
                     // All test cases do not pass yet. This condition is here to make sure things don't get worse :-)
-                    if (i < 900)
+                    if (i < 949)
                     {
                         if (correct == false)
                         {
