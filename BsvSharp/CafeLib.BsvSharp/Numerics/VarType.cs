@@ -35,7 +35,7 @@ namespace CafeLib.BsvSharp.Numerics
         public bool IsEmpty => Length == 0;
         public int Length => Buffer.Length;
         public byte FirstByte => Buffer[0];
-        public byte LastByte => Buffer[Length - 1];
+        public byte LastByte => Buffer[^1];
 
         /// <summary>
         /// Buffer indexer.
