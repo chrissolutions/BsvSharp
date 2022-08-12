@@ -160,7 +160,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                     //_testOutputHelper.WriteLine($"Pub: {tv.scriptPub.ToHexString()} => {tv.scriptPub}");
 
                     var checker = new TransactionSignatureChecker(new Transaction(), 0, Amount.Zero);
-                    var ok = ScriptInterpreter.VerifyScript(tv.scriptSig, tv.scriptPub, tv.scriptFlags, checker, out var error);
+                    var ok = ScriptInterpreter.VerifyScript(tv.scriptSig, tv.scriptPubKey, tv.scriptFlags, checker, out var error);
 
                     var correct = (ok && tv.scriptError == ScriptError.OK) || tv.scriptError == error;
 
@@ -172,7 +172,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                             _testOutputHelper.WriteLine($"testcase: {i}");
                             _testOutputHelper.WriteLine($"{opcode}");
                             _testOutputHelper.WriteLine($"Sig: {tv.scriptSig.ToHexString()} => {tv.scriptSig}");
-                            _testOutputHelper.WriteLine($"Pub: {tv.scriptPub.ToHexString()} => {tv.scriptPub}");
+                            _testOutputHelper.WriteLine($"Pub: {tv.scriptPubKey.ToHexString()} => {tv.scriptPubKey}");
                         }
                         Assert.True(correct);
                     }

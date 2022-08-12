@@ -36,7 +36,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             public string error;
 
             public Script scriptSig;
-            public Script scriptPub;
+            public Script scriptPubKey;
             public ScriptFlags scriptFlags;
             public ScriptError scriptError;
             public Opcode[] opcodes;
@@ -50,12 +50,12 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                 error = args[3];
 
                 scriptSig = ScriptBuilder.ParseTestScript(sig).ToScript();
-                scriptPub = ScriptBuilder.ParseTestScript(pub).ToScript();
+                scriptPubKey = ScriptBuilder.ParseTestScript(pub).ToScript();
                 scriptFlags = ScriptInterpreter.ParseFlags(flags);
                 scriptError = ToScriptError(error);
 
                 opcodes = scriptSig.Decode().Select(o => o.Code)
-                    .Concat(scriptPub.Decode().Select(o => o.Code))
+                    .Concat(scriptPubKey.Decode().Select(o => o.Code))
                     .Distinct()
                     .OrderBy(o => o).ToArray();
 
