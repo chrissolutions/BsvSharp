@@ -65,7 +65,7 @@ namespace CafeLib.BsvSharp.Scripting
 
             if (Script.IsPay2ScriptHash(scriptPub.Data))
             {
-                return SetError(out error, ScriptError.CLEANSTACK);
+                return SetError(out error, ScriptError.VERIFY);
             }
 
             var evaluator = new ScriptEvaluator();
