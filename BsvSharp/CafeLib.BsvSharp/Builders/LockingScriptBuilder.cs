@@ -23,5 +23,10 @@ namespace CafeLib.BsvSharp.Builders
         {
             PubKeyHash = pubKeyHash;
         }
+
+        protected LockingScriptBuilder(Script script)
+            : base(script)
+        {
+        }
     }
 }
