@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
@@ -35,9 +36,14 @@ namespace CafeLib.BsvSharp.Scripting
         {
         }
 
-        public Script(string hex)
-            : this(Encoders.Hex.Decode(hex))
+        public static Script FromHex(string hex)
         {
+            return new Script(Encoders.Hex.Decode(hex));
+        }
+
+        public static Script FromString(string script)
+        {
+            return ScriptBuilder.ParseScript(script);
         }
 
         /// <summary>
@@ -132,7 +138,7 @@ namespace CafeLib.BsvSharp.Scripting
             return (s.TryReadScript(ref sr, withoutLength), s);
         }
 
-        public int FindAndDelete(VarType vchSig)
+        internal int FindAndDelete(VarType vchSig)
         {
             var nFound = 0;
             var s = new ReadOnlyByteSequence(Data);
@@ -160,26 +166,6 @@ namespace CafeLib.BsvSharp.Scripting
 
             Data = new VarType(r);
             return nFound;
-#if false
-            CScript result;
-            iterator pc = begin(), pc2 = begin();
-            opcodetype opcode;
-
-            do {
-                result.insert(result.end(), pc2, pc);
-                while (static_cast<size_t>(end() - pc) >= b.size() &&
-                       std::equal(b.begin(), b.end(), pc)) {
-                    pc = pc + b.size();
-                    ++nFound;
-                }
-                pc2 = pc;
-            } while (GetOp(pc, opcode));
-
-            if (nFound > 0) {
-                result.insert(result.end(), pc2, end());
-                *this = result;
-            }
-#endif
         }
 
         /// <summary>

@@ -126,7 +126,7 @@ namespace CafeLib.BsvSharp.Builders
         public ScriptBuilder Add(string hex)
         {
             var script = !string.IsNullOrWhiteSpace(hex)
-                ? new Script(hex)
+                ? Script.FromHex(hex)
                 : new Script(new[] {(byte) Opcode.OP_FALSE, (byte) Opcode.OP_RETURN});
             return Add(script);
         }

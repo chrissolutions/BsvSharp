@@ -83,7 +83,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             {
                 var tx = Transaction.FromHex(test.RawTx);
 
-                var script = new Script(test.RawScript);
+                var script = Script.FromHex(test.RawScript);
                 Assert.Equal(test.RawScript, script.ToHexString());
 
                 var (scriptCodeOk, scriptCode) = Script.ParseHex(test.RawScript, withoutLength: true);

@@ -74,7 +74,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             "OP_RETURN 34 0x314c74794d45366235416e4d6f70517242504c6b3446474e3855427568784b71726e 1 0x01 51 0x7b2274223a32302e36322c2268223a35392c2270223a313031322c2263223a312c227773223a362e322c227764223a3236307d 34 0x314a6d64484e4456336f6434796e614c7635696b4d6234616f763737507a66516958 10 0x31353537303838383133")]
         public void ScriptEncodingTest(string hex, string decoded)
         {
-            var s = new Script(hex);
+            var s = Script.FromHex(hex);
             var str = s.ToVerboseString();
             Assert.Equal(decoded, str);
         }

@@ -77,6 +77,10 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         [Fact]
         public void VerifyScript_Using_TransactionSignatureChecker()
         {
+            var tx = new Transaction();
+            //var coinbaseUnlockBuilder = DefaultUnlockBuilder();
+            //coinbaseUnlockBuilder.fromScript(SVScript.fromString('OP_0 OP_0'));
+
             Assert.True(true);
         }
     }
