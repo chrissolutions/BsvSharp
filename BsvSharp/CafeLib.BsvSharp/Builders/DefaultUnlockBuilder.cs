@@ -3,14 +3,14 @@ using CafeLib.BsvSharp.Scripting;
 
 namespace CafeLib.BsvSharp.Builders
 {
-    public class DefaultSignedUnlockBuilder : SignedUnlockBuilder
+    public class DefaultUnlockBuilder : SignedUnlockBuilder
     {
-        internal DefaultSignedUnlockBuilder()
+        internal DefaultUnlockBuilder()
             : this(null)
         {
         }
 
-        public DefaultSignedUnlockBuilder(PublicKey pubKey, TemplateId templateId = TemplateId.Unknown)
+        public DefaultUnlockBuilder(PublicKey pubKey, TemplateId templateId = TemplateId.Unknown)
             : base(pubKey, templateId)
         {
         }
