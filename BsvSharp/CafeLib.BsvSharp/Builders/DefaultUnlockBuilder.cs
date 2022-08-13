@@ -6,12 +6,17 @@ namespace CafeLib.BsvSharp.Builders
     public class DefaultUnlockBuilder : SignedUnlockBuilder
     {
         internal DefaultUnlockBuilder()
-            : this(null)
+            : base(Script.None)
         {
         }
 
         public DefaultUnlockBuilder(PublicKey pubKey, TemplateId templateId = TemplateId.Unknown)
             : base(pubKey, templateId)
+        {
+        }
+
+        public DefaultUnlockBuilder(Script script)
+            : base(script)
         {
         }
     }

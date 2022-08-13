@@ -19,6 +19,11 @@ namespace CafeLib.BsvSharp.Builders
             PublicKey = pubKey;
         }
 
+        protected SignedUnlockBuilder(Script script)
+            : base(script)
+        {
+        }
+
         public virtual void Sign(Script scriptSig)
         {
             Set(scriptSig);
