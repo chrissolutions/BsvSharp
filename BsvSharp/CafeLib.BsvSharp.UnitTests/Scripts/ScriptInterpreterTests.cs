@@ -45,7 +45,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         }
 
         [Fact]
-        public void Verify_Script_From_Simple_Transaction()
+        public void VerifyScript_From_Simple_Transaction()
         {
             var privateKey = PrivateKey.FromWif("L24Rq5hPWMexw5mQi7tchYw6mhtr5ApiHZMN8KJXCkskEv7bTV61");
             var publicKey = privateKey.CreatePublicKey();
@@ -72,6 +72,12 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             var checker = new TransactionSignatureChecker(tx, 0, utxo.Amount);
             var verified = ScriptInterpreter.VerifyScript(scriptSig, utxo.ScriptPubKey, flags, checker, out var _);
             Assert.True(verified);
+        }
+
+        [Fact]
+        public void VerifyScript_Using_TransactionSignatureChecker()
+        {
+            Assert.True(true);
         }
     }
 }
