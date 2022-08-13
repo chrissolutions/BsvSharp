@@ -28,8 +28,8 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         [InlineData("OP_0", "OP_IF OP_VER OP_ELSE OP_1 OP_ENDIF", true)]
         public void VerifyTrivialScriptTest(string scriptSig, string scriptPub, bool result)
         {
-            var sig = ScriptBuilder.ParseScript(scriptSig);
-            var pub = ScriptBuilder.ParseScript(scriptPub);
+            var sig = Script.FromString(scriptSig);
+            var pub = Script.FromString(scriptPub);
             var ok = ScriptInterpreter.VerifyScript(sig, pub, ScriptFlags.VERIFY_NONE, DefaultChecker, out _);
             Assert.Equal(result, ok);
         }
