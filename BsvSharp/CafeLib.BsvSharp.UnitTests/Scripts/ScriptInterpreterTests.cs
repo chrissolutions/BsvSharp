@@ -96,12 +96,12 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             var defaultUnlockBuilder = new DefaultUnlockBuilder(Script.FromString(scriptSig));
             var txSpendInput = new TxIn(UInt256.Zero, 0, Amount.Zero, new(), defaultUnlockBuilder);
             txSpend.AddInput(txSpendInput);
+            var txSpendOutput = new TxOut(UInt256.Zero, 0, Amount.Zero, null);
+            txSpend.AddOutput(txSpendOutput);
 
-            //var txSpendOutput = TransactionOutput();
-            //txSpendOutput.script = SVScript();
-            //txSpendOutput.satoshis = BigInt.from(inputAmount);
-            //spendtx.addOutput(txSpendOutput);
-
+            //var checker = new TransactionSignatureChecker(txSpend 0, utxo.Amount);
+            //var verified = ScriptInterpreter.VerifyScript(scriptSig, utxo.ScriptPubKey, flags, checker, out var _);
+            //Assert.True(verified);
 
             Assert.True(true);
         }
