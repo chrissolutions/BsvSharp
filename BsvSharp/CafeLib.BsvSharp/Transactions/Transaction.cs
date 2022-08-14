@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Linq;
 using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Encoding;
@@ -28,19 +29,42 @@ namespace CafeLib.BsvSharp.Transactions
         private long _feePerKb;
 
         public string TxId => Encoders.HexReverse.Encode(TxHash);
-        public UInt256 TxHash { get; private set; }
+
+        public UInt256 TxHash => Hashes.Hash256(Serialize());
+
         public int Version { get; private set; } = 1;
+
         public uint LockTime { get; private set; }
+
         public Address ChangeAddress { get; private set; }
 
-        public TxInList Inputs { get; } //this transaction's inputs
+        /// <summary>
+        /// Transaction inputs.
+        /// </summary>
+        public TxInList Inputs { get; }
+
+        /// <summary>
+        /// Transaction outputs.
+        /// </summary>
         public TxOutList Outputs { get; } //this transaction's outputs
 
-        //if we have a Transaction with one input, and a prevTransactionId of zero, it's a coinbase.
+        /// <summary>
+        /// Determine whether the transaction is a coinbase transaction.
+        /// </summary>
+        /// <returns>
+        /// true if the transaction has a single input having a prevTransactionId of zero; false otherwise.
+        /// </returns>
         public bool IsCoinbase => Inputs.Count == 1 && Inputs[0].TxHash == UInt256.Zero;
 
+        /// <summary>
+        /// Transaction option.
+        /// </summary>
         public TransactionOption Option { get; private set; }
 
+        /// <summary>
+        /// Transaction default constructor.
+        /// </summary>
+        /// <param name="networkType">network type</param>
         public Transaction(NetworkType? networkType = null)
         {
             var network = RootService.GetNetwork(networkType);
@@ -524,11 +548,11 @@ namespace CafeLib.BsvSharp.Transactions
 
             var end = r.Data.Position;
 
-            // Compute the transaction hash.
-            var txBytes = r.Data.Sequence.Slice(start, end).ToArray();
-            var hash1 = Hashes.ComputeSha256(txBytes);
-            var hash2 = Hashes.ComputeSha256(hash1);
-            TxHash = new UInt256(hash2);
+            //// Compute the transaction hash.
+            //var txBytes = r.Data.Sequence.Slice(start, end).ToArray();
+            //var hash1 = Hashes.ComputeSha256(txBytes);
+            //var hash2 = Hashes.ComputeSha256(hash1);
+            //TxHash = new UInt256(hash2);
             return true;
         }
 
@@ -594,6 +618,25 @@ namespace CafeLib.BsvSharp.Transactions
         }
 
         #region Helpers
+
+        private UInt256 GetHash() => Hashes.Hash256(Serialize());
+
+
+        //The hash is the double-sha256 of the serialized transaction (reversed)
+        //private UInt256 GetHash() => 
+        //List<int> _getHash()
+        //{
+        //    List<int> hash = sha256Twice(HEX.decode(serialize(performChecks: false)));
+        //    return hash;
+        //}
+
+        ////The id is the hex encoded form of the hash
+        //String _getId()
+        //{
+        //    var id = HEX.encode(_getHash().reversed.toList());
+        //    _txId = id;
+        //    return _txId;
+        //}
 
         /// <summary>
         ///  Check for missing signature.
