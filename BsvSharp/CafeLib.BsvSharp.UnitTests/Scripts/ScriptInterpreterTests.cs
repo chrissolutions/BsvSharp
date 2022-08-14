@@ -91,14 +91,16 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             var txCredOut = new TxOut(UInt256.Zero, 0, txOutLockBuilder);
             txCredit.AddOutput(txCredOut);
 
-            //setup spent Transaction
+            //setup spend Transaction
             var txSpend = new Transaction();
             var defaultUnlockBuilder = new DefaultUnlockBuilder(Script.FromString(scriptSig));
-            //var txSpendInput = TransactionInput(UInt256.Zero, 0, 
-            //    prevTxId, 0, scriptPubkey, BigInt.zero, TransactionInput.UINT_MAX,
-            //    scriptBuilder: defaultUnlockBuilder);
+            var txSpendInput = new TxIn(UInt256.Zero, 0, Amount.Zero, new(), defaultUnlockBuilder);
+            txSpend.AddInput(txSpendInput);
 
-
+            //var txSpendOutput = TransactionOutput();
+            //txSpendOutput.script = SVScript();
+            //txSpendOutput.satoshis = BigInt.from(inputAmount);
+            //spendtx.addOutput(txSpendOutput);
 
 
             Assert.True(true);
