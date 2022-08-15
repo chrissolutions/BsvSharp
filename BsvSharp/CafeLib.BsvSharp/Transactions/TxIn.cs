@@ -68,7 +68,7 @@ namespace CafeLib.BsvSharp.Transactions
 
         public OutPoint PrevOut { get; private set; }
 
-        public Script UtxoScript { get; private set; }
+        public Script UtxoScript { get; internal set; }
 
         public uint SequenceNumber { get; set; }
 
@@ -148,8 +148,23 @@ namespace CafeLib.BsvSharp.Transactions
             return writer;
         }
 
-       internal bool Sign(Transaction tx, PrivateKey privateKey, SignatureHashEnum sighashType = SignatureHashEnum.All | SignatureHashEnum.ForkId)
-       {
+        public bool TryReadTxIn(ref ByteSequenceReader r)
+        {
+            var prevOut = new OutPoint();
+            if (!prevOut.TryReadOutPoint(ref r)) return false;
+            PrevOut = prevOut;
+
+            var script = new Script();
+            if (!script.TryReadScript(ref r)) return false;
+            _scriptBuilder = script;
+
+            if (!r.TryReadLittleEndian(out uint sequenceNumber)) return false;
+            SequenceNumber = sequenceNumber;
+            return true;
+        }
+
+        internal bool Sign(Transaction tx, PrivateKey privateKey, SignatureHashEnum sighashType = SignatureHashEnum.All | SignatureHashEnum.ForkId)
+        {
             var sigHash = new SignatureHashType(sighashType);
             var signatureHash = TransactionSignatureChecker.ComputeSignatureHash(UtxoScript, tx, tx.Inputs.IndexOf(this), sigHash, Amount);
             var signature = privateKey.SignTxSignature(signatureHash, sigHash);
@@ -164,21 +179,6 @@ namespace CafeLib.BsvSharp.Transactions
 
             IsFullySigned = false;
             return false;
-        }
-
-        public bool TryReadTxIn(ref ByteSequenceReader r)
-        {
-            var prevOut = new OutPoint();
-            if (!prevOut.TryReadOutPoint(ref r)) return false;
-            PrevOut = prevOut;
-
-            var script = new Script();
-            if (!script.TryReadScript(ref r)) return false;
-            _scriptBuilder = script;
-
-            if (!r.TryReadLittleEndian(out uint sequenceNumber)) return false;
-            SequenceNumber = sequenceNumber;
-            return true;
         }
     }
 }
