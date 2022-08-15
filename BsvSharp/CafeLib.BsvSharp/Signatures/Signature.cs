@@ -32,7 +32,7 @@ namespace CafeLib.BsvSharp.Signatures
         public Signature(byte[] signature, SignatureHashType hashType = default)
         {
             _data = signature;
-            _hashType = hashType != default ? hashType.RawSigHashType : (uint)SignatureHashEnum.Unsupported;
+            _hashType = hashType.RawSigHashType;
         }
 
         /// <summary>

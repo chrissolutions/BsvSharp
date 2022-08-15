@@ -13,7 +13,7 @@ namespace CafeLib.BsvSharp.Signatures
 
         public SignatureHashType()
         {
-            RawSigHashType = (uint)SignatureHashEnum.All;
+            RawSigHashType = (uint)SignatureHashEnum.Unsupported;
         }
 
         public SignatureHashType(SignatureHashEnum sigHash)
