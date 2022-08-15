@@ -168,17 +168,17 @@ namespace CafeLib.BsvSharp.Signatures
             }
 
             // Remove all outputs if signature hash type is none.
-            if (sighashType.GetBaseType() == BaseSignatureHashEnum.None)
+            if (sighashType.IsBaseNone)
             {
                 txCopy.Outputs.Clear();
             }
-            else if (sighashType.GetBaseType() == BaseSignatureHashEnum.Single)
+            else if (sighashType.IsBaseSingle)
             {
                 // The SIGHASH_SINGLE bug.
                 // https://bitcointalk.org/index.php?topic=260595.0
                 if (inputNumber >= txCopy.Outputs.Length)
                 {
-                    return UInt256.One;
+                    return SighashSingleBug;
                 }
 
                 var txCopyOut = txCopy.Outputs[inputNumber];
@@ -195,13 +195,12 @@ namespace CafeLib.BsvSharp.Signatures
                 txCopy.Outputs[inputNumber] = txOut;
             }
 
-            //if (sighashType.HasAnyoneCanPay)
-            //{
-            //    var keepTxn = this._txn!.inputs[inputNumber];
-            //    txnCopy.inputs.removeWhere((elem) => true); //delete all inputs
-            //    txnCopy.inputs.add(keepTxn);
-            //}
-
+            if (sighashType.HasAnyoneCanPay)
+            {
+                //    var keepTxn = this._txn!.inputs[inputNumber];
+                //    txnCopy.inputs.removeWhere((elem) => true); //delete all inputs
+                //    txnCopy.inputs.add(keepTxn);
+            }
 
             return UInt256.Zero;
         }
