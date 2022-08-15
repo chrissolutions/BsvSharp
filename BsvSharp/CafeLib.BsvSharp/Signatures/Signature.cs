@@ -7,7 +7,6 @@ using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Signatures
 {
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public struct Signature : IEquatable<Signature>
     {
         private byte[] _data;
@@ -186,6 +185,16 @@ namespace CafeLib.BsvSharp.Signatures
         public override string ToString()
         {
             return Encoders.Base64.Encode(_data);
+        }
+
+        public static bool operator ==(Signature left, Signature right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Signature left, Signature right)
+        {
+            return !(left == right);
         }
     }
 }
