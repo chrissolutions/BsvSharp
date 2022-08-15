@@ -29,10 +29,10 @@ namespace CafeLib.BsvSharp.Signatures
         /// </summary>
         /// <param name="signature">signature as byte array</param>
         /// <param name="hashType"></param>
-        public Signature(byte[] signature, SignatureHashType hashType = null)
+        public Signature(byte[] signature, SignatureHashType hashType = default)
         {
             _data = signature;
-            _hashType = hashType?.RawSigHashType ?? (uint)SignatureHashEnum.Unsupported;
+            _hashType = hashType != default ? hashType.RawSigHashType : (uint)SignatureHashEnum.Unsupported;
         }
 
         /// <summary>

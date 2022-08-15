@@ -123,6 +123,11 @@ namespace CafeLib.BsvSharp.Scripting
         ENABLE_SIGHASH_FORKID = (1U << 16),
 
         /// <summary>
+        /// Do we accept activate replay protection using a different fork id.
+        /// </summary>
+        ENABLE_REPLAY_PROTECTION = (1 << 17),
+
+        /// <summary>
         /// Is Genesis enabled - transactions that is being executed is part of block that uses Geneisis rules.
         /// </summary>
         SCRIPT_GENESIS = (1U << 18),

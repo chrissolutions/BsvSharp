@@ -1,12 +1,13 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using CafeLib.BsvSharp.Keys;
+using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CafeLib.BsvSharp.Signatures
 {
     /// <summary>
     /// Signature hash type.
     /// </summary>
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
-    public class SignatureHashType
+    public struct SignatureHashType : IEquatable<SignatureHashType>
     {
         private SignatureHashEnum SignatureHash => (SignatureHashEnum)RawSigHashType;
 
@@ -68,8 +69,34 @@ namespace CafeLib.BsvSharp.Signatures
 
         public uint GetForkValue() { return RawSigHashType >> 8; }
 
-        public override string ToString() {
-            return string.Empty;
+        public override string ToString()
+        {
+            return $"{RawSigHashType}";
+        }
+
+        public bool Equals(SignatureHashType other)
+        {
+            return RawSigHashType == other.RawSigHashType;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is SignatureHashType type && Equals(type);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(SignatureHash, IsDefined, HasForkId, HasAnyoneCanPay, RawSigHashType, IsBaseNone, IsBaseSingle);
+        }
+
+        public static bool operator ==(SignatureHashType left, SignatureHashType right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(SignatureHashType left, SignatureHashType right)
+        {
+            return !(left == right);
         }
     }
 }

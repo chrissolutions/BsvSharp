@@ -34,7 +34,7 @@ namespace CafeLib.BsvSharp.Extensions
         /// <param name="hash">hash to sign</param>
         /// <param name="hashType"></param>
         /// <returns>signature bytes</returns>
-        public static Signature SignTxSignature(this PrivateKey privateKey, UInt256 hash, SignatureHashType hashType = null)
+        public static Signature SignTxSignature(this PrivateKey privateKey, UInt256 hash, SignatureHashType hashType = default)
         {
             var signer = new DeterministicECDSA();
             signer.SetPrivateKey(privateKey.ECKey.PrivateKey);
