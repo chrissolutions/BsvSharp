@@ -4,6 +4,7 @@ using CafeLib.BsvSharp.Transactions;
 using CafeLib.BsvSharp.Units;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
+using CafeLib.Cryptography;
 using CafeLib.Cryptography.BouncyCastle.Util.Encoders;
 using System;
 using System.Collections.Generic;
@@ -15,92 +16,95 @@ namespace CafeLib.BsvSharp.Signatures
 {
     internal class SignatureHash
     {
+        public static UInt256 SighashSingleBug = UInt256.One;
+
         public static UInt256 ComputeSignatureHash(Transaction tx,
-            int inputIndex,
+            int inputNumber,
             SignatureHashType sigHashType,
-            Script subScript,
+            Script subscript,
             Amount amount,
             ScriptFlags flags = ScriptFlags.ENABLE_SIGHASH_FORKID
         )
         {
-            // Obtain a copy of the transaction.
-            var txCopy = Transaction.FromBytes(tx.Serialize());
+            var preImage = ComputePreImage(tx, inputNumber, sigHashType, subscript, amount, flags);
+            return (preImage == SighashSingleBug) ? SighashSingleBug : Hashes.Sha256(preImage.Span);
 
-            // Check for replay protection.
-            if ((flags & ScriptFlags.ENABLE_REPLAY_PROTECTION) != 0)
-            {
-                // Legacy chain's value for fork id must be of the form 0xffxxxx.
-                // By xoring with 0xdead, we ensure that the value will be different
-                // from the original one, even if it already starts with 0xff.
-                var forkValue = sigHashType.RawSigHashType >> 8;
-                var newForkValue = 0xff0000 | (forkValue ^ 0xdead);
-                sigHashType = new SignatureHashType((newForkValue << 8) | (sigHashType.RawSigHashType & 0xff));
-            }
 
-            // Check for fork id.
-            if (sigHashType.HasForkId && (flags & ScriptFlags.ENABLE_SIGHASH_FORKID) != 0)
-            {
-                return GetSigHashFromForkId(tx, inputIndex, sigHashType, subScript, amount, flags);
-            }
+            //// Obtain a copy of the transaction.
+            //var txCopy = Transaction.FromBytes(tx.Serialize());
 
-            // For no ForkId sighash, separators need to be removed.
-            var script = RemoveCodeSeparators(subScript);
+            //// Check for replay protection.
+            //if ((flags & ScriptFlags.ENABLE_REPLAY_PROTECTION) != 0)
+            //{
+            //    // Legacy chain's value for fork id must be of the form 0xffxxxx.
+            //    // By xoring with 0xdead, we ensure that the value will be different
+            //    // from the original one, even if it already starts with 0xff.
+            //    var forkValue = sigHashType.RawSigHashType >> 8;
+            //    var newForkValue = 0xff0000 | (forkValue ^ 0xdead);
+            //    sigHashType = new SignatureHashType((newForkValue << 8) | (sigHashType.RawSigHashType & 0xff));
+            //}
 
-            // Erase the txn input scripts.
-            txCopy.Inputs.ForEach(x => x.UtxoScript = new Script());
+            //// Check for fork id.
+            //if (sigHashType.HasForkId && (flags & ScriptFlags.ENABLE_SIGHASH_FORKID) != 0)
+            //{
+            //    return GetSigHashFromForkId(tx, inputNumber, sigHashType, subScript, amount, flags);
+            //}
 
-            // Setup the input we wish to sign
-            var tmpInput = txCopy.Inputs[inputIndex];
-            txCopy.Inputs[inputIndex] = new TxIn(tmpInput.TxHash, tmpInput.Index, tmpInput.Amount, subScript, tmpInput.SequenceNumber);
+            //// For no ForkId sighash, separators need to be removed.
+            //var script = RemoveCodeSeparators(subScript);
 
-            // Check signature hash type.
-            if (sigHashType.GetBaseType() == BaseSignatureHashEnum.None || sigHashType.GetBaseType() == BaseSignatureHashEnum.Single)
-            {
-                // clear all sequenceNumbers
-                txCopy.Inputs.ForEach((x, i) =>
-                {
-                    if (i != inputIndex)
-                        x.SequenceNumber = 0;
-                });
-            }
+            //// Erase the txn input scripts.
+            //txCopy.Inputs.ForEach(x => x.UtxoScript = new Script());
 
-            // Remove all outputs if signature hash type is none.
-            if (sigHashType.GetBaseType() == BaseSignatureHashEnum.None)
-            {
-                txCopy.Outputs.Clear();
-            }
-            else if (sigHashType.GetBaseType() == BaseSignatureHashEnum.Single)
-            {
-                // The SIGHASH_SINGLE bug.
-                // https://bitcointalk.org/index.php?topic=260595.0
-                if (inputIndex >= txCopy.Outputs.Length)
-                {
-                    return UInt256.One;
-                }
+            //// Setup the input we wish to sign
+            //var tmpInput = txCopy.Inputs[inputNumber];
+            //txCopy.Inputs[inputNumber] = new TxIn(tmpInput.TxHash, tmpInput.Index, tmpInput.Amount, subScript, tmpInput.SequenceNumber);
 
-                //    var txout = new TransactionOutput();
-                //    txout.script = txnCopy.outputs[inputNumber].script; //FIXME: What happens if there are not outputs !?
-                //    txout.satoshis = txnCopy.outputs[inputNumber].satoshis;
-                //    txout.outputIndex = txnCopy.outputs[inputNumber].outputIndex;
-                //    txout.transactionId = txnCopy.outputs[inputNumber].transactionId;
+            //// Check signature hash type.
+            //if (sigHashType.GetBaseType() == BaseSignatureHashEnum.None || sigHashType.GetBaseType() == BaseSignatureHashEnum.Single)
+            //{
+            //    // clear all sequenceNumbers
+            //    txCopy.Inputs.ForEach((x, i) =>
+            //    {
+            //        if (i != inputNumber)
+            //            x.SequenceNumber = 0;
+            //    });
+            //}
 
-                //    //resize outputs to current size of inputIndex + 1
+            //// Remove all outputs if signature hash type is none.
+            //if (sigHashType.GetBaseType() == BaseSignatureHashEnum.None)
+            //{
+            //    txCopy.Outputs.Clear();
+            //}
+            //else if (sigHashType.GetBaseType() == BaseSignatureHashEnum.Single)
+            //{
+            //    // The SIGHASH_SINGLE bug.
+            //    // https://bitcointalk.org/index.php?topic=260595.0
+            //    if (inputNumber >= txCopy.Outputs.Length)
+            //    {
+            //        return UInt256.One;
+            //    }
 
-                //    var outputCount = inputNumber + 1;
-                //    txnCopy.outputs.removeWhere((elem) => true); //remove all the outputs
-                //                                                 //create new outputs up to inputnumer + 1
-                //    for (var ndx = 0; ndx < inputNumber + 1; ndx++)
-                //    {
-                //        var tx = new TransactionOutput();
-                //        tx.script = SVScript.fromString(""); //FIXME: What happens if there are no outputs !?
-                //        tx.satoshis = BigInt.parse(_BITS_64_ON, radix: 16);
-                //        txnCopy.outputs.add(tx);
-                //    }
+            //    var txCopyOut = txCopy.Outputs[inputNumber];
+            //    var txout = new TxOut(txCopyOut.TxHash, txCopyOut.Index, txCopyOut.Script, txCopyOut.IsChangeOutput);
 
-                //    //add back the saved output in the corresponding position of inputIndex
-                //    txnCopy.outputs[inputNumber] = txout; //FIXME : ??? Is this the correct way ?
+            //    // Resize outputs to current size of inputIndex + 1
 
-            }
+            //    //    var outputCount = inputNumber + 1;
+            //    //    txnCopy.outputs.removeWhere((elem) => true); //remove all the outputs
+            //    //                                                 //create new outputs up to inputnumer + 1
+            //    //    for (var ndx = 0; ndx < inputNumber + 1; ndx++)
+            //    //    {
+            //    //        var tx = new TransactionOutput();
+            //    //        tx.script = SVScript.fromString(""); //FIXME: What happens if there are no outputs !?
+            //    //        tx.satoshis = BigInt.parse(_BITS_64_ON, radix: 16);
+            //    //        txnCopy.outputs.add(tx);
+            //    //    }
+
+            //    //    //add back the saved output in the corresponding position of inputIndex
+            //    //    txnCopy.outputs[inputNumber] = txout; //FIXME : ??? Is this the correct way ?
+
+            //}
 
 
             //if (this._sighashType & SighashType.SIGHASH_ANYONECANPAY > 0)
@@ -111,15 +115,100 @@ namespace CafeLib.BsvSharp.Signatures
             //}
 
             //return this.toString();
-
-            return UInt256.Zero;
         }
 
         #region Helpers
 
-        private static UInt256 GetSigHashFromForkId(Transaction tx,
+        private static UInt256 ComputePreImage(Transaction tx,
+            int inputNumber,
+            SignatureHashType sighashType,
+            Script subscript,
+            Amount amount,
+            ScriptFlags flags)
+        {
+            // Obtain a copy of the transaction.
+            var txCopy = Transaction.FromBytes(tx.Serialize());
+
+            // Check for replay protection.
+            if ((flags & ScriptFlags.ENABLE_REPLAY_PROTECTION) != 0)
+            {
+                // Legacy chain's value for fork id must be of the form 0xffxxxx.
+                // By xoring with 0xdead, we ensure that the value will be different
+                // from the original one, even if it already starts with 0xff.
+                var forkValue = sighashType.RawSigHashType >> 8;
+                var newForkValue = 0xff0000 | (forkValue ^ 0xdead);
+                sighashType = new SignatureHashType((newForkValue << 8) | (sighashType.RawSigHashType & 0xff));
+            }
+
+            // Check for fork id.
+            if (sighashType.HasForkId && (flags & ScriptFlags.ENABLE_SIGHASH_FORKID) != 0)
+            {
+                return ComputeSighashFromForkId(tx, inputNumber, sighashType, subscript, amount, flags);
+            }
+
+            // For no ForkId sighash, separators need to be removed.
+            var scriptCopy = RemoveCodeSeparators(subscript);
+
+            // Erase the txn input scripts.
+            txCopy.Inputs.ForEach(x => x.UtxoScript = new Script());
+
+            // Setup the input we wish to sign
+            var tmpInput = txCopy.Inputs[inputNumber];
+            txCopy.Inputs[inputNumber] = new TxIn(tmpInput.TxHash, tmpInput.Index, tmpInput.Amount, subscript, tmpInput.SequenceNumber);
+
+            // Check signature hash type.
+            if (sighashType.GetBaseType() == BaseSignatureHashEnum.None || sighashType.GetBaseType() == BaseSignatureHashEnum.Single)
+            {
+                // Clear sequence numbers
+                txCopy.Inputs.ForEach((x, i) =>
+                {
+                    if (i != inputNumber)
+                        x.SequenceNumber = 0;
+                });
+            }
+
+            // Remove all outputs if signature hash type is none.
+            if (sighashType.GetBaseType() == BaseSignatureHashEnum.None)
+            {
+                txCopy.Outputs.Clear();
+            }
+            else if (sighashType.GetBaseType() == BaseSignatureHashEnum.Single)
+            {
+                // The SIGHASH_SINGLE bug.
+                // https://bitcointalk.org/index.php?topic=260595.0
+                if (inputNumber >= txCopy.Outputs.Length)
+                {
+                    return UInt256.One;
+                }
+
+                var txCopyOut = txCopy.Outputs[inputNumber];
+                var txOut = new TxOut(txCopyOut.TxHash, txCopyOut.Index, txCopyOut.Script, txCopyOut.IsChangeOutput);
+
+                // Resize outputs to current size of inputIndex + 1
+                txCopy.Outputs.Clear();
+                for (var ii = 0; ii < inputNumber + 1; ++ii)
+                {
+                    txCopy.Outputs.Add(new TxOut(UInt256.Zero, 0, new Amount(-1L), new()));
+                }
+
+                // Add back the saved output in the corresponding position of inputIndex
+                txCopy.Outputs[inputNumber] = txOut;
+            }
+
+            //if (sighashType.HasAnyoneCanPay)
+            //{
+            //    var keepTxn = this._txn!.inputs[inputNumber];
+            //    txnCopy.inputs.removeWhere((elem) => true); //delete all inputs
+            //    txnCopy.inputs.add(keepTxn);
+            //}
+
+
+            return UInt256.Zero;
+        }
+
+        private static UInt256 ComputeSighashFromForkId(Transaction tx,
             int inputIndex,
-            SignatureHashType sigHashType,
+            SignatureHashType sighashType,
             Script scriptCode,
             Amount amount,
             ScriptFlags flags = ScriptFlags.ENABLE_SIGHASH_FORKID
