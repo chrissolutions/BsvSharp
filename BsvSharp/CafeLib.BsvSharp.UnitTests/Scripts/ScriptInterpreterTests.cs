@@ -97,7 +97,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             //setup spend Transaction
             var txSpend = new Transaction();
             var defaultUnlockBuilder = new DefaultUnlockBuilder(scriptSig);
-            var txSpendInput = new TxIn(UInt256.Zero, 0, Amount.Zero, new(), defaultUnlockBuilder);
+            var txSpendInput = new TxIn(txCredit.TxHash, 0, Amount.Zero, new(), defaultUnlockBuilder);
             txSpend.AddInput(txSpendInput);
             var txSpendOutput = new TxOut(UInt256.Zero, 0, Amount.Zero, null);
             txSpend.AddOutput(txSpendOutput);
