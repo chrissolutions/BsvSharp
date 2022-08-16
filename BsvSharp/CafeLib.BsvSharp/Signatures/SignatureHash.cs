@@ -6,13 +6,6 @@ using CafeLib.BsvSharp.Transactions;
 using CafeLib.BsvSharp.Units;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
-using CafeLib.Cryptography;
-using CafeLib.Cryptography.BouncyCastle.Util.Encoders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CafeLib.BsvSharp.Signatures
 {
@@ -49,14 +42,14 @@ namespace CafeLib.BsvSharp.Signatures
             }
 
             // For no ForkId sighash, separators need to be removed.
-            //var scriptCopy = RemoveCodeSeparators(subscript);
+            var scriptCopy = RemoveCodeSeparators(subscript);
 
-            // Erase the txn input scripts.
+            // Erase the transaction inputs script.
             txCopy.Inputs.ForEach(x => x.UtxoScript = new Script());
 
             // Setup the input we wish to sign
             var tmpInput = txCopy.Inputs[inputNumber];
-            txCopy.Inputs[inputNumber] = new TxIn(tmpInput.TxHash, tmpInput.Index, tmpInput.Amount, subscript, tmpInput.SequenceNumber);
+            txCopy.Inputs[inputNumber] = new TxIn(tmpInput.TxHash, tmpInput.Index, tmpInput.Amount, scriptCopy, tmpInput.SequenceNumber);
 
             // Check signature hash type.
             if (sigHashType.IsBaseNone || sigHashType.IsBaseSingle)
@@ -192,10 +185,10 @@ namespace CafeLib.BsvSharp.Signatures
             return hw.GetHashFinal();
         }
 
-        private static UInt256 GetSequenceHash(Transaction txTo)
+        private static UInt256 GetSequenceHash(Transaction tx)
         {
             using var hw = new HashWriter();
-            foreach (var i in txTo.Inputs)
+            foreach (var i in tx.Inputs)
             {
                 hw.Write(i.SequenceNumber);
             }
@@ -209,9 +202,9 @@ namespace CafeLib.BsvSharp.Signatures
 
             if (inputNumber == null)
             {
-                foreach (var tout in tx.Outputs)
+                foreach (var txout in tx.Outputs)
                 {
-                    hw.Write(tout);
+                    hw.Write(txout);
                 }
             }
             else
@@ -220,6 +213,18 @@ namespace CafeLib.BsvSharp.Signatures
             }
 
             return hw.GetHashFinal();
+        }
+
+        /// <summary>
+        /// Strips all OP_CODESEPARATOR instructions from the script.
+        /// </summary>
+        /// <param name="script">script</param>
+        /// <returns>return script with code separators removed</returns>
+        private static Script RemoveCodeSeparators(Script script)
+        {
+            var sb = new ScriptBuilder(script);
+            var ops = sb.Ops.RemoveAll(o => o.Opcode != Opcode.OP_CODESEPARATOR);
+            return sb;
         }
 
         #endregion
