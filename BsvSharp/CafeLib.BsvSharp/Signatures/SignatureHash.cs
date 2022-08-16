@@ -49,7 +49,7 @@ namespace CafeLib.BsvSharp.Signatures
             }
 
             // For no ForkId sighash, separators need to be removed.
-            var scriptCopy = RemoveCodeSeparators(subscript);
+            //var scriptCopy = RemoveCodeSeparators(subscript);
 
             // Erase the txn input scripts.
             txCopy.Inputs.ForEach(x => x.UtxoScript = new Script());
@@ -171,23 +171,14 @@ namespace CafeLib.BsvSharp.Signatures
             // Outputs (none/one/all, depending on flags)
             writer.Write(hashOutputs);
 
-            //// Locktime
-            //writer.writeUint32(txn.nLockTime, Endian.little);
+            // Locktime
+            writer.Write(tx.LockTime);
 
-            //// sighashType
-            //writer.writeUint32(sighashType >> 0, Endian.little);
+            // sighashType
+            writer.Write(sigHashType.RawSigHashType);
 
-            //var buf = writer.toBytes();
-            //var ret = sha256Twice(buf.toList());
-            //return ret.reversed.toList();
-
-
-            return UInt256.Zero;
-        }
-
-        private static Script RemoveCodeSeparators(Script script)
-        {
-            return new Script();
+            // return hash.
+            return writer.GetHashFinal();
         }
 
         private static UInt256 GetPrevOutHash(Transaction tx)
