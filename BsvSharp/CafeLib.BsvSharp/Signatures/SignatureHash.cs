@@ -38,7 +38,7 @@ namespace CafeLib.BsvSharp.Signatures
             // Check for fork id.
             if (sigHashType.HasForkId && (flags & ScriptFlags.ENABLE_SIGHASH_FORKID) != 0)
             {
-                return ComputeSighashFromForkId(tx, inputNumber, sigHashType, subscript, amount, flags);
+                return ComputeSighashFromForkId(tx, inputNumber, sigHashType, subscript, amount);
             }
 
             // For no ForkId sighash, separators need to be removed.
@@ -113,8 +113,7 @@ namespace CafeLib.BsvSharp.Signatures
             int inputNumber,
             SignatureHashType sigHashType,
             Script subscript,
-            Amount amount,
-            ScriptFlags flags = ScriptFlags.ENABLE_SIGHASH_FORKID)
+            Amount amount)
         {
             var hashPrevouts = new UInt256();
             var hashSequence = new UInt256();
