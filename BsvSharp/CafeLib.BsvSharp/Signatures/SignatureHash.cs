@@ -49,7 +49,7 @@ namespace CafeLib.BsvSharp.Signatures
 
             // Setup the input we wish to sign
             var tmpInput = txCopy.Inputs[inputNumber];
-            txCopy.Inputs[inputNumber] = new TxIn(tmpInput.TxHash, tmpInput.Index, tmpInput.Amount, scriptCopy, tmpInput.SequenceNumber);
+            txCopy.Inputs[inputNumber] = new TxIn(tmpInput.TxHash, tmpInput.Index, tmpInput.Amount, scriptCopy);
 
             // Check signature hash type.
             if (sigHashType.IsBaseNone || sigHashType.IsBaseSingle)
@@ -222,7 +222,7 @@ namespace CafeLib.BsvSharp.Signatures
         private static Script RemoveCodeSeparators(Script script)
         {
             var sb = new ScriptBuilder(script);
-            var ops = sb.Ops.RemoveAll(o => o.Opcode != Opcode.OP_CODESEPARATOR);
+            var ops = sb.Ops.RemoveAll(o => o.Opcode == Opcode.OP_CODESEPARATOR);
             return sb;
         }
 

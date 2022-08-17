@@ -139,6 +139,19 @@ namespace CafeLib.BsvSharp.Transactions
             return nSequenceMasked <= txToSequenceMasked;
         }
 
+        public static UInt256 ComputeSignatureHash2
+        (
+            Script scriptCode,
+            Transaction txTo,
+            int nIn,
+            SignatureHashType sigHashType,
+            Amount amount,
+            ScriptFlags flags = ScriptFlags.ENABLE_SIGHASH_FORKID
+        )
+        {
+            return SignatureHash.ComputeSignatureHash(txTo, nIn, sigHashType, scriptCode, amount, flags);
+        }
+
         /// <summary>
         /// Compute signature hash.
         /// </summary>
@@ -170,10 +183,7 @@ namespace CafeLib.BsvSharp.Transactions
                     hashPrevOuts = GetPrevOutHash(txTo);
                 }
 
-                var baseNotSingleOrNone =
-                    (sigHashType.GetBaseType() != BaseSignatureHashEnum.Single) &&
-                    (sigHashType.GetBaseType() != BaseSignatureHashEnum.None);
-
+                var baseNotSingleOrNone = !sigHashType.IsBaseSingle && !sigHashType.IsBaseNone;
                 if (!sigHashType.HasAnyoneCanPay && baseNotSingleOrNone)
                 {
                     hashSequence = GetSequenceHash(txTo);

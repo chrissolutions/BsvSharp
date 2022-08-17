@@ -120,7 +120,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="utxoScript"></param>
         /// <param name="scriptBuilder"></param>
         public TxIn(UInt256 prevTxId, int outIndex, Amount amount, Script utxoScript, ScriptBuilder scriptBuilder)
-            : this(prevTxId, outIndex, amount, utxoScript, SequenceFinal, scriptBuilder)
+            : this(new OutPoint(prevTxId, outIndex), amount, utxoScript, SequenceFinal, scriptBuilder)
         {
         }
 
@@ -130,11 +130,32 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="prevTxId"></param>
         /// <param name="outIndex"></param>
         /// <param name="amount"></param>
-        /// <param name="utxoScript"></param>
+        public TxIn(UInt256 prevTxId, int outIndex, Amount amount)
+            : this(new OutPoint(prevTxId, outIndex), amount, Script.None, SequenceFinal, null)
+        {
+        }
+
+        /// <summary>
+        /// Transaction input constructor.
+        /// </summary>
+        /// <param name="prevTxId"></param>
+        /// <param name="outIndex"></param>
+        /// <param name="amount"></param>
         /// <param name="sequenceNumber"></param>
+        public TxIn(UInt256 prevTxId, int outIndex, Amount amount, uint sequenceNumber)
+            : this(new OutPoint(prevTxId, outIndex), amount, Script.None, sequenceNumber, null)
+        {
+        }
+
+        /// <summary>
+        /// Transaction input constructor.
+        /// </summary>
+        /// <param name="prevTxId"></param>
+        /// <param name="outIndex"></param>
+        /// <param name="amount"></param>
         /// <param name="scriptBuilder"></param>
-        public TxIn(UInt256 prevTxId, int outIndex, Amount amount, Script utxoScript = new(), uint sequenceNumber = SequenceFinal, ScriptBuilder scriptBuilder = null)
-            : this(new OutPoint(prevTxId, outIndex), amount, utxoScript, sequenceNumber, scriptBuilder)
+        public TxIn(UInt256 prevTxId, int outIndex, Amount amount, ScriptBuilder scriptBuilder = null)
+            : this(new OutPoint(prevTxId, outIndex), amount, Script.None, SequenceFinal, scriptBuilder)
         {
         }
 
