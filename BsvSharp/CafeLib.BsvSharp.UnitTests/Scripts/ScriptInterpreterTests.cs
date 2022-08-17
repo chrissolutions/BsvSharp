@@ -103,7 +103,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             txSpend.AddOutput(txSpendOutput);
 
             var checker = new TransactionSignatureChecker(txSpend, 0, Amount.Zero);
-            var verified = ScriptInterpreter.VerifyScript(scriptSig, scriptPubKey, 0, checker, out var error);
+            var verified = ScriptInterpreter.VerifyScript(scriptSig, scriptPubKey, ScriptFlags.VERIFY_NONE, checker, out var error);
             Assert.True(verified);
         }
     }
