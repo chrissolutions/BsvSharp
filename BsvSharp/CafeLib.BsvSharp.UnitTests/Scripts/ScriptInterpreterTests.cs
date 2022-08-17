@@ -88,7 +88,6 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             var txCreditInput = new TxIn(UInt256.Zero, -1, Amount.Zero, new(), coinbaseUnlockBuilder);
             txCredit.AddInput(txCreditInput);
 
-
             //add output to credit Transaction
             var txOutLockBuilder = new DefaultLockBuilder(scriptPubKey);
             var txCredOut = new TxOut(UInt256.Zero, 0, txOutLockBuilder);
