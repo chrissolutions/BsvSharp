@@ -50,7 +50,7 @@ namespace CafeLib.BsvSharp.Signatures
 
                 _ when inputNumber >= tx.Inputs.Count => SighashSingleBug,
 
-                _ when sigHashType.GetBaseType() == BaseSignatureHashEnum.Single && inputNumber >= tx.Outputs.Count => SighashSingleBug,
+                _ when sigHashType.IsBaseSingle && inputNumber >= tx.Outputs.Count => SighashSingleBug,
 
                 _ => ComputeSighashForNonForkId(tx, inputNumber, sigHashType, subscript)
             };
