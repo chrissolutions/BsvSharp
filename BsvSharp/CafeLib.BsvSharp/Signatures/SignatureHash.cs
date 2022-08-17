@@ -16,19 +16,19 @@ namespace CafeLib.BsvSharp.Signatures
         /// <summary>
         /// Compute signature hash.
         /// </summary>
-        /// <param name="scriptCode"></param>
-        /// <param name="tx"></param>
-        /// <param name="inputNumber"></param>
-        /// <param name="sigHashType"></param>
-        /// <param name="amount"></param>
-        /// <param name="flags"></param>
-        /// <returns></returns>
+        /// <param name="tx">transaction</param>
+        /// <param name="inputNumber">input number</param>
+        /// <param name="sigHashType">sighash type</param>
+        /// <param name="subscript">scriptSig</param>
+        /// <param name="amount">spend amount</param>
+        /// <param name="flags">script flags</param>
+        /// <returns>signature hash</returns>
         public static UInt256 ComputeSignatureHash
         (
             Transaction tx,
             int inputNumber,
             SignatureHashType sigHashType,
-            Script scriptCode,
+            Script subscript,
             Amount amount,
             ScriptFlags flags = ScriptFlags.ENABLE_SIGHASH_FORKID
         )
@@ -46,7 +46,7 @@ namespace CafeLib.BsvSharp.Signatures
             return inputNumber switch
             {
                 _ when sigHashType.HasForkId && (flags & ScriptFlags.ENABLE_SIGHASH_FORKID) != 0 =>
-                    ComputeSighashFromForkId(tx, inputNumber, sigHashType, scriptCode, amount),
+                    ComputeSighashForForkId(tx, inputNumber, sigHashType, subscript, amount),
 
                 _ when inputNumber >= tx.Inputs.Count => SighashSingleBug,
 
@@ -54,13 +54,22 @@ namespace CafeLib.BsvSharp.Signatures
 
                 _ when sigHashType.GetBaseType() == BaseSignatureHashEnum.Single && inputNumber >= tx.Outputs.Count => SighashSingleBug,
 
-                _ => ComputeSighashForNonForkId(tx, inputNumber, sigHashType, scriptCode)
+                _ => ComputeSighashForNonForkId(tx, inputNumber, sigHashType, subscript)
             };
         }
 
         #region Helpers
 
-        private static UInt256 ComputeSighashFromForkId(
+        /// <summary>
+        /// Compute the sighash for fork id.
+        /// </summary>
+        /// <param name="tx">transaction</param>
+        /// <param name="inputNumber">input number</param>
+        /// <param name="sigHashType">sighash type</param>
+        /// <param name="subscript">scriptSig</param>
+        /// <param name="amount">spend amount</param>
+        /// <returns>signature hash</returns>
+        private static UInt256 ComputeSighashForForkId(
             Transaction tx,
             int inputNumber,
             SignatureHashType sigHashType,
@@ -125,16 +134,25 @@ namespace CafeLib.BsvSharp.Signatures
             return writer.GetHashFinal();
         }
 
+        /// <summary>
+        /// Compute the sighash for non-fork id.
+        /// </summary>
+        /// <param name="tx">transaction</param>
+        /// <param name="inputNumber">input number</param>
+        /// <param name="sigHashType">sighash type</param>
+        /// <param name="subscript">scriptSig</param>
+        /// <returns>signature hash</returns>
+        /// <returns></returns>
         private static UInt256 ComputeSighashForNonForkId(
             Transaction tx,
             int inputNumber,
             SignatureHashType sigHashType,
-            Script scriptCode)
+            Script subscript)
         {
             using var writer = new HashWriter();
 
             // Original digest algorithm...
-            var scriptCopy = RemoveCodeSeparators(scriptCode);
+            var scriptCopy = RemoveCodeSeparators(subscript);
 
             // Start with the version...
             writer.Write(tx.Version);
@@ -188,6 +206,11 @@ namespace CafeLib.BsvSharp.Signatures
             return writer.GetHashFinal();
         }
 
+        /// <summary>
+        /// Get hash of inputs prevouts
+        /// </summary>
+        /// <param name="tx">transaction</param>
+        /// <returns>hash of inputs prevouts</returns>
         private static UInt256 GetPrevOutHash(Transaction tx)
         {
             using var hw = new HashWriter();
@@ -199,6 +222,11 @@ namespace CafeLib.BsvSharp.Signatures
             return hw.GetHashFinal();
         }
 
+        /// <summary>
+        /// Get hash of sequence numbers
+        /// </summary>
+        /// <param name="tx">transaction</param>
+        /// <returns>hash of inputs sequence numbers</returns>
         private static UInt256 GetSequenceHash(Transaction tx)
         {
             using var hw = new HashWriter();
@@ -210,6 +238,12 @@ namespace CafeLib.BsvSharp.Signatures
             return hw.GetHashFinal();
         }
 
+        /// <summary>
+        /// Get hash of outputs
+        /// </summary>
+        /// <param name="tx">transaction</param>
+        /// <param name="inputNumber">optional input number</param>
+        /// <returns>hash of outputs</returns>
         private static UInt256 GetOutputsHash(Transaction tx, int? inputNumber = null)
         {
             using var hw = new HashWriter();
