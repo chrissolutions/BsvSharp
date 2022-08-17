@@ -168,39 +168,6 @@ namespace CafeLib.BsvSharp.Transactions
             return publicKey.Verify(sigHash, signature);
         }
 
-        private static UInt256 GetPrevOutHash(Transaction txTo)
-        {
-            using var hw = new HashWriter();
-            foreach (var i in txTo.Inputs)
-            {
-                hw.Write(i.PrevOut);
-            }
-
-            return hw.GetHashFinal();
-        }
-
-        private static UInt256 GetSequenceHash(Transaction txTo)
-        {
-            using var hw = new HashWriter();
-            foreach (var i in txTo.Inputs)
-            {
-                hw.Write(i.SequenceNumber);
-            }
-
-            return hw.GetHashFinal();
-        }
-
-        private static UInt256 GetOutputsHash(Transaction txTo)
-        {
-            using var hw = new HashWriter();
-            foreach (var o in txTo.Outputs)
-            {
-                hw.Write(o);
-            }
-
-            return hw.GetHashFinal();
-        }
-
         #endregion
     }
 }
