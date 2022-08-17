@@ -52,71 +52,71 @@ namespace CafeLib.BsvSharp.Signatures
             if (nIn >= txTo.Inputs.Count)
             {
                 //  nIn out of range
-                return UInt256.One;
+                return SighashSingleBug;
             }
 
             // Check for invalid use of SIGHASH_SINGLE
             if (sigHashType.GetBaseType() == BaseSignatureHashEnum.Single && nIn >= txTo.Outputs.Count)
             {
                 //  nOut out of range
-                return UInt256.One;
+                return SighashSingleBug;
             }
 
+            // Original digest algorithm...
+            var hasAnyoneCanPay = sigHashType.HasAnyoneCanPay;
+
+            // ReSharper disable once UnusedVariable
+            var numberOfInputs = hasAnyoneCanPay ? 1 : txTo.Inputs.Count;
+
+            using var writer = new HashWriter();
+            // Start with the version...
+            writer.Write(txTo.Version);
+            // Add Input(s)...
+            if (hasAnyoneCanPay)
             {
-                // Original digest algorithm...
-                var hasAnyoneCanPay = sigHashType.HasAnyoneCanPay;
-                // ReSharper disable once UnusedVariable
-                var numberOfInputs = hasAnyoneCanPay ? 1 : txTo.Inputs.Count;
-                using var writer = new HashWriter();
-                // Start with the version...
-                writer.Write(txTo.Version);
-                // Add Input(s)...
-                if (hasAnyoneCanPay)
-                {
-                    // AnyoneCanPay serializes only the input being signed.
-                    var i = txTo.Inputs[nIn];
-                    writer
-                        .Write((byte)1)
-                        .Write(i.PrevOut)
-                        .Write(scriptCode, true)
-                        .Write(i.SequenceNumber);
-                }
-                else
-                {
-                    // Non-AnyoneCanPay case. Process all inputs but handle input being signed in its own way.
-                    var isSingleOrNone = sigHashType.IsBaseSingle || sigHashType.IsBaseNone;
-                    writer.Write(txTo.Inputs.Count.AsVarIntBytes());
-                    for (var nInput = 0; nInput < txTo.Inputs.Count; nInput++)
-                    {
-                        var i = txTo.Inputs[nInput];
-                        writer.Write(i.PrevOut);
-                        if (nInput != nIn)
-                            writer.Write(Script.None);
-                        else
-                            writer.Write(scriptCode, true);
-                        if (nInput != nIn && isSingleOrNone)
-                            writer.Write(0);
-                        else
-                            writer.Write(i.SequenceNumber);
-                    }
-                }
-                // Add Output(s)...
-                var nOutputs = sigHashType.IsBaseNone ? 0 : sigHashType.IsBaseSingle ? nIn + 1 : txTo.Outputs.Count;
-                writer.Write(nOutputs.AsVarIntBytes());
-                for (var nOutput = 0; nOutput < nOutputs; nOutput++)
-                {
-                    if (sigHashType.IsBaseSingle && nOutput != nIn)
-                        writer.Write(TxOut.Empty);
-                    else
-                        writer.Write(txTo.Outputs[nOutput]);
-                }
-                // Finish up...
+                // AnyoneCanPay serializes only the input being signed.
+                var i = txTo.Inputs[nIn];
                 writer
-                    .Write(txTo.LockTime)
-                    .Write(sigHashType.RawSigHashType)
-                    ;
-                return writer.GetHashFinal();
+                    .Write((byte)1)
+                    .Write(i.PrevOut)
+                    .Write(scriptCode, true)
+                    .Write(i.SequenceNumber);
             }
+            else
+            {
+                // Non-AnyoneCanPay case. Process all inputs but handle input being signed in its own way.
+                var isSingleOrNone = sigHashType.IsBaseSingle || sigHashType.IsBaseNone;
+                writer.Write(txTo.Inputs.Count.AsVarIntBytes());
+                for (var nInput = 0; nInput < txTo.Inputs.Count; nInput++)
+                {
+                    var i = txTo.Inputs[nInput];
+                    writer.Write(i.PrevOut);
+                    if (nInput != nIn)
+                        writer.Write(Script.None);
+                    else
+                        writer.Write(scriptCode, true);
+                    if (nInput != nIn && isSingleOrNone)
+                        writer.Write(0);
+                    else
+                        writer.Write(i.SequenceNumber);
+                }
+            }
+            // Add Output(s)...
+            var nOutputs = sigHashType.IsBaseNone ? 0 : sigHashType.IsBaseSingle ? nIn + 1 : txTo.Outputs.Count;
+            writer.Write(nOutputs.AsVarIntBytes());
+            for (var nOutput = 0; nOutput < nOutputs; nOutput++)
+            {
+                if (sigHashType.IsBaseSingle && nOutput != nIn)
+                    writer.Write(TxOut.Empty);
+                else
+                    writer.Write(txTo.Outputs[nOutput]);
+            }
+            // Finish up...
+            writer
+                .Write(txTo.LockTime)
+                .Write(sigHashType.RawSigHashType)
+                ;
+            return writer.GetHashFinal();
         }
 
         public static UInt256 ComputeSignatureHash2(
