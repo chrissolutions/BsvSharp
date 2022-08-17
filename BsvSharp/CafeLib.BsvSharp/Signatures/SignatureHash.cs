@@ -34,6 +34,16 @@ namespace CafeLib.BsvSharp.Signatures
             ScriptFlags flags = ScriptFlags.ENABLE_SIGHASH_FORKID
         )
         {
+            if ((flags & ScriptFlags.ENABLE_REPLAY_PROTECTION) != 0)
+            {
+                // Legacy chain's value for fork id must be of the form 0xffxxxx.
+                // By xoring with 0xdead, we ensure that the value will be different
+                // from the original one, even if it already starts with 0xff.
+                var forkValue = sigHashType.RawSigHashType >> 8;
+                var newForkValue = 0xff0000 | (forkValue ^ 0xdead);
+                sigHashType = new SignatureHashType((newForkValue << 8) | (sigHashType.RawSigHashType & 0xff));
+            }
+
             if (sigHashType.HasForkId && (flags & ScriptFlags.ENABLE_SIGHASH_FORKID) != 0)
             {
                 return ComputeSighashFromForkId(txTo, nIn, sigHashType, scriptCode, amount);
