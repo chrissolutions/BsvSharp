@@ -9,7 +9,7 @@ namespace CafeLib.BsvSharp.Extensions
     public static class WriterExtensions
     {
         public static IDataWriter Write(this IDataWriter w, Script script, bool withoutCodeSeparators = false)
-            => script.WriteTo(w, new {withoutCodeSeparators});
+            => script.WriteTo(w);
 
         public static IDataWriter Write(this IDataWriter w, OutPoint op) => op.WriteTo(w);
         public static IDataWriter Write(this IDataWriter w, TxIn txIn) => txIn.WriteTo(w);

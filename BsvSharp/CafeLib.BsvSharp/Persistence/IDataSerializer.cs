@@ -15,13 +15,5 @@ namespace CafeLib.BsvSharp.Persistence
         /// <param name="writer">data writer</param>
         /// <returns>data writer</returns>
         IDataWriter WriteTo(IDataWriter writer);
-        
-        /// <summary>
-        /// Serialize object to data writer
-        /// </summary>
-        /// <param name="writer">data writer</param>
-        /// <param name="parameters">parameters</param>
-        /// <returns>data writer</returns>
-        IDataWriter WriteTo(IDataWriter writer, object parameters);
     }
 }

@@ -13,21 +13,20 @@ namespace CafeLib.BsvSharp.Signatures
     {
         public static UInt256 SighashSingleBug = UInt256.One;
 
-
         /// <summary>
         /// Compute signature hash.
         /// </summary>
         /// <param name="scriptCode"></param>
-        /// <param name="txTo"></param>
-        /// <param name="nIn"></param>
+        /// <param name="tx"></param>
+        /// <param name="inputNumber"></param>
         /// <param name="sigHashType"></param>
         /// <param name="amount"></param>
         /// <param name="flags"></param>
         /// <returns></returns>
         public static UInt256 ComputeSignatureHash
         (
-            Transaction txTo,
-            int nIn,
+            Transaction tx,
+            int inputNumber,
             SignatureHashType sigHashType,
             Script scriptCode,
             Amount amount,
@@ -44,172 +43,19 @@ namespace CafeLib.BsvSharp.Signatures
                 sigHashType = new SignatureHashType((newForkValue << 8) | (sigHashType.RawSigHashType & 0xff));
             }
 
-            if (sigHashType.HasForkId && (flags & ScriptFlags.ENABLE_SIGHASH_FORKID) != 0)
+            return inputNumber switch
             {
-                return ComputeSighashFromForkId(txTo, nIn, sigHashType, scriptCode, amount);
-            }
+                _ when sigHashType.HasForkId && (flags & ScriptFlags.ENABLE_SIGHASH_FORKID) != 0 =>
+                    ComputeSighashFromForkId(tx, inputNumber, sigHashType, scriptCode, amount),
 
-            if (nIn >= txTo.Inputs.Count)
-            {
-                //  nIn out of range
-                return SighashSingleBug;
-            }
+                _ when inputNumber >= tx.Inputs.Count => SighashSingleBug,
 
-            // Check for invalid use of SIGHASH_SINGLE
-            if (sigHashType.GetBaseType() == BaseSignatureHashEnum.Single && nIn >= txTo.Outputs.Count)
-            {
-                //  nOut out of range
-                return SighashSingleBug;
-            }
+                _ when inputNumber >= tx.Inputs.Count => SighashSingleBug,
 
-            // Original digest algorithm...
-            var hasAnyoneCanPay = sigHashType.HasAnyoneCanPay;
+                _ when sigHashType.GetBaseType() == BaseSignatureHashEnum.Single && inputNumber >= tx.Outputs.Count => SighashSingleBug,
 
-            // ReSharper disable once UnusedVariable
-            var numberOfInputs = hasAnyoneCanPay ? 1 : txTo.Inputs.Count;
-
-            using var writer = new HashWriter();
-            // Start with the version...
-            writer.Write(txTo.Version);
-            // Add Input(s)...
-            if (hasAnyoneCanPay)
-            {
-                // AnyoneCanPay serializes only the input being signed.
-                var i = txTo.Inputs[nIn];
-                writer
-                    .Write((byte)1)
-                    .Write(i.PrevOut)
-                    .Write(scriptCode, true)
-                    .Write(i.SequenceNumber);
-            }
-            else
-            {
-                // Non-AnyoneCanPay case. Process all inputs but handle input being signed in its own way.
-                var isSingleOrNone = sigHashType.IsBaseSingle || sigHashType.IsBaseNone;
-                writer.Write(txTo.Inputs.Count.AsVarIntBytes());
-                for (var nInput = 0; nInput < txTo.Inputs.Count; nInput++)
-                {
-                    var i = txTo.Inputs[nInput];
-                    writer.Write(i.PrevOut);
-                    if (nInput != nIn)
-                        writer.Write(Script.None);
-                    else
-                        writer.Write(scriptCode, true);
-                    if (nInput != nIn && isSingleOrNone)
-                        writer.Write(0);
-                    else
-                        writer.Write(i.SequenceNumber);
-                }
-            }
-            // Add Output(s)...
-            var nOutputs = sigHashType.IsBaseNone ? 0 : sigHashType.IsBaseSingle ? nIn + 1 : txTo.Outputs.Count;
-            writer.Write(nOutputs.AsVarIntBytes());
-            for (var nOutput = 0; nOutput < nOutputs; nOutput++)
-            {
-                if (sigHashType.IsBaseSingle && nOutput != nIn)
-                    writer.Write(TxOut.Empty);
-                else
-                    writer.Write(txTo.Outputs[nOutput]);
-            }
-            // Finish up...
-            writer
-                .Write(txTo.LockTime)
-                .Write(sigHashType.RawSigHashType)
-                ;
-            return writer.GetHashFinal();
-        }
-
-        public static UInt256 ComputeSignatureHash2(
-            Transaction tx,
-            int inputNumber,
-            SignatureHashType sigHashType,
-            Script subscript,
-            Amount amount,
-            ScriptFlags flags = ScriptFlags.ENABLE_SIGHASH_FORKID)
-        {
-            // Obtain a copy of the transaction.
-            var txCopy = Transaction.FromBytes(tx.Serialize());
-
-            // Check for replay protection.
-            if ((flags & ScriptFlags.ENABLE_REPLAY_PROTECTION) != 0)
-            {
-                // Legacy chain's value for fork id must be of the form 0xffxxxx.
-                // By xoring with 0xdead, we ensure that the value will be different
-                // from the original one, even if it already starts with 0xff.
-                var forkValue = sigHashType.RawSigHashType >> 8;
-                var newForkValue = 0xff0000 | (forkValue ^ 0xdead);
-                sigHashType = new SignatureHashType((newForkValue << 8) | (sigHashType.RawSigHashType & 0xff));
-            }
-
-            // Check for fork id.
-            if (sigHashType.HasForkId && (flags & ScriptFlags.ENABLE_SIGHASH_FORKID) != 0)
-            {
-                return ComputeSighashFromForkId(tx, inputNumber, sigHashType, subscript, amount);
-            }
-
-            // For no ForkId sighash, separators need to be removed.
-            var scriptCopy = RemoveCodeSeparators(subscript);
-
-            // Erase the transaction inputs script.
-            txCopy.Inputs.ForEach(x => x.UtxoScript = new Script());
-
-            // Setup the input we wish to sign
-            var tmpInput = txCopy.Inputs[inputNumber];
-            txCopy.Inputs[inputNumber] = new TxIn(tmpInput.TxHash, tmpInput.Index, tmpInput.Amount, scriptCopy);
-
-            // Check signature hash type.
-            if (sigHashType.IsBaseNone || sigHashType.IsBaseSingle)
-            {
-                // Clear sequence numbers
-                txCopy.Inputs.ForEach((x, i) =>
-                {
-                    if (i != inputNumber)
-                        x.SequenceNumber = 0;
-                });
-            }
-
-            if (sigHashType.IsBaseNone)
-            {
-                // Remove all outputs if signature hash type is none.
-                txCopy.Outputs.Clear();
-            }
-            else if (sigHashType.IsBaseSingle)
-            {
-                // The SIGHASH_SINGLE bug.
-                // https://bitcointalk.org/index.php?topic=260595.0
-                if (inputNumber >= txCopy.Outputs.Length)
-                {
-                    return SighashSingleBug;
-                }
-
-                var txCopyOut = txCopy.Outputs[inputNumber];
-                var txOut = new TxOut(txCopyOut.TxHash, txCopyOut.Index, txCopyOut.Script, txCopyOut.IsChangeOutput);
-
-                // Resize outputs to current size of inputIndex + 1
-                txCopy.Outputs.Clear();
-                for (var ii = 0; ii < inputNumber + 1; ++ii)
-                {
-                    txCopy.Outputs.Add(new TxOut(UInt256.Zero, 0, new Amount(-1L), new()));
-                }
-
-                // Add back the saved output in the corresponding position of inputIndex
-                txCopy.Outputs[inputNumber] = txOut;
-            }
-
-            if (sigHashType.HasAnyoneCanPay)
-            {
-                var txKeep = tx.Inputs[inputNumber];
-                txCopy.Inputs.Clear();
-                txCopy.Inputs.Add(txKeep);
-            }
-
-            // Finish up...
-            using var writer = new HashWriter();
-            writer
-                .Write(txCopy.Serialize())
-                .Write(sigHashType.RawSigHashType)
-                ;
-            return writer.GetHashFinal();
+                _ => ComputeSighashForNonForkId(tx, inputNumber, sigHashType, scriptCode)
+            };
         }
 
         #region Helpers
@@ -276,6 +122,69 @@ namespace CafeLib.BsvSharp.Signatures
             writer.Write(sigHashType.RawSigHashType);
 
             // return hash.
+            return writer.GetHashFinal();
+        }
+
+        private static UInt256 ComputeSighashForNonForkId(
+            Transaction tx,
+            int inputNumber,
+            SignatureHashType sigHashType,
+            Script scriptCode)
+        {
+            using var writer = new HashWriter();
+
+            // Original digest algorithm...
+            var scriptCopy = RemoveCodeSeparators(scriptCode);
+
+            // Start with the version...
+            writer.Write(tx.Version);
+
+            // Add Input(s)...
+            if (sigHashType.HasAnyoneCanPay)
+            {
+                // AnyoneCanPay serializes only the input being signed.
+                var i = tx.Inputs[inputNumber];
+                writer
+                    .Write((byte)1)
+                    .Write(i.PrevOut)
+                    .Write(scriptCopy)
+                    .Write(i.SequenceNumber);
+            }
+            else
+            {
+                // Non-AnyoneCanPay case. Process all inputs but handle input being signed in its own way.
+                writer.Write(tx.Inputs.Count.AsVarIntBytes());
+                for (var nInput = 0; nInput < tx.Inputs.Count; nInput++)
+                {
+                    var i = tx.Inputs[nInput];
+                    writer.Write(i.PrevOut);
+                    if (nInput != inputNumber)
+                        writer.Write(Script.None);
+                    else
+                        writer.Write(scriptCopy);
+                    if (nInput != inputNumber && (sigHashType.IsBaseSingle || sigHashType.IsBaseNone))
+                        writer.Write(0);
+                    else
+                        writer.Write(i.SequenceNumber);
+                }
+            }
+
+            // Add Output(s)...
+            var nOutputs = sigHashType.IsBaseNone ? 0 : sigHashType.IsBaseSingle ? inputNumber + 1 : tx.Outputs.Count;
+            writer.Write(nOutputs.AsVarIntBytes());
+            for (var nOutput = 0; nOutput < nOutputs; nOutput++)
+            {
+                if (sigHashType.IsBaseSingle && nOutput != inputNumber)
+                    writer.Write(TxOut.Empty);
+                else
+                    writer.Write(tx.Outputs[nOutput]);
+            }
+
+            // Finish up...
+            writer
+                .Write(tx.LockTime)
+                .Write(sigHashType.RawSigHashType)
+                ;
             return writer.GetHashFinal();
         }
 
