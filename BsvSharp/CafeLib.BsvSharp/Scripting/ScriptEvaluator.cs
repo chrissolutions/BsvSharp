@@ -713,8 +713,7 @@ namespace CafeLib.BsvSharp.Scripting
                                     // Remove signature for pre-fork scripts
                                     CleanupScriptCode(subScript, vchSig, flags);
 
-                                    bool fSuccess = checker.CheckSignature(vchSig, vchPubKey, subScript, flags);
-
+                                    bool fSuccess = VerifySignature(checker, vchSig, vchPubKey, subScript, flags);
                                     if (!fSuccess && (flags & ScriptFlags.VERIFY_NULLFAIL) != 0 && vchSig.Length > 0)
                                     {
                                         return SetError(out error, ScriptError.SIG_NULLFAIL);
@@ -931,6 +930,20 @@ namespace CafeLib.BsvSharp.Scripting
             }
 
             return true;
+        }
+
+        private static bool VerifySignature(ISignatureChecker checker, VarType vchSig, VarType vchPubKey, Script subScript, ScriptFlags flags)
+        {
+            bool fSuccess = false;
+            try
+            {
+                fSuccess = checker.CheckSignature(vchSig, vchPubKey, subScript, flags);
+            }
+            catch
+            {
+            }
+
+            return fSuccess;
         }
 
         private static bool IsLowDerSignature(VarType vchSig, ref ScriptError error)

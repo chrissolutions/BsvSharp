@@ -185,7 +185,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                         : (ok && tv.scriptError == ScriptError.OK) || tv.scriptError == error;
 
                     // All test cases do not pass yet. This condition is here to make sure things don't get worse :-)
-                    if (i < 957)
+                    if (i < 1010)
                     {
                         if (correct == false)
                         {
