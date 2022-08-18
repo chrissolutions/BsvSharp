@@ -3,10 +3,8 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
-using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Numerics;
-using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Signatures;
 using CafeLib.BsvSharp.Units;
@@ -14,7 +12,7 @@ using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Transactions
 {
-    public class TransactionSignatureChecker : ISignatureChecker
+    public struct TransactionSignatureChecker : ISignatureChecker
     {
         private readonly Transaction _tx;
         private readonly int _txInIndex;

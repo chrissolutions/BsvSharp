@@ -16,6 +16,8 @@ using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
 using CafeLib.Cryptography.BouncyCastle.Math;
 using CafeLib.Cryptography.BouncyCastle.Math.EC;
+using CafeLib.Cryptography.BouncyCastle.Crypto.Signers;
+using CafeLib.Cryptography.BouncyCastle.Asn1;
 // ReSharper disable NonReadonlyMemberInGetHashCode
 // ReSharper disable InconsistentNaming
 
@@ -382,7 +384,11 @@ namespace CafeLib.BsvSharp.Keys
         /// <returns></returns>
         private bool VerifyTxSig(UInt256 hash, VarType sig)
         {
-            return ECKey.Verify(hash, ECDSASignature.FromDER(sig));
+            var sigBytes = sig[0..(sig.Length-1)];
+            var signature = ECDSASignature.FromDER(sigBytes);
+            var rBytes = signature.R.ToByteArray();
+            var sBytes = signature.S.ToByteArray();
+            return ECKey.Verify(hash, ECDSASignature.FromDER(sigBytes));
         }
 
         #endregion

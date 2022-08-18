@@ -79,6 +79,10 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             "71 0x304402200a5c6163f07b8d3b013c4d1d6dba25e780b39658d79ba37af7057a3b7f15ffa102201fd9b4eaa9943f734928b99a83592c2e7bf342ea2680f6a2bb705167966b742001",
             "65 0x0479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8 OP_CHECKSIG"
         )]
+        [InlineData(
+            "71 0x30440220d7a0417c3f6d1a15094d1cf2a3378ca0503eb8a57630953a9e2987e21ddd0a6502207a6266d686c99090920249991d3d42065b6d43eb70187b219c0db82e4f94d1a201",
+            "33 0x038282263212c609d9ea2a6e3e172de238d8c39cabd5ac1ca10646e23fd5f51508 OP_CHECKSIG"
+        )]
         public void VerifyScript_Using_TransactionSignatureChecker(string scriptSigText, string scriptPubKeyText)
         {
             var scriptSig = Script.FromString(scriptSigText);

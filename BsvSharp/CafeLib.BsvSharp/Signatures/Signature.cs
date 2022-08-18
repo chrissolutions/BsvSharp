@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
