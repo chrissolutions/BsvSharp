@@ -388,7 +388,9 @@ namespace CafeLib.BsvSharp.Keys
             var signature = ECDSASignature.FromDER(sigBytes);
             var rBytes = signature.R.ToByteArray();
             var sBytes = signature.S.ToByteArray();
-            return ECKey.Verify(hash, ECDSASignature.FromDER(sigBytes));
+            var r = new BigInteger(1, rBytes);
+            var s = new BigInteger(1, sBytes);
+            return ECKey.Verify(hash, new ECDSASignature(r, s));
         }
 
         #endregion
