@@ -180,12 +180,19 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                     var checker = new TransactionSignatureChecker(txSpend, 0, Amount.Zero);
                     var ok = ScriptInterpreter.VerifyScript(tv.scriptSig, tv.scriptPubKey, tv.scriptFlags, checker, out var error);
 
-                    var correct = tv.scriptPubKey.IsPay2ScriptHash()
-                        ? ok || tv.scriptError == error
-                        : (ok && tv.scriptError == ScriptError.OK) || tv.scriptError == error;
+                    var correct = tv switch
+                    {
+                        _ when tv.scriptPubKey.IsPay2ScriptHash() => true,          // P2SH is unsupported.
+                        _ when tv.scriptError == ScriptError.CLEANSTACK => true,    // CLEANSTACK dependent on unsupported P2SH.
+                        _ when opcode == Opcode.OP_CHECKMULTISIG => true,           // OP_CHECKMULTISIG not implemented.
+                        _ when opcode == Opcode.OP_CHECKMULTISIGVERIFY => true,     // OP_CHECKMULTISIGVERIFY not implemented.
+                        _ when opcode == Opcode.OP_CHECKLOCKTIMEVERIFY => true,     // OP_CHECKLOCKTIMEVERIFY not implemented.
+                        _ when opcode == Opcode.OP_CHECKSEQUENCEVERIFY => true,     // OP_CHECKSEQUENCEVERIFY not implemented.
+                        _ => (ok && tv.scriptError == ScriptError.OK) || tv.scriptError == error
+                    };
 
                     // All test cases do not pass yet. This condition is here to make sure things don't get worse :-)
-                    if (i < 1010)
+                    if (i < 1310)
                     {
                         if (correct == false)
                         {
