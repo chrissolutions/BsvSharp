@@ -1,9 +1,4 @@
-﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
-// Distributed under the Open BSV software license, see the accompanying file LICENSE.
-#endregion
-
-using System;
+﻿using System;
 using System.Linq;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
@@ -16,10 +11,6 @@ using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
 using CafeLib.Cryptography.BouncyCastle.Math;
 using CafeLib.Cryptography.BouncyCastle.Math.EC;
-using CafeLib.Cryptography.BouncyCastle.Crypto.Signers;
-using CafeLib.Cryptography.BouncyCastle.Asn1;
-// ReSharper disable NonReadonlyMemberInGetHashCode
-// ReSharper disable InconsistentNaming
 
 namespace CafeLib.BsvSharp.Keys
 {
@@ -386,10 +377,8 @@ namespace CafeLib.BsvSharp.Keys
         {
             var sigBytes = sig[0..(sig.Length-1)];
             var signature = ECDSASignature.FromDER(sigBytes);
-            var rBytes = signature.R.ToByteArray();
-            var sBytes = signature.S.ToByteArray();
-            var r = new BigInteger(1, rBytes);
-            var s = new BigInteger(1, sBytes);
+            var r = new BigInteger(1, signature.R.ToByteArray());
+            var s = new BigInteger(1, signature.S.ToByteArray());
             return ECKey.Verify(hash, new ECDSASignature(r, s));
         }
 
