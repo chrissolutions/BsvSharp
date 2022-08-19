@@ -21,18 +21,18 @@ namespace CafeLib.BsvSharp.Builders
         /// false if this operation still needs to be changed
         /// false is typically used for data placeholders
         /// </summary>
-        public bool IsFinal;
+        public bool IsFinal { get; init; }
 
         /// <summary>
         /// If IsRaw is true, ignore Op.Code and just add Op.Data bytes to script.
         /// </summary>
-        public bool IsRaw;
+        public bool IsRaw { get; init; }
 
         /// <summary>
         /// KzOp is the standard script opcode plus data bytes struct.
         /// If IsRaw is true, ignore Op.Code and just add Op.Data bytes to script.
         /// </summary>
-        public Operand Operand;
+        public Operand Operand { get; init; }
 
         /// <summary>
         /// Operand opcode.
