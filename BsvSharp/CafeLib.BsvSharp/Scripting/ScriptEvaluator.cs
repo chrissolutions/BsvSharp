@@ -832,7 +832,7 @@ namespace CafeLib.BsvSharp.Scripting
         }
 
         private static SignatureHashType GetHashType(VarType vchSig)
-            => new SignatureHashType(vchSig.Length == 0 ? SignatureHashEnum.Unsupported : (SignatureHashEnum)vchSig.LastByte);
+            => new(vchSig.Length == 0 ? SignatureHashEnum.Unsupported : (SignatureHashEnum)vchSig.LastByte);
 
 
         private static void CleanupScriptCode(Script scriptCode, VarType vchSig, ScriptFlags flags)
