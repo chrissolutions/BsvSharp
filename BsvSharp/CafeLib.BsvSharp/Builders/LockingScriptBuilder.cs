@@ -7,7 +7,7 @@ namespace CafeLib.BsvSharp.Builders
     public class LockingScriptBuilder : ScriptBuilder
     {
         public UInt160 PubKeyHash { get; }
-        
+
         public LockingScriptBuilder(Address address, TemplateId templateId = TemplateId.Unknown)
             : this(address.PubKeyHash, templateId)
         {
@@ -19,7 +19,7 @@ namespace CafeLib.BsvSharp.Builders
         }
 
         protected LockingScriptBuilder(UInt160 pubKeyHash, TemplateId templateId)
-            :base(true, templateId)
+            : base(true, templateId)
         {
             PubKeyHash = pubKeyHash;
         }
