@@ -180,6 +180,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                     var checker = new TransactionSignatureChecker(txSpend, 0, Amount.Zero);
                     var ok = ScriptInterpreter.VerifyScript(tv.scriptSig, tv.scriptPubKey, tv.scriptFlags, checker, out var error);
 
+                    // BsvSharp does not support P2SH and the corresponding technical debt of the BTC Core developers.
                     var correct = tv switch
                     {
                         _ when tv.scriptPubKey.IsPay2ScriptHash() => true,          // P2SH is unsupported.
@@ -191,18 +192,14 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                         _ => (ok && tv.scriptError == ScriptError.OK) || tv.scriptError == error
                     };
 
-                    // All test cases do not pass yet. This condition is here to make sure things don't get worse :-)
-                    if (i < 1310)
+                    if (correct == false)
                     {
-                        if (correct == false)
-                        {
-                            _testOutputHelper.WriteLine($"testcase: {i}");
-                            _testOutputHelper.WriteLine($"{opcode}");
-                            _testOutputHelper.WriteLine($"Sig: {tv.scriptSig.ToHexString()} => {tv.scriptSig}");
-                            _testOutputHelper.WriteLine($"Pub: {tv.scriptPubKey.ToHexString()} => {tv.scriptPubKey}");
-                        }
-                        Assert.True(correct);
+                        _testOutputHelper.WriteLine($"testcase: {i}");
+                        _testOutputHelper.WriteLine($"{opcode}");
+                        _testOutputHelper.WriteLine($"Sig: {tv.scriptSig.ToHexString()} => {tv.scriptSig}");
+                        _testOutputHelper.WriteLine($"Pub: {tv.scriptPubKey.ToHexString()} => {tv.scriptPubKey}");
                     }
+                    Assert.True(correct);
                 }
             }
         }
