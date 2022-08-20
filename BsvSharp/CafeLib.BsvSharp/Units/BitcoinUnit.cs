@@ -12,6 +12,7 @@ namespace CafeLib.BsvSharp.Units
     {
         Bitcoin = 100_000_000,
         MilliBitcoin = 100_000,
+        Duro = 500,
         Bit = 100,
         Satoshi = 1
     }
