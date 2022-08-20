@@ -11,7 +11,7 @@ namespace CafeLib.BsvSharp.Numerics
     public readonly struct VarInt
     {
         private const int SizeofVarByte = sizeof(byte);
-        private const int SizeofVarChar = sizeof(char) + sizeof(byte) ;
+        private const int SizeofVarChar = sizeof(char) + sizeof(byte);
         private const int SizeofVarInt = sizeof(int) + sizeof(byte);
         private const int SizeofVarLong = sizeof(long) + sizeof(byte);
 
