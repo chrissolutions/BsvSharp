@@ -159,7 +159,7 @@ namespace CafeLib.BsvSharp.Builders
         /// Build Script.
         /// </summary>
         /// <returns>script</returns>
-        public virtual Script ToScript() => new Script(ToBytes());
+        public virtual Script ToScript() => new(ToBytes());
 
         /// <summary>
         /// Convert script builder to byte array.
@@ -513,6 +513,6 @@ namespace CafeLib.BsvSharp.Builders
         }
         
         public static implicit operator Script(ScriptBuilder sb) => sb.ToScript();
-        public static implicit operator ScriptBuilder(Script v) => new ScriptBuilder(v);
+        public static implicit operator ScriptBuilder(Script v) => new(v);
     }
 }
