@@ -12,11 +12,9 @@ using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
 
-// ReSharper disable NonReadonlyMemberInGetHashCode
-
 namespace CafeLib.BsvSharp.Scripting
 {
-    public struct Operand :  IDataSerializer
+    public struct Operand :  IDataSerializer, IEquatable<Operand>
     {
         public Opcode Code { get; private set; }
 
@@ -119,7 +117,7 @@ namespace CafeLib.BsvSharp.Scripting
                 if (!BitConverter.IsLittleEndian) return false;
                 var lengthBytes = BitConverter.GetBytes((uint)Data.Length).AsSpan(0, LengthBytesCount);
                 lengthBytes.CopyTo(span);
-                span = span.Slice(lengthBytes.Length);
+                span = span[lengthBytes.Length..];
             }
             if (length > 0) 
             {
@@ -167,46 +165,6 @@ namespace CafeLib.BsvSharp.Scripting
                 Data.CopyTo(bytes[1..]);
             return bytes;
         }
-
-        /*
-            // script.h lines 527-562
-            bool GetOp2(const_iterator &pc, opcodetype &opcodeRet,
-                std::vector<uint8_t> *pvchRet) const {
-                opcodeRet = OP_INVALIDOPCODE;
-                if (pvchRet) pvchRet->clear();
-                if (pc >= end()) return false;
-
-                // Read instruction
-                if (end() - pc < 1) return false;
-                unsigned int opcode = *pc++;
-
-                // Immediate operand
-                if (opcode <= OP_PUSHDATA4) {
-                    unsigned int nSize = 0;
-                    if (opcode < OP_PUSHDATA1) {
-                        nSize = opcode;
-                    } else if (opcode == OP_PUSHDATA1) {
-                        if (end() - pc < 1) return false;
-                        nSize = *pc++;
-                    } else if (opcode == OP_PUSHDATA2) {
-                        if (end() - pc < 2) return false;
-                        nSize = ReadLE16(&pc[0]);
-                        pc += 2;
-                    } else if (opcode == OP_PUSHDATA4) {
-                        if (end() - pc < 4) return false;
-                        nSize = ReadLE32(&pc[0]);
-                        pc += 4;
-                    }
-                    if (end() - pc < 0 || (unsigned int)(end() - pc) < nSize)
-                        return false;
-                    if (pvchRet) pvchRet->assign(pc, pc + nSize);
-                    pc += nSize;
-                }
-
-                opcodeRet = (opcodetype)opcode;
-                return true;
-            }
-        */
 
         public static (bool ok, Operand op) TryRead(ref ReadOnlyByteSequence ros, out long consumed) {
             var op = new Operand();
