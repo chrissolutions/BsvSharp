@@ -322,13 +322,6 @@ namespace CafeLib.BsvSharp.Builders
             return sb;
         }
 
-                    //if (!isOp && ps[arg] == "OP") {
-                    //    arg++;
-                    //    var opcodeBytes = ParseCompactValueToBytes(ps[arg]);
-                    //    if (opcodeBytes == null || opcodeBytes.Length > 1)
-                    //        throw new InvalidOperationException();
-                    //    op = (KzOpcode)opcodeBytes[0];
-                    //}
         public static ScriptBuilder ParseCompact(string compactScript)
         {
             var sb = new ScriptBuilder();
