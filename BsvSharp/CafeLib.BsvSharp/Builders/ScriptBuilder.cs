@@ -226,7 +226,7 @@ namespace CafeLib.BsvSharp.Builders
 
             if (s.StartsWith("'") && s.EndsWith("'"))
             {
-                s = s.Substring(1, s.Length - 2);
+                s = s[1..^1];
                 if (s.Contains('\''))
                     throw new InvalidOperationException();
                 bytes = System.Text.Encoding.ASCII.GetBytes(s);
