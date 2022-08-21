@@ -159,13 +159,13 @@ namespace CafeLib.BsvSharp.Builders
         /// Build Script.
         /// </summary>
         /// <returns>script</returns>
-        public virtual Script ToScript() => new(ToBytes());
+        public virtual Script ToScript() => new(ToArray());
 
         /// <summary>
         /// Convert script builder to byte array.
         /// </summary>
         /// <returns></returns>
-        public byte[] ToBytes()
+        public byte[] ToArray()
         {
             var bytes = new byte[Ops.Sum(o => o.Length)];
             var span = (ByteSpan)bytes;
@@ -227,7 +227,7 @@ namespace CafeLib.BsvSharp.Builders
             if (s.StartsWith("'") && s.EndsWith("'"))
             {
                 s = s.Substring(1, s.Length - 2);
-                if (s.Contains("'"))
+                if (s.Contains('\''))
                     throw new InvalidOperationException();
                 bytes = System.Text.Encoding.ASCII.GetBytes(s);
             } 
