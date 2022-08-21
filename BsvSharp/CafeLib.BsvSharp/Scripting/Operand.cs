@@ -121,8 +121,8 @@ namespace CafeLib.BsvSharp.Scripting
             }
             if (length > 0) 
             {
-                Data.Span.CopyTo(span.Slice(0, Data.Length));
-                span = span.Slice((int)length);
+                Data.Span.CopyTo(span[..Data.Length]);
+                span = span[(int)length..];
             }
             return true;
         }

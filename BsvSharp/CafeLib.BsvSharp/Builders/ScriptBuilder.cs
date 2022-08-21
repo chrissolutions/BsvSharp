@@ -36,7 +36,7 @@ namespace CafeLib.BsvSharp.Builders
         /// which case the opcode is ignored and the data is treated as unparsed script code.
         /// </summary>
         public List<OperandBuilder> Ops { get; protected set; } = new List<OperandBuilder>();
-        
+
         /// <summary>
         /// true when no more additions, deletions or changes to existing operations will occur.
         /// </summary>
