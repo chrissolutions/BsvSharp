@@ -207,15 +207,11 @@ namespace CafeLib.BsvSharp.Scripting
         OP_CODESEPARATOR = 0xab,
         OP_CHECKSIG = 0xac,
         OP_CHECKSIGVERIFY = 0xad,
-        OP_CHECKMULTISIG = 0xae,
-        OP_CHECKMULTISIGVERIFY = 0xaf,
 
         // expansion
         OP_NOP1 = 0xb0,
-        OP_CHECKLOCKTIMEVERIFY = 0xb1,
-        OP_NOP2 = OP_CHECKLOCKTIMEVERIFY,
-        OP_CHECKSEQUENCEVERIFY = 0xb2,
-        OP_NOP3 = OP_CHECKSEQUENCEVERIFY,
+        OP_NOP2 = 0xb1,
+        OP_NOP3 = 0xb2,
         OP_NOP4 = 0xb3,
         OP_NOP5 = 0xb4,
         OP_NOP6 = 0xb5,
@@ -224,8 +220,14 @@ namespace CafeLib.BsvSharp.Scripting
         OP_NOP9 = 0xb8,
         OP_NOP10 = 0xb9,
 
+        // BTC Core terchnical debt.
+        OP_CHECKMULTISIG = 0xae,
+        OP_CHECKMULTISIGVERIFY = 0xaf,
+        OP_CHECKLOCKTIMEVERIFY = OP_NOP2,
+        OP_CHECKSEQUENCEVERIFY = OP_NOP3,
+
         // The first op_code value after all defined opcodes
-        FIRST_UNDEFINED_OP_VALUE,
+        FIRST_UNDEFINED_OP_VALUE = OP_NOP4,
 
         // template matching params
         OP_SMALLINTEGER = 0xfa,
