@@ -5,6 +5,7 @@ using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Services;
+using CafeLib.BsvSharp.Signatures;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
@@ -211,7 +212,7 @@ namespace CafeLib.BsvSharp.Keys
         public static PublicKey FromSignedMessage(string message, string signature)
         {
             var signatureBytes = Encoders.Base64.Decode(signature);
-            var hash = KeyExtensions.GetMessageHash(message.Utf8ToBytes());
+            var hash = SignatureMessage.GetMessageHash(message);
             return FromSignedHash(hash, signatureBytes);
         }
 

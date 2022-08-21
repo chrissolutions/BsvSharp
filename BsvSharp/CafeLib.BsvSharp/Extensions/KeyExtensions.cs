@@ -50,7 +50,7 @@ namespace CafeLib.BsvSharp.Extensions
         /// <returns>signature</returns>
         public static Signature SignMessage(this PrivateKey key, string message)
         {
-            return key.SignMessageHash(GetMessageHash(message.Utf8ToBytes()));
+            return key.SignMessageHash(SignatureMessage.GetMessageHash(message));
         }
 
         /// <summary>
@@ -78,20 +78,8 @@ namespace CafeLib.BsvSharp.Extensions
 
         public static bool VerifyMessage(this UInt160 keyId, string message, string signature)
         {
-            var rkey = PublicKey.FromSignedHash(GetMessageHash(message.Utf8ToBytes()), Encoders.Base64.Decode(signature));
+            var rkey = PublicKey.FromSignedHash(SignatureMessage.GetMessageHash(message), Encoders.Base64.Decode(signature));
             return rkey != null && rkey.GetId() == keyId;
         }
-
-        #region Helpers
-
-        internal static UInt256 GetMessageHash(ReadOnlyByteSpan message)
-        {
-            const string bitcoinSignedMessageHeader = "Bitcoin Signed Message:\n";
-            var bitcoinSignedMessageHeaderBytes = Encoders.Utf8.Decode(bitcoinSignedMessageHeader);
-            var msgBytes = new [] {(byte)bitcoinSignedMessageHeaderBytes.Length}.Concat(bitcoinSignedMessageHeaderBytes, new VarInt((ulong)message.Length).ToArray(), message);
-            return Hashes.Hash256(msgBytes);
-        }
-
-        #endregion
     }
 }
