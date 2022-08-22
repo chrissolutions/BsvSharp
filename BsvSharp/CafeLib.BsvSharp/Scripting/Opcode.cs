@@ -11,8 +11,9 @@ namespace CafeLib.BsvSharp.Scripting
     public enum Opcode : byte
     {
         // push value
-        OP_0 = 0x00,
+        OP_0 = 0,
         OP_FALSE = OP_0,
+
         // The following opcodes specify how many of the following bytes to push.
         OP_PUSH1 = 1,
         OP_PUSH2 = 2,
@@ -89,14 +90,19 @@ namespace CafeLib.BsvSharp.Scripting
         OP_PUSH73 = 73,
         OP_PUSH74 = 74,
         OP_PUSH75 = 75,
+
         // The byte following this opcode specifies how many bytes after it to push.
         OP_PUSHDATA1 = 0x4c,
+
         // The two bytes following this opcode specify how many bytes after it to push.
         OP_PUSHDATA2 = 0x4d,
+
         // The four bytes following this opcode specify how many bytes after it to push.
         OP_PUSHDATA4 = 0x4e,
+
         OP_1NEGATE = 0x4f,
         OP_RESERVED = 0x50,
+
         // The following opcodes push the specified value.
         OP_1 = 0x51,
         OP_TRUE = OP_1,
@@ -220,7 +226,7 @@ namespace CafeLib.BsvSharp.Scripting
         OP_NOP9 = 0xb8,
         OP_NOP10 = 0xb9,
 
-        // BTC Core terchnical debt.
+        // BTC Core technical debt.
         OP_CHECKMULTISIG = 0xae,
         OP_CHECKMULTISIGVERIFY = 0xaf,
         OP_CHECKLOCKTIMEVERIFY = OP_NOP2,
