@@ -271,11 +271,14 @@ namespace CafeLib.BsvSharp.Builders
                         sb.Add(bytes);
                     else
                         sb.Push(bytes);
-                } else {
+                }
+                else
+                {
                     var data = (byte[])null;
                     if (!Enum.TryParse("OP_" + ps[arg], out Opcode opcode))
                         throw new InvalidOperationException();
-                    if (opcode is > Opcode.OP_0 and < Opcode.OP_PUSHDATA1) {
+                    if (opcode is > Opcode.OP_0 and < Opcode.OP_PUSHDATA1) 
+                    {
                         // add next single byte value to op.
                         arg++;
                         data = ParseCompactValueToBytes(ps[arg]);
@@ -284,24 +287,31 @@ namespace CafeLib.BsvSharp.Builders
                             data = Array.Empty<byte>();
                             arg--;
                         }
-                    } else if (opcode is >= Opcode.OP_PUSHDATA1 and <= Opcode.OP_PUSHDATA4) {
+                    }
+                    else if (opcode is >= Opcode.OP_PUSHDATA1 and <= Opcode.OP_PUSHDATA4)
+                    {
                         // add next one, two, or four byte value as length of following data value to op.
                         arg++;
                         var lengthBytes = ParseCompactValueToBytes(ps[arg]);
                         var len = 0u;
                         if (!BitConverter.IsLittleEndian)
                             throw new NotSupportedException();
-                        if (opcode == Opcode.OP_PUSHDATA1) {
+                        if (opcode == Opcode.OP_PUSHDATA1)
+                        {
                             // add next one byte value as length of following data value to op.
                             if (lengthBytes.Length != 1)
                                 throw new InvalidOperationException();
                             len = lengthBytes[0];
-                        } else if (opcode == Opcode.OP_PUSHDATA2) {
+                        }
+                        else if (opcode == Opcode.OP_PUSHDATA2) 
+                        {
                             // add next two byte value as length of following data value to op.
                             if (lengthBytes.Length != 2)
                                 throw new InvalidOperationException();
                             len = BitConverter.ToUInt16(lengthBytes);
-                        } else if (opcode == Opcode.OP_PUSHDATA4) {
+                        }
+                        else if (opcode == Opcode.OP_PUSHDATA4)
+                        {
                             // add next four byte value as length of following data value to op.
                             if (lengthBytes.Length != 4)
                                 throw new InvalidOperationException();
