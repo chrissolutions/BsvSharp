@@ -43,10 +43,8 @@ namespace CafeLib.BsvSharp.Scripting
         public bool EvalScript(Script script, ScriptFlags flags, ISignatureChecker checker, out ScriptError error)
         {
             var ros = new ReadOnlyByteSequence(script.Data);
-            // ReSharper disable once UnusedVariable
-            var pc = ros.Start;
+            var pStart = ros.Start;
             var pend = ros.End;
-            var pBeginCodeHash = ros.Start;
             var op = new Operand();
             var vfExec = new ScriptStack<bool>();
             var altStack = new ScriptStack<VarType>();
@@ -689,7 +687,7 @@ namespace CafeLib.BsvSharp.Scripting
                             case Opcode.OP_CODESEPARATOR:
                                 {
                                     // Hash starts after the code separator
-                                    pBeginCodeHash = ros.Data.Start;
+                                    pStart = ros.Data.Start;
                                 }
                                 break;
 
@@ -708,7 +706,7 @@ namespace CafeLib.BsvSharp.Scripting
                                     }
 
                                     // Subset of script starting at the most recent code separator.
-                                    var subScript = script.Slice(pBeginCodeHash, pend);
+                                    var subScript = script.Slice(pStart, pend);
 
                                     // Remove signature for pre-fork scripts
                                     CleanupScriptCode(subScript, vchSig, flags);
