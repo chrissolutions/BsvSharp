@@ -24,11 +24,11 @@ namespace CafeLib.BsvSharp.Builders
         private bool _isFinal;
 
         /// <summary>
-        /// true if script is associated with a scriptPub.
+        /// true if script is associated with a scriptPubKey.
         /// false if script is associated with a scriptSig.
         /// null if script purpose is unknown.
         /// </summary>
-        private bool? _isPub;
+        private bool? _scriptPubKey;
 
         /// <summary>
         /// The sequence of operations where each operation is an opcode and optional data.
@@ -46,16 +46,16 @@ namespace CafeLib.BsvSharp.Builders
             protected set => _isFinal = value;
         }
 
-        public bool IsPub
+        public bool IsScriptPubKey
         {
-            get => _isPub == true; 
-            set => _isPub = value ? true : null;
+            get => _scriptPubKey == true; 
+            set => _scriptPubKey = value ? true : null;
         }
 
-        public bool IsSig
+        public bool IsScriptSig
         {
-            get => _isPub == false; 
-            set => _isPub = value ? false : null;
+            get => _scriptPubKey == false; 
+            set => _scriptPubKey = value ? false : null;
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace CafeLib.BsvSharp.Builders
 
         protected ScriptBuilder(bool isPub, TemplateId templateId)
         {
-            _isPub = isPub;
+            _scriptPubKey = isPub;
             TemplateId = templateId;
         }
 
@@ -99,15 +99,15 @@ namespace CafeLib.BsvSharp.Builders
             return Add(script);
         }
 
-        public ScriptBuilder Add(Opcode opc)
+        public ScriptBuilder Add(Opcode opcode)
         {
-            Ops.Add(new Operand(opc));
+            Ops.Add(new Operand(opcode));
             return this;
         }
 
-        public ScriptBuilder Add(Opcode opc, VarType v)
+        public ScriptBuilder Add(Opcode opcode, VarType v)
         {
-            Ops.Add(new Operand(opc, v)); 
+            Ops.Add(new Operand(opcode, v)); 
             return this;
         }
 
@@ -176,8 +176,6 @@ namespace CafeLib.BsvSharp.Builders
 
             return bytes;
         }
-
-        //public string ToHex() => ToBytes().ToHex();
 
         public override string ToString()
         {
