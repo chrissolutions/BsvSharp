@@ -269,7 +269,7 @@ namespace CafeLib.BsvSharp.Signatures
         private static Script RemoveCodeSeparators(Script script)
         {
             var sb = new ScriptBuilder(script);
-            var ops = sb.Ops.RemoveAll(o => o.Opcode == Opcode.OP_CODESEPARATOR);
+            var ops = sb.Operands.RemoveAll(o => o.Opcode == Opcode.OP_CODESEPARATOR);
             return sb;
         }
 

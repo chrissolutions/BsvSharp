@@ -54,13 +54,13 @@ namespace CafeLib.BsvSharp.Builders
 
             Set(scriptSig);
 
-            if (Ops.Count != 2)
+            if (Operands.Count != 2)
             {
                 throw new ScriptException("Wrong number of data elements for P2PKH ScriptSig");
             }
 
-            AddSignature(new Signature(Ops.First().Operand.Data));
-            PublicKey = new PublicKey(Ops.Last().Operand.Data);
+            AddSignature(new Signature(Operands.First().Operand.Data));
+            PublicKey = new PublicKey(Operands.Last().Operand.Data);
         }
     }
 }

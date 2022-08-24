@@ -35,14 +35,14 @@ namespace CafeLib.BsvSharp.Builders
         /// To support testing and unimplemented features, an operation's IsRaw flag can be set in
         /// which case the opcode is ignored and the data is treated as unparsed script code.
         /// </summary>
-        public List<OperandBuilder> Ops { get; protected set; } = new List<OperandBuilder>();
+        public List<OperandBuilder> Operands { get; protected set; } = new List<OperandBuilder>();
 
         /// <summary>
         /// true when no more additions, deletions or changes to existing operations will occur.
         /// </summary>
         public bool IsFinal
         {
-            get => _isFinal && Ops.All(op => op.IsFinal);
+            get => _isFinal && Operands.All(op => op.IsFinal);
             protected set => _isFinal = value;
         }
 
@@ -89,37 +89,37 @@ namespace CafeLib.BsvSharp.Builders
 
         public virtual ScriptBuilder Clear()
         {
-            Ops.Clear(); 
+            Operands.Clear(); 
             return this;
         }
 
         public ScriptBuilder Set(Script script)
         {
-            Ops.Clear(); 
+            Operands.Clear(); 
             return Add(script);
         }
 
         public ScriptBuilder Add(Opcode opcode)
         {
-            Ops.Add(new Operand(opcode));
+            Operands.Add(new Operand(opcode));
             return this;
         }
 
         public ScriptBuilder Add(Opcode opcode, VarType v)
         {
-            Ops.Add(new Operand(opcode, v)); 
+            Operands.Add(new Operand(opcode, v)); 
             return this;
         }
 
         public ScriptBuilder Add(OperandBuilder opBuilder)
         {
-            Ops.Add(opBuilder); 
+            Operands.Add(opBuilder); 
             return this;
         }
 
         public ScriptBuilder Add(Script script)
         {
-            Ops.AddRange(script.Decode().Select(o => new OperandBuilder(o)));
+            Operands.AddRange(script.Decode().Select(o => new OperandBuilder(o)));
             return this;
         }
 
@@ -133,7 +133,7 @@ namespace CafeLib.BsvSharp.Builders
 
         public virtual ScriptBuilder Add(byte[] raw)
         {
-            Ops.Add(new OperandBuilder(new VarType(raw)));
+            Operands.Add(new OperandBuilder(new VarType(raw)));
             return this;
         }
 
@@ -141,17 +141,17 @@ namespace CafeLib.BsvSharp.Builders
         /// Push a zero as a non-final placeholder.
         /// </summary>
         /// <returns></returns>
-        public ScriptBuilder Push() => Add(new OperandBuilder { IsFinal = false, IsRaw = false, Operand = new Operand(Opcode.OP_0) });
+        public ScriptBuilder Pushdata() => Add(new OperandBuilder { IsFinal = false, IsRaw = false, Operand = new Operand(Opcode.OP_0) });
 
         public ScriptBuilder Push(ReadOnlyByteSpan data)
         {
-            Ops.Add(Operand.Push(data)); 
+            Operands.Add(Operand.Pushdata(data)); 
             return this;
         }
 
         public ScriptBuilder Push(long v)
         {
-            Ops.Add(Operand.Push(v));
+            Operands.Add(Operand.Pushdata(v));
             return this;
         }
 
@@ -167,9 +167,9 @@ namespace CafeLib.BsvSharp.Builders
         /// <returns></returns>
         public byte[] ToArray()
         {
-            var bytes = new byte[Ops.Sum(o => o.Length)];
+            var bytes = new byte[Operands.Sum(o => o.Length)];
             var span = (ByteSpan)bytes;
-            foreach (var op in Ops) 
+            foreach (var op in Operands) 
             {
                 op.TryCopyTo(ref span);
             }
@@ -179,13 +179,13 @@ namespace CafeLib.BsvSharp.Builders
 
         public override string ToString()
         {
-            return string.Join(' ', Ops.Select(o => o.ToVerboseString()));
+            return string.Join(' ', Operands.Select(o => o.ToVerboseString()));
         }
 
         public string ToTemplateString()
         {
             var sb = new StringBuilder();
-            foreach (var bop in Ops) 
+            foreach (var bop in Operands) 
             {
                 var op = bop.Operand;
                 var len = op.Data.Length;

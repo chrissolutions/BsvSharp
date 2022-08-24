@@ -103,12 +103,12 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
 
             var builder = ScriptBuilder.ParseAssembly(asm);
             Assert.NotNull(builder);
-            Assert.Equal(Opcode.OP_DUP, builder.Ops[0].Opcode);
-            Assert.Equal(Opcode.OP_HASH160, builder.Ops[1].Opcode);
-            Assert.Equal((Opcode)20, builder.Ops[2].Opcode);
-            Assert.Equal("f4c03610e60ad15100929cc23da2f3a799af1725", builder.Ops[2].Operand.GetDataBytes().ToHex().ToLowerInvariant());
-            Assert.Equal(Opcode.OP_EQUALVERIFY, builder.Ops[3].Opcode);
-            Assert.Equal(Opcode.OP_CHECKSIG, builder.Ops[4].Opcode);
+            Assert.Equal(Opcode.OP_DUP, builder.Operands[0].Opcode);
+            Assert.Equal(Opcode.OP_HASH160, builder.Operands[1].Opcode);
+            Assert.Equal((Opcode)20, builder.Operands[2].Opcode);
+            Assert.Equal("f4c03610e60ad15100929cc23da2f3a799af1725", builder.Operands[2].Operand.GetDataBytes().ToHex().ToLowerInvariant());
+            Assert.Equal(Opcode.OP_EQUALVERIFY, builder.Operands[3].Opcode);
+            Assert.Equal(Opcode.OP_CHECKSIG, builder.Operands[4].Opcode);
             Assert.Equal(asm, builder.ToScript().ToAssemblyString());
         }
 

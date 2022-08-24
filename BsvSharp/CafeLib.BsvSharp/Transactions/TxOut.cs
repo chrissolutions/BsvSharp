@@ -56,8 +56,8 @@ namespace CafeLib.BsvSharp.Transactions
         /// the script.
         /// </summary>
         /// <returns></returns>
-        public bool IsDataOut => _scriptBuilder.Ops.Any() && _scriptBuilder.Ops[0].Operand.Code == Opcode.OP_FALSE
-                   || _scriptBuilder.Ops.Count >= 2 && _scriptBuilder.Ops[0].Operand.Code == Opcode.OP_RETURN;
+        public bool IsDataOut => _scriptBuilder.Operands.Any() && _scriptBuilder.Operands[0].Operand.Code == Opcode.OP_FALSE
+                   || _scriptBuilder.Operands.Count >= 2 && _scriptBuilder.Operands[0].Operand.Code == Opcode.OP_RETURN;
 
         /// <summary>
         /// 

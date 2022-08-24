@@ -44,7 +44,7 @@ namespace CafeLib.BsvSharp.Scripting
             Data = VarType.Empty;
         }
 
-        public static Operand Push(ReadOnlyByteSpan data)
+        public static Operand Pushdata(ReadOnlyByteSpan data)
         {
             var opOnly = data.Length == 1 && data[0] <= 16;
             
@@ -63,7 +63,7 @@ namespace CafeLib.BsvSharp.Scripting
             return op;
         }
 
-        public static Operand Push(long v)
+        public static Operand Pushdata(long v)
         {
             Opcode code;
             var val = VarType.Empty;
