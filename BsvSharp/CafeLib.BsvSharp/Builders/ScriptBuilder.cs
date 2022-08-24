@@ -28,7 +28,7 @@ namespace CafeLib.BsvSharp.Builders
         /// false if script is associated with a scriptSig.
         /// null if script purpose is unknown.
         /// </summary>
-        private bool? _scriptPubKey;
+        private bool? _scriptPubKeyFlag;
 
         /// <summary>
         /// The sequence of operations where each operation is an opcode and optional data.
@@ -48,14 +48,14 @@ namespace CafeLib.BsvSharp.Builders
 
         public bool IsScriptPubKey
         {
-            get => _scriptPubKey == true; 
-            set => _scriptPubKey = value ? true : null;
+            get => _scriptPubKeyFlag == true; 
+            set => _scriptPubKeyFlag = value ? true : null;
         }
 
         public bool IsScriptSig
         {
-            get => _scriptPubKey == false; 
-            set => _scriptPubKey = value ? false : null;
+            get => _scriptPubKeyFlag == false; 
+            set => _scriptPubKeyFlag = value ? false : null;
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace CafeLib.BsvSharp.Builders
 
         protected ScriptBuilder(bool isPub, TemplateId templateId)
         {
-            _scriptPubKey = isPub;
+            _scriptPubKeyFlag = isPub;
             TemplateId = templateId;
         }
 
