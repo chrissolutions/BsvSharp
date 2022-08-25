@@ -22,7 +22,7 @@ namespace CafeLib.BsvSharp.Transactions
     /// Not used for making dynamic changes (building scripts).
     /// See <see cref="Transaction"/> when dynamically building a transaction input.
     /// </summary>
-    public class TxIn : ITxId, IDataSerializer
+    public class TransactionInput : ITransactionId, IDataSerializer
     {
         /// <summary>
         /// This is the ScriptPub of the referenced Prevout.
@@ -90,7 +90,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <summary>
         /// TxIn default constructor.
         /// </summary>
-        internal TxIn()
+        internal TransactionInput()
         {
         }
 
@@ -102,7 +102,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="utxoScript"></param>
         /// <param name="sequenceNumber"></param>
         /// <param name="scriptBuilder"></param>
-        public TxIn(OutPoint prevOutPoint, Amount amount, Script utxoScript, uint sequenceNumber, ScriptBuilder scriptBuilder = null)
+        public TransactionInput(OutPoint prevOutPoint, Amount amount, Script utxoScript, uint sequenceNumber, ScriptBuilder scriptBuilder = null)
         {
             PrevOut = prevOutPoint;
             Amount = amount;
@@ -119,7 +119,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="amount"></param>
         /// <param name="utxoScript"></param>
         /// <param name="scriptBuilder"></param>
-        public TxIn(UInt256 prevTxId, int outIndex, Amount amount, Script utxoScript, ScriptBuilder scriptBuilder)
+        public TransactionInput(UInt256 prevTxId, int outIndex, Amount amount, Script utxoScript, ScriptBuilder scriptBuilder)
             : this(new OutPoint(prevTxId, outIndex), amount, utxoScript, SequenceFinal, scriptBuilder)
         {
         }
@@ -130,7 +130,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="prevTxId"></param>
         /// <param name="outIndex"></param>
         /// <param name="amount"></param>
-        public TxIn(UInt256 prevTxId, int outIndex, Amount amount)
+        public TransactionInput(UInt256 prevTxId, int outIndex, Amount amount)
             : this(new OutPoint(prevTxId, outIndex), amount, Script.None, SequenceFinal, null)
         {
         }
@@ -142,7 +142,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="outIndex"></param>
         /// <param name="amount"></param>
         /// <param name="sequenceNumber"></param>
-        public TxIn(UInt256 prevTxId, int outIndex, Amount amount, uint sequenceNumber)
+        public TransactionInput(UInt256 prevTxId, int outIndex, Amount amount, uint sequenceNumber)
             : this(new OutPoint(prevTxId, outIndex), amount, Script.None, sequenceNumber, null)
         {
         }
@@ -154,7 +154,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="outIndex"></param>
         /// <param name="amount"></param>
         /// <param name="scriptBuilder"></param>
-        public TxIn(UInt256 prevTxId, int outIndex, Amount amount, ScriptBuilder scriptBuilder = null)
+        public TransactionInput(UInt256 prevTxId, int outIndex, Amount amount, ScriptBuilder scriptBuilder = null)
             : this(new OutPoint(prevTxId, outIndex), amount, Script.None, SequenceFinal, scriptBuilder)
         {
         }

@@ -58,7 +58,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         [InlineData("0000000000000000000000000000000000000000000000000000000000000001")]
         public void Verify_TxId_Test(string txId)
         {
-            var txIn = new TxIn(UInt256.FromHex(txId), 0, 1000L);
+            var txIn = new TransactionInput(UInt256.FromHex(txId), 0, 1000L);
             Assert.Equal(txId, txIn.TxHash.ToString());
         }
 

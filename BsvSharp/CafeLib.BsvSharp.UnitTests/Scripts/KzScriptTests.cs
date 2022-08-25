@@ -161,20 +161,20 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
 
                     var txCredit = new Transaction();
                     var coinbaseUnlockBuilder = new DefaultUnlockBuilder(Script.FromString("OP_0 OP_0"));
-                    var txCreditInput = new TxIn(UInt256.Zero, -1, Amount.Zero, new(), coinbaseUnlockBuilder);
+                    var txCreditInput = new TransactionInput(UInt256.Zero, -1, Amount.Zero, new(), coinbaseUnlockBuilder);
                     txCredit.AddInput(txCreditInput);
 
                     //add output to credit Transaction
                     var txOutLockBuilder = new DefaultLockBuilder(tv.scriptPubKey);
-                    var txCredOut = new TxOut(UInt256.Zero, 0, txOutLockBuilder);
+                    var txCredOut = new TransactionOutput(UInt256.Zero, 0, txOutLockBuilder);
                     txCredit.AddOutput(txCredOut);
 
                     //setup spend Transaction
                     var txSpend = new Transaction();
                     var defaultUnlockBuilder = new DefaultUnlockBuilder(tv.scriptSig);
-                    var txSpendInput = new TxIn(txCredit.TxHash, 0, Amount.Zero, new(), defaultUnlockBuilder);
+                    var txSpendInput = new TransactionInput(txCredit.TxHash, 0, Amount.Zero, new(), defaultUnlockBuilder);
                     txSpend.AddInput(txSpendInput);
-                    var txSpendOutput = new TxOut(UInt256.Zero, 0, Amount.Zero, null);
+                    var txSpendOutput = new TransactionOutput(UInt256.Zero, 0, Amount.Zero, null);
                     txSpend.AddOutput(txSpendOutput);
 
                     var checker = new TransactionSignatureChecker(txSpend, 0, Amount.Zero);

@@ -209,8 +209,8 @@ namespace CafeLib.BsvSharp.Network
                 new Transaction
                 (
                     version: 1,
-                    vin: new TxInList(new[] { new TxIn(UInt256.Zero, -1, Amount.Zero, 0) }),
-                    vout: new TxOutList(new[] { new TxOut(UInt256.Zero, -1, Amount.Zero, Script.None) }),
+                    vin: new TransactionInputList(new[] { new TransactionInput(UInt256.Zero, -1, Amount.Zero, 0) }),
+                    vout: new TransactionOutputList(new[] { new TransactionOutput(UInt256.Zero, -1, Amount.Zero, Script.None) }),
                     lockTime: 0
                 )
             };

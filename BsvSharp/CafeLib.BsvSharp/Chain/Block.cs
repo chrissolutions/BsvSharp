@@ -60,9 +60,9 @@ namespace CafeLib.BsvSharp.Chain
             Txs = new TransactionList();
             for (var i = 0; i < count; i++)
             {
-                var t = new Transaction();
-                if (!t.TryReadTransaction(ref r)) return false;
-                Txs.Add(t);
+                var tx = new Transaction();
+                if (!tx.TryReadTransaction(ref r)) return false;
+                Txs.Add(tx);
             }
 
             return VerifyMerkleRoot();
@@ -72,7 +72,7 @@ namespace CafeLib.BsvSharp.Chain
 
         private bool VerifyMerkleRoot() => ComputeMerkleRoot() == MerkleRoot;
 
-        public IEnumerable<(Transaction tx, TxOut o, int i)> GetOutputsSendingToAddresses(UInt160[] addresses)
+        public IEnumerable<(Transaction tx, TransactionOutput o, int i)> GetOutputsSendingToAddresses(UInt160[] addresses)
         {
             var v = new UInt160();
             foreach (var tx in Txs)

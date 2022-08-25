@@ -2,7 +2,7 @@
 
 namespace CafeLib.BsvSharp.Transactions
 {
-    public class TransactionList : TxIdList<Transaction>
+    public class TransactionList : TransactionIdList<Transaction>
     {
         public TransactionList()
         {

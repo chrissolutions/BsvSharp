@@ -191,7 +191,7 @@ namespace CafeLib.BsvSharp.Signatures
             for (var nOutput = 0; nOutput < nOutputs; nOutput++)
             {
                 if (sigHashType.IsBaseSingle && nOutput != inputNumber)
-                    writer.Write(TxOut.Empty);
+                    writer.Write(TransactionOutput.Empty);
                 else
                     writer.Write(tx.Outputs[nOutput]);
             }

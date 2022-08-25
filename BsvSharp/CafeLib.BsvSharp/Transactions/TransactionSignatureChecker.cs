@@ -77,7 +77,7 @@ namespace CafeLib.BsvSharp.Transactions
             // prevent this condition. Alternatively we could test all
             // inputs, but testing just this input minimizes the data
             // required to prove correct CHECKLOCKTIMEVERIFY execution.
-            return TxIn.SequenceFinal != _tx.Inputs[_txInIndex].SequenceNumber;
+            return TransactionInput.SequenceFinal != _tx.Inputs[_txInIndex].SequenceNumber;
         }
 
         /// <summary>
@@ -102,14 +102,14 @@ namespace CafeLib.BsvSharp.Transactions
             // consensus constrained. Testing that the transaction's sequence
             // number do not have this bit set prevents using this property
             // to get around a CHECKSEQUENCEVERIFY check.
-            if ((txToSequence & TxIn.SequenceLocktimeDisableFlag) != 0)
+            if ((txToSequence & TransactionInput.SequenceLocktimeDisableFlag) != 0)
             {
                 return false;
             }
 
             // Mask off any bits that do not have consensus-enforced meaning
             // before doing the integer comparisons
-            const uint nLockTimeMask = TxIn.SequenceLocktimeTypeFlag | TxIn.SequenceLocktimeMask;
+            const uint nLockTimeMask = TransactionInput.SequenceLocktimeTypeFlag | TransactionInput.SequenceLocktimeMask;
             var txToSequenceMasked = txToSequence & nLockTimeMask;
             var nSequenceMasked = sequenceNumber & nLockTimeMask;
 
@@ -122,10 +122,10 @@ namespace CafeLib.BsvSharp.Transactions
             // the nSequenceMasked in the transaction.
             if (
                 !(
-                    txToSequenceMasked < TxIn.SequenceLocktimeTypeFlag &&
-                    nSequenceMasked < TxIn.SequenceLocktimeTypeFlag ||
-                    txToSequenceMasked >= TxIn.SequenceLocktimeTypeFlag &&
-                    nSequenceMasked >= TxIn.SequenceLocktimeTypeFlag
+                    txToSequenceMasked < TransactionInput.SequenceLocktimeTypeFlag &&
+                    nSequenceMasked < TransactionInput.SequenceLocktimeTypeFlag ||
+                    txToSequenceMasked >= TransactionInput.SequenceLocktimeTypeFlag &&
+                    nSequenceMasked >= TransactionInput.SequenceLocktimeTypeFlag
                 )
             )
             {

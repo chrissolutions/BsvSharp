@@ -4,7 +4,7 @@ using CafeLib.Core.Numerics;
 namespace CafeLib.BsvSharp.Transactions
 {
     [SuppressMessage("ReSharper", "UnusedMemberInSuper.Global")]
-    public interface ITxId
+    public interface ITransactionId
     {
         UInt256 TxHash { get; }
     }

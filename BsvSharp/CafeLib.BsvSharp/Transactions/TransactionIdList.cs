@@ -5,15 +5,15 @@ namespace CafeLib.BsvSharp.Transactions
     /// <summary>
     ///	Collection of vertices.
     /// </summary>
-    public class TxIdList<T> : List<T> where T : ITxId
+    public class TransactionIdList<T> : List<T> where T : ITransactionId
     {
         public int Length => Count;
 
-        protected TxIdList()
+        protected TransactionIdList()
         {
         }
 
-        protected TxIdList(IEnumerable<T> list)
+        protected TransactionIdList(IEnumerable<T> list)
             : base(list)
         {
         }
