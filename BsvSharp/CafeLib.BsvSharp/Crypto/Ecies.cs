@@ -51,8 +51,8 @@ namespace CafeLib.BsvSharp.Crypto
             }
         }
 
-        public bool ShortTag { get; set; }
-        public bool NoKey { get; set; }
+        public bool ShortTag { get; init; }
+        public bool NoKey { get; init; }
 
         /// <summary>
         /// Two parties set matching pairs of priv and pub keys.

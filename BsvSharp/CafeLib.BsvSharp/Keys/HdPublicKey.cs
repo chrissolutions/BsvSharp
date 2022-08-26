@@ -1,25 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys.Base58;
 using CafeLib.Core.Buffers;
 
 namespace CafeLib.BsvSharp.Keys
 {
-    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
     public class HdPublicKey : HdKey
     {
         public PublicKey PublicKey { get; private set; }
-
-        public HdPublicKey()
-        {
-        }
-
-        public HdPublicKey(ReadOnlyByteSpan code)
-        {
-            Decode(code);
-        }
 
         public static HdPublicKey FromPrivateKey(HdPrivateKey privateKey)
         {
@@ -107,9 +96,10 @@ namespace CafeLib.BsvSharp.Keys
         }
 
         internal Base58HdPublicKey ToBase58() => new(this);
+        
         public override string ToString() => ToBase58().ToString();
 
-        public override int GetHashCode() => base.GetHashCode() ^ PublicKey.GetHashCode();
+        public override int GetHashCode() => ToString().GetHashCode();
 
         public bool Equals(HdPublicKey o) => o is not null && base.Equals(o) && PublicKey == o.PublicKey;
         public override bool Equals(object obj) => obj is HdPublicKey key && this == key;

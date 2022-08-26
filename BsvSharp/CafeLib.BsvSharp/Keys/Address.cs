@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Services;
-using CafeLib.Core.Encodings;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
-using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Keys
 {
@@ -32,11 +29,8 @@ namespace CafeLib.BsvSharp.Keys
     /// * next 20 bytes - the hash value computed by taking the `ripemd160(sha256(PUBLIC_KEY))`
     /// * last 4 bytes  - a checksum value taken from the first four bytes of sha256(sha256(previous_21_bytes))
     /// </summary>
-    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
     public class Address : IEquatable<Address>
     {
-        private static readonly HexEncoder Hex = Encoders.Hex;
-        private static readonly Base58CheckEncoder Base58Check = Encoders.Base58Check;
         private byte[] _bytes;
 
         /// <summary>
@@ -155,21 +149,20 @@ namespace CafeLib.BsvSharp.Keys
             return address;
         }
 
-
         /// <summary>
         /// Serialize this address object to a base58-encoded string.
         /// This method is an alias for the [toBase58()] method
         /// </summary>
         /// <returns>base58 encoded address</returns>
-        public override string ToString() => Base58Check.Encode(_bytes);
+        public override string ToString() => Encoders.Base58Check.Encode(_bytes);
 
         /// <summary>
         /// Returns the public key hash `ripemd160(sha256(public_key))` encoded as a hexadecimal string
         /// </summary>
         /// <returns>encoded public key hash</returns>
-        public string ToHex() => Hex.Encode(_bytes);
+        public string ToHex() => Encoders.Hex.Encode(_bytes);
         
-        public override int GetHashCode() => _bytes.GetHashCodeOfValues();
+        public override int GetHashCode() => ToString().GetHashCode();
 
         public bool Equals(Address o) => o is not null && _bytes.SequenceEqual(o._bytes);
         public override bool Equals(object obj) => Equals((Address)obj);
@@ -182,20 +175,20 @@ namespace CafeLib.BsvSharp.Keys
 
         private void FromBase58CheckInternal(string source)
         {
-            _bytes = Base58Check.Decode(source);
+            _bytes = Encoders.Base58Check.Decode(source);
             Version = _bytes[0];
         }
 
         private void FromHexInternal(string hexPubKey, NetworkType networkType)
         {
             Version = RootService.GetNetwork(networkType).PublicKeyAddress[0];
-            _bytes = new[]{(byte)Version}.Concat(Hex.Decode(hexPubKey).Hash160().ToArray());
+            _bytes = new[]{(byte)Version}.Concat(Encoders.Hex.Decode(hexPubKey).Hash160().ToArray());
         }
 
         private void FromScriptInternal(Script script, NetworkType networkType)
         {
             Version = RootService.GetNetwork(networkType).PublicKeyAddress[0];
-            _bytes = new[]{(byte)Version}.Concat(Hex.Decode(script.ToHexString()).Hash160().ToArray());
+            _bytes = new[]{(byte)Version}.Concat(Encoders.Hex.Decode(script.ToHexString()).Hash160().ToArray());
         }
 
         #endregion

@@ -1,14 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using CafeLib.BsvSharp.Persistence;
+﻿using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Transactions;
 
 namespace CafeLib.BsvSharp.Extensions
 {
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static class WriterExtensions
     {
-        public static IDataWriter Write(this IDataWriter w, Script script, bool withoutCodeSeparators = false)
+        public static IDataWriter Write(this IDataWriter w, Script script)
             => script.WriteTo(w);
 
         public static IDataWriter Write(this IDataWriter w, OutPoint op) => op.WriteTo(w);

@@ -1,9 +1,6 @@
 ﻿using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Keys;
-using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Signatures;
-using CafeLib.Core.Buffers;
-using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
 using CafeLib.Cryptography.BouncyCastle.Asn1.X9;

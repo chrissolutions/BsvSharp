@@ -8,7 +8,7 @@ namespace CafeLib.BsvSharp.Keys
     /// </summary>
     public abstract class HdKey
     {
-        public const uint HardenedBit = 0x80000000;
+        protected const uint HardenedBit = 0x80000000;
         public const int Bip32KeySize = 74;
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace CafeLib.BsvSharp.Keys
         /// </summary>
         /// <param name="kp"></param>
         /// <returns>null on derivation failure. Otherwise the derived private key.</returns>
-        public HdKey DeriveBase(KeyPath kp)
+        protected HdKey DeriveBase(KeyPath kp)
         {
             var k = this;
             foreach (var i in kp)
@@ -86,7 +86,7 @@ namespace CafeLib.BsvSharp.Keys
 
         public override int GetHashCode() => Depth.GetHashCode() ^ Fingerprint.GetHashCode() ^ Child.GetHashCode() ^ ChainCode.GetHashCode();
 
-        public bool Equals(HdKey o) => !(o is null) && Depth == o.Depth && Fingerprint == o.Fingerprint && Child == o.Child && ChainCode == o.ChainCode;
+        public bool Equals(HdKey o) => o is not null && Depth == o.Depth && Fingerprint == o.Fingerprint && Child == o.Child && ChainCode == o.ChainCode;
         public override bool Equals(object obj) => obj is HdKey key && Equals(key);
 
         public static bool operator ==(HdKey x, HdKey y) => x?.Equals(y) ?? y is null;

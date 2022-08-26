@@ -10,7 +10,6 @@ using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Extensions
 {
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static class BytesExtensions
     {
         public static int AggregateHashCode(this IEnumerable<byte> bytes) => bytes?.Aggregate(17, (current, b) => current * 31 + b) ?? 0;

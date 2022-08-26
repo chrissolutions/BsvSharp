@@ -23,7 +23,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <summary>
         /// Internal elliptical curve key.
         /// </summary>
-        internal ECKey ECKey { get; set; }
+        internal ECKey ECKey { get; private set; }
 
         ///// <summary>
         ///// HardenedBit.
