@@ -12,8 +12,6 @@ namespace CafeLib.BsvSharp.Extensions
         // ReSharper disable once InconsistentNaming
         private static readonly X9ECParameters Secp256k1 = ECKey.CreateCurve();
 
-        //private int SerializedPublicKeyLength => IsCompressed ? Secp256k1.SERIALIZED_COMPRESSED_PUBKEY_LENGTH : Secp256k1.SERIALIZED_UNCOMPRESSED_PUBKEY_LENGTH;
-
         public static PublicKey CreatePublicKey(this PrivateKey privateKey)
         {
             var ecKey = new ECKey(privateKey.ToArray(), true);
