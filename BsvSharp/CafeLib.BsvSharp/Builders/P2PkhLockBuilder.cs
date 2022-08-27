@@ -17,11 +17,11 @@ namespace CafeLib.BsvSharp.Builders
         }
 
         private P2PkhLockBuilder(UInt160 pubKeyHash)
-            :base(pubKeyHash, TemplateId.Pay2ScriptHash)
+            : base(pubKeyHash, TemplateId.Pay2ScriptHash)
         {
             Add(Opcode.OP_DUP)
                 .Add(Opcode.OP_HASH160)
-                .Push(pubKeyHash.Span)
+                .Pushdata(pubKeyHash.Span)
                 .Add(Opcode.OP_EQUALVERIFY)
                 .Add(Opcode.OP_CHECKSIG);
         }
