@@ -63,19 +63,12 @@ namespace CafeLib.BsvSharp.Keys
         {
             get
             {
-                switch (Version)
+                return Version switch
                 {
-                    case 0:
-                    case 111:
-                        return AddressType.PubkeyHash;
-
-                    case 5:
-                    case 196:
-                        return AddressType.ScriptHash;
-
-                    default:
-                        throw new FormatException($"{nameof(Version)} is not a valid address type.");
-                }
+                    0 or 111 => AddressType.PubkeyHash,
+                    5 or 196 => AddressType.ScriptHash,
+                    _ => throw new FormatException($"{nameof(Version)} is not a valid address type."),
+                };
             }
         }
 
@@ -83,19 +76,12 @@ namespace CafeLib.BsvSharp.Keys
         {
             get
             {
-                switch (Version)
+                return Version switch
                 {
-                    case 0:
-                    case 5:
-                        return NetworkType.Main;
-
-                    case 111:
-                    case 196:
-                        return NetworkType.Test;
-
-                    default:
-                        throw new FormatException($"{nameof(Version)} is not a valid network type.");
-                }
+                    0 or 5 => NetworkType.Main,
+                    111 or 196 => NetworkType.Test,
+                    _ => throw new FormatException($"{nameof(Version)} is not a valid network type."),
+                };
             }
         }
 
