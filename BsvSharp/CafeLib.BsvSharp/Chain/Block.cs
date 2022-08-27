@@ -44,24 +44,24 @@ namespace CafeLib.BsvSharp.Chain
             Transactions = new TransactionList(txs);
         }
 
-        public bool TryReadBlock(ref ReadOnlyByteSequence ros)
+        public bool TryReadBlock(ref ReadOnlyByteSequence sequence)
         {
-            var r = new ByteSequenceReader(ros);
-            if (!TryReadBlock(ref r)) return false;
-            ros = ros.Data.Slice(r.Data.Consumed);
+            var reader = new ByteSequenceReader(sequence);
+            if (!TryReadBlock(ref reader)) return false;
+            sequence = sequence.Data.Slice(reader.Data.Consumed);
             return true;
         }
 
-        private bool TryReadBlock(ref ByteSequenceReader r)
+        private bool TryReadBlock(ref ByteSequenceReader reader)
         {
-            if (!TryReadBlockHeader(ref r)) return false;
-            if (!r.TryReadVariant(out var count)) return false;
+            if (!TryReadBlockHeader(ref reader)) return false;
+            if (!reader.TryReadVariant(out var count)) return false;
 
             Transactions = new TransactionList();
             for (var i = 0; i < count; i++)
             {
                 var tx = new Transaction();
-                if (!tx.TryReadTransaction(ref r)) return false;
+                if (!tx.TryReadTransaction(ref reader)) return false;
                 Transactions.Add(tx);
             }
 
@@ -77,9 +77,9 @@ namespace CafeLib.BsvSharp.Chain
             var v = new UInt160();
             foreach (var tx in Transactions)
             {
-                foreach (var o in tx.Outputs)
+                foreach (var output in tx.Outputs)
                 {
-                    foreach (var op in o.Script.Decode())
+                    foreach (var op in output.Script.Decode())
                     {
                         if (op.Code == Opcode.OP_PUSH20) 
                         {
@@ -87,7 +87,7 @@ namespace CafeLib.BsvSharp.Chain
                             var i = Array.BinarySearch(addresses, v);
                             if (i >= 0) 
                             {
-                                yield return (tx, o, i);
+                                yield return (tx, output, i);
                             }
                         }
                     }
