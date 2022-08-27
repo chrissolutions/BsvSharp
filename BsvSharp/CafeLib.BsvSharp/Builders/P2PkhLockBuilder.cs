@@ -21,7 +21,7 @@ namespace CafeLib.BsvSharp.Builders
         {
             Add(Opcode.OP_DUP)
                 .Add(Opcode.OP_HASH160)
-                .Pushdata(pubKeyHash.Span)
+                .AddData(pubKeyHash.Span)
                 .Add(Opcode.OP_EQUALVERIFY)
                 .Add(Opcode.OP_CHECKSIG);
         }

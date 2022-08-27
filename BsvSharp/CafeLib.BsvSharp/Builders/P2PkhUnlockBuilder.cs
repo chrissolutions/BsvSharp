@@ -20,8 +20,8 @@ namespace CafeLib.BsvSharp.Builders
         public P2PkhUnlockBuilder(PublicKey publicKey)
             : base(publicKey, TemplateId.Pay2PublicKeyHash)
         {
-            Pushdata(new byte[72]) // This will become the CHECKSIG signature
-                .Pushdata(publicKey);
+            AddData(new byte[72]) // This will become the CHECKSIG signature
+                .AddData(publicKey);
         }
         
         public P2PkhUnlockBuilder(Script script)
@@ -39,8 +39,8 @@ namespace CafeLib.BsvSharp.Builders
         {
             base.Clear();
             
-            Pushdata(Signatures.FirstOrDefault().ToTxFormat().Data)
-                .Pushdata(PublicKey);
+            AddData(Signatures.FirstOrDefault().ToTxFormat().Data)
+                .AddData(PublicKey);
 
             return base.ToScript();
         }

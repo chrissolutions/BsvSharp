@@ -141,15 +141,15 @@ namespace CafeLib.BsvSharp.Builders
         /// Push a zero as a non-final placeholder.
         /// </summary>
         /// <returns></returns>
-        public ScriptBuilder Pushdata() => Add(new OperandBuilder { IsFinal = false, IsRaw = false, Operand = new Operand(Opcode.OP_0) });
+        public ScriptBuilder AddData() => Add(new OperandBuilder { IsFinal = false, IsRaw = false, Operand = new Operand(Opcode.OP_0) });
 
-        public ScriptBuilder Pushdata(ReadOnlyByteSpan data)
+        public ScriptBuilder AddData(ReadOnlyByteSpan data)
         {
             Operands.Add(Operand.Pushdata(data)); 
             return this;
         }
 
-        public ScriptBuilder Pushdata(long v)
+        public ScriptBuilder AddData(long v)
         {
             Operands.Add(Operand.Pushdata(v));
             return this;
@@ -268,7 +268,7 @@ namespace CafeLib.BsvSharp.Builders
                         // Hex literals are treated as raw, unparsed bytes added to the script.
                         sb.Add(bytes);
                     else
-                        sb.Pushdata(bytes);
+                        sb.AddData(bytes);
                 }
                 else
                 {
@@ -338,7 +338,7 @@ namespace CafeLib.BsvSharp.Builders
                 var s = ps[0];
                 var bytes = ParseCompactValueToBytes(s);
                 if (bytes != null) {
-                    sb.Pushdata(bytes);
+                    sb.AddData(bytes);
                     ps = ps[1..];
                 } else if (Enum.TryParse("OP_" + s, out Opcode op)) {
                     var args = 1;
@@ -467,7 +467,7 @@ namespace CafeLib.BsvSharp.Builders
                     var bytes = Encoders.Hex.Decode(tokens[i]);
                     if (bytes != null)
                     {
-                        builder.Pushdata(bytes);
+                        builder.AddData(bytes);
                     }
                 }
             }

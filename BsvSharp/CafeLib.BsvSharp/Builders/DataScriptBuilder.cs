@@ -64,7 +64,7 @@ namespace CafeLib.BsvSharp.Builders
             _dataCache.ForEach(x =>
             {
                 if (x is null || !x.Any()) return;
-                Pushdata(x.ToArray());
+                AddData(x.ToArray());
             });
 
             return base.ToScript();
