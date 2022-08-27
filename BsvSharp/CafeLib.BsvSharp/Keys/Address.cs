@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Network;
