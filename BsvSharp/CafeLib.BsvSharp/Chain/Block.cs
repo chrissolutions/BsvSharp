@@ -22,11 +22,11 @@ namespace CafeLib.BsvSharp.Chain
     /// </summary>
     public class Block : BlockHeader
     {
-        public TransactionList Txs { get; private set; }
+        public TransactionList Transactions { get; private set; }
 
         public Block()
         {
-            Txs = new TransactionList();
+            Transactions = new TransactionList();
         }
 
         public Block
@@ -41,7 +41,7 @@ namespace CafeLib.BsvSharp.Chain
         )
             : base(version, hashPrevBlock, hashMerkleRoot, time, bits, nonce)
         {
-            Txs = new TransactionList(txs);
+            Transactions = new TransactionList(txs);
         }
 
         public bool TryReadBlock(ref ReadOnlyByteSequence ros)
@@ -57,25 +57,25 @@ namespace CafeLib.BsvSharp.Chain
             if (!TryReadBlockHeader(ref r)) return false;
             if (!r.TryReadVariant(out var count)) return false;
 
-            Txs = new TransactionList();
+            Transactions = new TransactionList();
             for (var i = 0; i < count; i++)
             {
                 var tx = new Transaction();
                 if (!tx.TryReadTransaction(ref r)) return false;
-                Txs.Add(tx);
+                Transactions.Add(tx);
             }
 
             return VerifyMerkleRoot();
         }
 
-        private UInt256 ComputeMerkleRoot() => Txs.ComputeMerkleRoot();
+        private UInt256 ComputeMerkleRoot() => Transactions.ComputeMerkleRoot();
 
         private bool VerifyMerkleRoot() => ComputeMerkleRoot() == MerkleRoot;
 
         public IEnumerable<(Transaction tx, TransactionOutput o, int i)> GetOutputsSendingToAddresses(UInt160[] addresses)
         {
             var v = new UInt160();
-            foreach (var tx in Txs)
+            foreach (var tx in Transactions)
             {
                 foreach (var o in tx.Outputs)
                 {
