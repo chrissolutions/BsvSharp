@@ -31,7 +31,7 @@ namespace CafeLib.BsvSharp.Keys
     /// </summary>
     public class Address : IEquatable<Address>
     {
-        private byte[] _bytes;
+        private UInt160 _address;
 
         /// <summary>
         /// Address default constructor.
@@ -140,20 +140,21 @@ namespace CafeLib.BsvSharp.Keys
         /// This method is an alias for the [toBase58()] method
         /// </summary>
         /// <returns>base58 encoded address</returns>
-        public override string ToString() => Encoders.Base58Check.Encode(_bytes);
+        public override string ToString() => Encoders.Base58Check.Encode(new[] { (byte)Version }.Concat(_address.ToArray()));
 
         /// <summary>
         /// Returns the public key hash `ripemd160(sha256(public_key))` encoded as a hexadecimal string
         /// </summary>
         /// <returns>encoded public key hash</returns>
-        public string ToHex() => Encoders.Hex.Encode(_bytes);
+        public string ToHex() => Encoders.Hex.Encode(new[] { (byte)Version }.Concat(_address.ToArray()));
         
         public override int GetHashCode() => ToString().GetHashCode();
 
-        public bool Equals(Address o) => o is not null && _bytes.SequenceEqual(o._bytes);
+        public bool Equals(Address o) => o is not null && Version == o.Version && _address == o._address;
         public override bool Equals(object obj) => Equals((Address)obj);
 
-        public static implicit operator UInt160(Address rhs) => new(rhs._bytes[1..]);
+        public static implicit operator UInt160(Address rhs) => rhs._address;
+
         public static bool operator ==(Address x, Address y) => x?.Equals(y) ?? y is null;
         public static bool operator !=(Address x, Address y) => !(x == y);
 
@@ -161,20 +162,21 @@ namespace CafeLib.BsvSharp.Keys
 
         private void FromBase58CheckInternal(string source)
         {
-            _bytes = Encoders.Base58Check.Decode(source);
-            Version = _bytes[0];
+            var bytes = Encoders.Base58Check.Decode(source);
+            Version = bytes[0];
+            _address = new UInt160(bytes[1..]);
         }
 
         private void FromHexInternal(string hexPubKey, NetworkType networkType)
         {
             Version = RootService.GetNetwork(networkType).PublicKeyAddress[0];
-            _bytes = new[]{(byte)Version}.Concat(Encoders.Hex.Decode(hexPubKey).Hash160().ToArray());
+            _address = Encoders.Hex.Decode(hexPubKey).Hash160();
         }
 
         private void FromScriptInternal(Script script, NetworkType networkType)
         {
             Version = RootService.GetNetwork(networkType).PublicKeyAddress[0];
-            _bytes = new[]{(byte)Version}.Concat(Encoders.Hex.Decode(script.ToHexString()).Hash160().ToArray());
+            _address = Encoders.Hex.Decode(script.ToHexString()).Hash160();
         }
 
         #endregion
