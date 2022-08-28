@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -91,7 +90,7 @@ namespace CafeLib.BsvSharp.Numerics
             return bytes;
         }
 
-        public static (int length, byte prefix) GetInfo(long value)
+        private static (int length, byte prefix) GetInfo(long value)
         {
             int len;
             byte prefix;
