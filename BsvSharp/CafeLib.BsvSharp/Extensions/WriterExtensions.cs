@@ -1,4 +1,8 @@
-﻿using CafeLib.BsvSharp.Persistence;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Transactions;
 
