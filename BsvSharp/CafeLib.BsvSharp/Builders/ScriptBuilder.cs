@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CafeLib.BsvSharp.Encoding;
+using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.Core.Buffers;
@@ -223,7 +224,8 @@ namespace CafeLib.BsvSharp.Builders
 
                 case var _ when token.StartsWith("'") && token.EndsWith("'"):
                     token = token[1..^1];
-                    if (token.Contains('\'')) throw new InvalidOperationException();
+                    if (token.Contains('\''))
+                        throw new ScriptException("Syntax error");
                     bytes = Encoders.Ascii.Decode(token);
                     return (bytes, false);
 
@@ -292,15 +294,21 @@ namespace CafeLib.BsvSharp.Builders
                             var len = opcode switch
                             {
                                 // add next one byte value as length of following data value to op.
-                                Opcode.OP_PUSHDATA1 when lengthBytes.Length != 1 => throw new InvalidOperationException(), 
+                                Opcode.OP_PUSHDATA1 when lengthBytes.Length != 1 =>
+                                    throw new ScriptException("Length bytes does not equal 1 for OP_PUSHDATA1."), 
+
                                 Opcode.OP_PUSHDATA1 => lengthBytes[0],
                                 
                                 // add next two byte value as length of following data value to op.
-                                Opcode.OP_PUSHDATA2 when lengthBytes.Length != 2 => throw new InvalidOperationException(),
+                                Opcode.OP_PUSHDATA2 when lengthBytes.Length != 2 =>
+                                    throw new ScriptException("Length bytes does not equal 2 for OP_PUSHDATA2."),
+
                                 Opcode.OP_PUSHDATA2 => BitConverter.ToUInt16(lengthBytes),
                                 
                                 // add next four byte value as length of following data value to op.
-                                Opcode.OP_PUSHDATA4 when lengthBytes.Length != 4 => throw new InvalidOperationException(),
+                                Opcode.OP_PUSHDATA4 when lengthBytes.Length != 4 => 
+                                    throw new ScriptException("Length bytes does not equal 4 for OP_PUSHDATA4."),
+
                                 Opcode.OP_PUSHDATA4 => BitConverter.ToUInt32(lengthBytes),
                                 
                                 _ => 0u
@@ -363,19 +371,22 @@ namespace CafeLib.BsvSharp.Builders
                             {
                                 case Opcode.OP_PUSHDATA1:
                                     // add next one byte value as length of following data value to op.
-                                    if (data.Length != 1) throw new InvalidOperationException();
+                                    if (data.Length != 1)
+                                        throw new ScriptException("Length bytes does not equal 1 for OP_PUSHDATA1.");
                                     len = data[0];
                                     break;
                                     
                                 case Opcode.OP_PUSHDATA2:
                                     // add next two byte value as length of following data value to op.
-                                    if (data.Length != 2) throw new InvalidOperationException();
+                                    if (data.Length != 2)
+                                        throw new ScriptException("Length bytes does not equal 2 for OP_PUSHDATA2.");
                                     len = BitConverter.ToUInt16(data);
                                     break;
                                     
                                 case Opcode.OP_PUSHDATA4:
                                     // add next four byte value as length of following data value to op.
-                                    if (data.Length != 4) throw new InvalidOperationException();
+                                    if (data.Length != 4)
+                                        throw new ScriptException("Length bytes does not equal 4 for OP_PUSHDATA4.");
                                     len = BitConverter.ToUInt32(data);
                                     break;
                             }
@@ -423,19 +434,21 @@ namespace CafeLib.BsvSharp.Builders
             var tokens = script.Split(' ', StringSplitOptions.RemoveEmptyEntries).AsSpan();
             for (var i = 0; i < tokens.Length; ++i)
             {
-                if (!Enum.TryParse<Opcode>(tokens[i], out var op)) throw new InvalidOperationException();
-                switch (op)
+                if (!Enum.TryParse<Opcode>(tokens[i], out var opcode))
+                    throw new ScriptException($"Opcode {tokens[i]} is not found.");
+                switch (opcode)
                 {
                     case Opcode.OP_0:
                     case Opcode.OP_1NEGATE:
-                        builder.Add(op);
+                        builder.Add(opcode);
                         break;
 
                     case < Opcode.OP_PUSHDATA1:
                     {
                         var data = Encoders.Hex.Decode(tokens[++i]);
-                        if (data.Length >= (int)Opcode.OP_PUSHDATA1) throw new InvalidOperationException();
-                        builder.Add(op, data);
+                        if (data.Length >= (int)Opcode.OP_PUSHDATA1) 
+                            throw new ScriptException($"Length error '{data.Length}' for '{opcode}'.");
+                        builder.Add(opcode, data);
                         break;
                     }
 
@@ -444,12 +457,12 @@ namespace CafeLib.BsvSharp.Builders
                     case Opcode.OP_PUSHDATA4:
                     {
                         var data = Encoders.Hex.Decode(tokens[i+=2]);
-                        builder.Add(op, new VarType(data));
+                        builder.Add(opcode, new VarType(data));
                         break;
                     }
 
                     default:
-                        builder.Add(op);
+                        builder.Add(opcode);
                         break;
                 }
             }
