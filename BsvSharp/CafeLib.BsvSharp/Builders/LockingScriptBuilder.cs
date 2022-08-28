@@ -1,4 +1,8 @@
-﻿using CafeLib.BsvSharp.Keys;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.Core.Numerics;
 
