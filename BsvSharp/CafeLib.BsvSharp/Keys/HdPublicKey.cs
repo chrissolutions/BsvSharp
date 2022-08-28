@@ -1,4 +1,8 @@
-﻿using System;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using System;
 using System.Diagnostics;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys.Base58;

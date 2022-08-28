@@ -1,4 +1,8 @@
-﻿using System;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using System;
 using System.Linq;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Network;
@@ -7,7 +11,6 @@ using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
 using CafeLib.Cryptography.BouncyCastle.Math;
-// ReSharper disable InconsistentNaming
 
 namespace CafeLib.BsvSharp.Keys
 {
