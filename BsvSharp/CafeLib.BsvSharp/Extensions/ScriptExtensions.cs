@@ -9,7 +9,7 @@ namespace CafeLib.BsvSharp.Extensions
         /// Convert VarType to ScriptNum
         /// </summary>
         /// <param name="v">var type</param>
-        /// <param name="fRequireMinimal">required minimal flag</param>
+        /// <param name="fRequireMinimal">require minimal flag</param>
         /// <returns></returns>
         public static ScriptNum ToScriptNum(this VarType v, bool fRequireMinimal = false)
         {
