@@ -1,9 +1,4 @@
-﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
-// Distributed under the Open BSV software license, see the accompanying file LICENSE.
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,13 +20,6 @@ namespace CafeLib.BsvSharp.Builders
         private bool _isFinal;
 
         /// <summary>
-        /// true if script is associated with a scriptPubKey.
-        /// false if script is associated with a scriptSig.
-        /// null if script purpose is unknown.
-        /// </summary>
-        private bool? _scriptPubKeyFlag;
-
-        /// <summary>
         /// The sequence of operations where each operation is an opcode and optional data.
         /// To support testing and unimplemented features, an operation's IsRaw flag can be set in
         /// which case the opcode is ignored and the data is treated as unparsed script code.
@@ -47,18 +35,6 @@ namespace CafeLib.BsvSharp.Builders
             protected set => _isFinal = value;
         }
 
-        public bool IsScriptPubKey
-        {
-            get => _scriptPubKeyFlag == true; 
-            set => _scriptPubKeyFlag = value ? true : null;
-        }
-
-        public bool IsScriptSig
-        {
-            get => _scriptPubKeyFlag == false; 
-            set => _scriptPubKeyFlag = value ? false : null;
-        }
-
         /// <summary>
         /// If the script implements a known template, this will be the template type.
         /// Otherwise it will be Unknown.
@@ -68,13 +44,12 @@ namespace CafeLib.BsvSharp.Builders
         /// <summary>
         /// ScriptBuilder default constructor.
         /// </summary>
-        public ScriptBuilder()
+        protected ScriptBuilder()
         {
         }
 
-        protected ScriptBuilder(bool isPub, TemplateId templateId)
+        protected ScriptBuilder(TemplateId templateId)
         {
-            _scriptPubKeyFlag = isPub;
             TemplateId = templateId;
         }
 
@@ -311,6 +286,7 @@ namespace CafeLib.BsvSharp.Builders
 
                                 Opcode.OP_PUSHDATA4 => BitConverter.ToUInt32(lengthBytes),
                                 
+                                // ReSharper disable once UnreachableSwitchArmDueToIntegerAnalysis
                                 _ => 0u
                             };
                             

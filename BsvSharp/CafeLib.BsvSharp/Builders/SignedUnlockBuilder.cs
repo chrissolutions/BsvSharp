@@ -14,7 +14,7 @@ namespace CafeLib.BsvSharp.Builders
         public void AddSignature(Signature signature) => (Signatures as ICollection<Signature>)?.Add(signature);
 
         protected SignedUnlockBuilder(PublicKey pubKey, TemplateId templateId = TemplateId.Unknown)
-            : base(false, templateId)
+            : base(templateId)
         {
             PublicKey = pubKey;
         }

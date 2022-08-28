@@ -19,7 +19,7 @@ namespace CafeLib.BsvSharp.Builders
         }
 
         protected LockingScriptBuilder(UInt160 pubKeyHash, TemplateId templateId)
-            : base(true, templateId)
+            : base(templateId)
         {
             PubKeyHash = pubKeyHash;
         }
