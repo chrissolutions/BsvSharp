@@ -9,7 +9,7 @@ namespace CafeLib.BsvSharp.Keys.Base58
     /// <summary>
     /// Base class for Base58 encoded objects.
     /// </summary>
-    internal abstract class Base58Data : IComparable<Base58Data>
+    internal abstract class Base58Data : IEquatable<Base58Data>, IComparable<Base58Data>
     {
         private byte[] _versionData;
         private int _versionLength;
