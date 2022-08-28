@@ -199,50 +199,41 @@ namespace CafeLib.BsvSharp.Builders
         /// <summary>
         /// Converts hex and ascii strings to a specific byte count, if len has a value and disagrees it is an error.
         /// Converts integer values to little endian bytes where the most significant bit is set if negative.
-        /// For integer values, if len has a value, the result is expanded if necessary. If len is too small it is an error.
         /// </summary>
-        /// <param name="s"></param>
-        /// <param name="len"></param>
-        /// <returns></returns>
-        private static byte[] ParseCompactValueToBytes(string s, uint? len = null) => ParseLiteralValueToBytes(s, len).bytes;
+        /// <param name="value">value to parse into bytes</param>
+        /// <returns>byte array</returns>
+        private static byte[] ParseValueToBytes(string value) => ParseLiteralValueToBytes(value).bytes;
 
         /// <summary>
         /// Parses signed decimals, hexadecimal strings prefixed with 0x, and ascii strings enclosed in single quotes.
         /// Each format is converted to a byte array.
         /// Converts hex and ascii strings to a specific byte count, if len has a value and disagrees it is an error.
         /// Converts integer values to little endian bytes where the most significant bit is set if negative.
-        /// For integer values, if len has a value, the result is expanded if necessary. If len is too small it is an error.
         /// </summary>
-        /// <param name="s"></param>
-        /// <param name="len"></param>
+        /// <param name="token">token to parse</param>
         /// <returns>Tuple of the parsed byte[] data and a boolean true if the literal was specified in hexadecimal.
         /// Returns null for bytes if can't be parsed as a literal.</returns>
-        private static (byte[] bytes, bool isHex) ParseLiteralValueToBytes(string s, uint? len = null)
+        private static (byte[] bytes, bool isHex) ParseLiteralValueToBytes(string token)
         {
-            var bytes = (byte[])null;
-            var isHex = false;
+            switch (token)
+            {
+                case var _ when token.StartsWith("0x"):
+                    var bytes = Encoders.Hex.Decode(token[2..]);
+                    return (bytes, true);
 
-            if (s.StartsWith("'") && s.EndsWith("'"))
-            {
-                s = s[1..^1];
-                if (s.Contains('\''))
-                    throw new InvalidOperationException();
-                bytes = System.Text.Encoding.ASCII.GetBytes(s);
-            } 
-            else if (s.StartsWith("0x"))
-            {
-                isHex = true;
-                bytes = Encoders.Hex.Decode(s[2..]);
-            } 
-            else if (long.TryParse(s, out var v))
-            {
-                bytes = new ScriptNum(v).ToArray();
+                case var _ when token.StartsWith("'") && token.EndsWith("'"):
+                    token = token[1..^1];
+                    if (token.Contains('\'')) throw new InvalidOperationException();
+                    bytes = Encoders.Ascii.Decode(token);
+                    return (bytes, false);
+
+                case var _ when long.TryParse(token, out var v):
+                    bytes = new ScriptNum(v).ToArray();
+                    return (bytes, false);
+
+                default:
+                    return (null, false);
             }
-
-            if (len.HasValue && bytes != null && len.Value != bytes.Length)
-                throw new InvalidOperationException();
-            
-            return (bytes, isHex);
         }
 
         /// <summary>
@@ -259,10 +250,10 @@ namespace CafeLib.BsvSharp.Builders
         internal static ScriptBuilder ParseTestScript(string testScript)
         {
             var sb = new ScriptBuilder();
-            var ps = testScript.Split(' ', StringSplitOptions.RemoveEmptyEntries).AsSpan();
-            while (ps.Length > 0) {
-                var arg = 0;
-                var (bytes, isHex) = ParseLiteralValueToBytes(ps[arg]);
+            var tokens = testScript.Split(' ', StringSplitOptions.RemoveEmptyEntries).AsSpan();
+            while (tokens.Length > 0) {
+                var index = 0;
+                var (bytes, isHex) = ParseLiteralValueToBytes(tokens[index]);
                 if (bytes != null) {
                     if (isHex)
                         // Hex literals are treated as raw, unparsed bytes added to the script.
@@ -272,52 +263,55 @@ namespace CafeLib.BsvSharp.Builders
                 }
                 else
                 {
-                    var data = (byte[])null;
-                    if (!Enum.TryParse("OP_" + ps[arg], out Opcode opcode))
+                    byte[] data = null;
+                    if (!Enum.TryParse($"OP_{tokens[index]}", out Opcode opcode))
                         throw new InvalidOperationException();
-                    if (opcode is > Opcode.OP_0 and < Opcode.OP_PUSHDATA1) 
+                    switch (opcode)
                     {
-                        // add next single byte value to op.
-                        arg++;
-                        data = ParseCompactValueToBytes(ps[arg]);
-                        if (data == null) {
-                            // Put this arg back. Treat missing data as zero length.
-                            data = Array.Empty<byte>();
-                            arg--;
-                        }
-                    }
-                    else if (opcode is >= Opcode.OP_PUSHDATA1 and <= Opcode.OP_PUSHDATA4)
-                    {
-                        // add next one, two, or four byte value as length of following data value to op.
-                        arg++;
-                        var lengthBytes = ParseCompactValueToBytes(ps[arg]);
-                        var len = 0u;
-                        if (!BitConverter.IsLittleEndian)
-                            throw new NotSupportedException();
-                        if (opcode == Opcode.OP_PUSHDATA1)
+                        case > Opcode.OP_0 and < Opcode.OP_PUSHDATA1:
                         {
-                            // add next one byte value as length of following data value to op.
-                            if (lengthBytes.Length != 1)
-                                throw new InvalidOperationException();
-                            len = lengthBytes[0];
+                            // add next single byte value to op.
+                            index++;
+                            data = ParseValueToBytes(tokens[index]);
+                            if (data == null)
+                            {
+                                // Put this token back. Treat missing data as zero length.
+                                data = Array.Empty<byte>();
+                                index--;
+                            }
+
+                            break;
                         }
-                        else if (opcode == Opcode.OP_PUSHDATA2) 
+                        case >= Opcode.OP_PUSHDATA1 and <= Opcode.OP_PUSHDATA4:
                         {
-                            // add next two byte value as length of following data value to op.
-                            if (lengthBytes.Length != 2)
-                                throw new InvalidOperationException();
-                            len = BitConverter.ToUInt16(lengthBytes);
-                        }
-                        else if (opcode == Opcode.OP_PUSHDATA4)
-                        {
-                            // add next four byte value as length of following data value to op.
-                            if (lengthBytes.Length != 4)
-                                throw new InvalidOperationException();
-                            len = BitConverter.ToUInt32(lengthBytes);
-                        }
-                        if (len > 0) {
-                            arg++;
-                            data = arg < ps.Length ? ParseCompactValueToBytes(ps[arg], len) : Array.Empty<byte>();
+                            // add next one, two, or four byte value as length of following data value to op.
+                            index++;
+                            var lengthBytes = ParseValueToBytes(tokens[index]);
+                            if (!BitConverter.IsLittleEndian)
+                                throw new NotSupportedException();
+                            var len = opcode switch
+                            {
+                                // add next one byte value as length of following data value to op.
+                                Opcode.OP_PUSHDATA1 when lengthBytes.Length != 1 => throw new InvalidOperationException(), 
+                                Opcode.OP_PUSHDATA1 => lengthBytes[0],
+                                
+                                // add next two byte value as length of following data value to op.
+                                Opcode.OP_PUSHDATA2 when lengthBytes.Length != 2 => throw new InvalidOperationException(),
+                                Opcode.OP_PUSHDATA2 => BitConverter.ToUInt16(lengthBytes),
+                                
+                                // add next four byte value as length of following data value to op.
+                                Opcode.OP_PUSHDATA4 when lengthBytes.Length != 4 => throw new InvalidOperationException(),
+                                Opcode.OP_PUSHDATA4 => BitConverter.ToUInt32(lengthBytes),
+                                
+                                _ => 0u
+                            };
+                            
+                            if (len > 0) {
+                                index++;
+                                data = index < tokens.Length ? ParseValueToBytes(tokens[index]) : Array.Empty<byte>();
+                            }
+
+                            break;
                         }
                     }
                     if (data == null)
@@ -325,68 +319,11 @@ namespace CafeLib.BsvSharp.Builders
                     else
                         sb.Add(opcode, new VarType(data));
                 }
-                ps = ps[Math.Min(arg + 1, ps.Length)..];
+                tokens = tokens[Math.Min(index + 1, tokens.Length)..];
             }
             return sb;
         }
-
-        public static ScriptBuilder ParseCompact(string compactScript)
-        {
-            var sb = new ScriptBuilder();
-            var ps = compactScript.Split(' ', StringSplitOptions.RemoveEmptyEntries).AsSpan();
-            while (ps.Length > 0) {
-                var s = ps[0];
-                var bytes = ParseCompactValueToBytes(s);
-                if (bytes != null) {
-                    sb.AddData(bytes);
-                    ps = ps[1..];
-                } else if (Enum.TryParse("OP_" + s, out Opcode op)) {
-                    var args = 1;
-                    var data = (byte[])null;
-                    if (op > Opcode.OP_0 && op < Opcode.OP_PUSHDATA1) {
-                        // add next single byte value to op.
-                        args = 2;
-                        data = ParseCompactValueToBytes(ps[1]);
-                        if (data.Length >= (int)Opcode.OP_PUSHDATA1)
-                            throw new InvalidOperationException();
-                    } else if (op >= Opcode.OP_PUSHDATA1 && op <= Opcode.OP_PUSHDATA4) {
-                        // add next one, two, or four byte value as length of following data value to op.
-                        args = 2;
-                        var lengthBytes = ParseCompactValueToBytes(ps[1]);
-                        var len = 0u;
-                        if (!BitConverter.IsLittleEndian)
-                            throw new NotSupportedException();
-                        if (op == Opcode.OP_PUSHDATA1) {
-                            // add next one byte value as length of following data value to op.
-                            if (lengthBytes.Length != 1)
-                                throw new InvalidOperationException();
-                            len = lengthBytes[0];
-                        } else if (op == Opcode.OP_PUSHDATA2) {
-                            // add next two byte value as length of following data value to op.
-                            if (lengthBytes.Length != 2)
-                                throw new InvalidOperationException();
-                            len = BitConverter.ToUInt16(lengthBytes);
-                        } else if (op == Opcode.OP_PUSHDATA4) {
-                            // add next four byte value as length of following data value to op.
-                            if (lengthBytes.Length != 4)
-                                throw new InvalidOperationException();
-                            len = BitConverter.ToUInt32(lengthBytes);
-                        }
-                        if (len > 0) {
-                            args = 3;
-                            data = ParseCompactValueToBytes(ps[2], len);
-                        }
-                    }
-                    if (data == null)
-                        sb.Add(op);
-                    else
-                        sb.Add(op, new VarType(data));
-                    ps = ps[args..];
-                } else
-                    throw new InvalidOperationException();
-            }
-            return sb;
-        }
+        
 
         /// <summary>
         /// Parse encoded script.
