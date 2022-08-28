@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using System.Collections.Generic;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Transactions;
 using CafeLib.Core.Extensions;

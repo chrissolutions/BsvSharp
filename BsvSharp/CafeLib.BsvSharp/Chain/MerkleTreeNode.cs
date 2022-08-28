@@ -1,4 +1,8 @@
-﻿using CafeLib.Core.Numerics;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Chain
