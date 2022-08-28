@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -14,7 +13,7 @@ namespace CafeLib.BsvSharp.Persistence
 {
     public class HashWriter : IDisposable, IDataWriter
     {
-        private readonly Sha256Digest _sha256 = new Sha256Digest();
+        private readonly Sha256Digest _sha256 = new();
 
         public void Dispose() { Dispose(true); GC.SuppressFinalize(this); }
 
