@@ -22,7 +22,7 @@ namespace CafeLib.BsvSharp.Scripting
     /// values to be returned as a vector of bytes but throwing an exception if
     /// arithmetic is done or the result is interpreted as an integer.
     /// </summary>
-    public readonly struct ScriptNum
+    public readonly struct ScriptNum : IEquatable<ScriptNum>
     {
         private const uint MaximumElementSize = 4;
 
@@ -72,7 +72,8 @@ namespace CafeLib.BsvSharp.Scripting
         public override string ToString() => $"{Data}L, {ToInt()}, \"{ToHex()}\"";
 
         public override int GetHashCode() => ToInt();
-        public override bool Equals(object o) => o is ScriptNum num && Data == num.Data;
+        public bool Equals(ScriptNum o) => o is ScriptNum num && Data == num.Data;
+        public override bool Equals(object o) => Equals((ScriptNum)o);
 
         /// <summary>
         /// Look at a sequence of bytes as an encoded number.
