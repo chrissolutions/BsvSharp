@@ -60,8 +60,6 @@ namespace CafeLib.BsvSharp.Scripting
 
         public string ToHex() => Hex.Encode(ToArray());
 
-        public long GetValue() => Data;
-
         public int ToInt()
         {
             if(Data > int.MaxValue) return int.MaxValue;
