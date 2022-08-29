@@ -101,11 +101,11 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         public void Test_Power_Of_Two_Encoding(long v64, int v32, string hex)
         {
             var sn = new ScriptNum(v64);
-            Assert.Equal(v64, sn.Data);
+            Assert.Equal<long>(v64, sn);
             Assert.Equal(v32, sn.ToInt());
             Assert.Equal(hex, sn.ToHex());
             sn = new ScriptNum(hex);
-            Assert.Equal(v64, sn.Data);
+            Assert.Equal<long>(v64, sn);
             Assert.Equal(v32, sn.ToInt());
             Assert.Equal(hex, sn.ToHex());
         }
