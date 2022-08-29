@@ -1,10 +1,13 @@
-﻿using CafeLib.BsvSharp.Builders;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Transactions;
 using CafeLib.BsvSharp.Units;
-using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Signatures

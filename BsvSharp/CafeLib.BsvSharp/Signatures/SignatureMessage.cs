@@ -1,4 +1,8 @@
-﻿using CafeLib.BsvSharp.Encoding;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.Core.Buffers;
@@ -14,7 +18,7 @@ namespace CafeLib.BsvSharp.Signatures
 
         #region Helpers
 
-        internal static UInt256 CalculateMessageHash(ReadOnlyByteSpan message)
+        private static UInt256 CalculateMessageHash(ReadOnlyByteSpan message)
         {
             const string bitcoinSignedMessageHeader = "Bitcoin Signed Message:\n";
             var bitcoinSignedMessageHeaderBytes = Encoders.Utf8.Decode(bitcoinSignedMessageHeader);
