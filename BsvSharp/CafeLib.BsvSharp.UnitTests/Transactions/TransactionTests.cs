@@ -121,7 +121,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
                 TxId = UInt256.FromHex("975951898cca4c71612f80b332ce05f0408247be125db445557924b93319cb3a"),
                 Index = 2,
                 ScriptPubKey = Script.FromHex("76a91434f23a48e5b7c103ce7abfeb707406f0a255646288ac"),
-                Amount = new Amount(5263L)
+                Amount = new Amount(5263L, BitcoinUnit.Satoshi)
             };
 
             var tx = new Transaction()

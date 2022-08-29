@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2021 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
