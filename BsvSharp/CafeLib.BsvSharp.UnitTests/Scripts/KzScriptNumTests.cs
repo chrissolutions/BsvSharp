@@ -101,11 +101,11 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         public void Test_Power_Of_Two_Encoding(long v64, int v32, string hex)
         {
             var sn = new ScriptNum(v64);
-            Assert.Equal(v64, sn.Data);
+            Assert.Equal<long>(v64, sn);
             Assert.Equal(v32, sn.ToInt());
             Assert.Equal(hex, sn.ToHex());
             sn = new ScriptNum(hex);
-            Assert.Equal(v64, sn.Data);
+            Assert.Equal<long>(v64, sn);
             Assert.Equal(v32, sn.ToInt());
             Assert.Equal(hex, sn.ToHex());
         }
@@ -123,11 +123,11 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         public void Test_Negative_Power_Of_Two_Encoding(long v64, int v32, string hex)
         {
             var sn = new ScriptNum(v64);
-            Assert.Equal(v64, sn.Data);
+            Assert.Equal<long>(v64, sn);
             Assert.Equal(v32, sn.ToInt());
             Assert.Equal(hex, sn.ToHex());
             sn = new ScriptNum(hex);
-            Assert.Equal(v64, sn.Data);
+            Assert.Equal<long>(v64, sn);
             Assert.Equal(v32, sn.ToInt());
             Assert.Equal(hex, sn.ToHex());
         }
@@ -146,11 +146,11 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         public void Test_High_Bit_Encoding(long v64, int v32, string hex)
         {
             var sn = new ScriptNum(v64);
-            Assert.Equal(v64, sn.Data);
+            Assert.Equal<long>(v64, sn);
             Assert.Equal(v32, sn.ToInt());
             Assert.Equal(hex, sn.ToHex());
             sn = new ScriptNum(hex);
-            Assert.Equal(v64, sn.Data);
+            Assert.Equal<long>(v64, sn);
             Assert.Equal(v32, sn.ToInt());
             Assert.Equal(hex, sn.ToHex());
         }
@@ -167,11 +167,11 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         public void Test_Low_Bit_Encoding(long v64, int v32, string hex)
         {
             var sn = new ScriptNum(v64);
-            Assert.Equal(v64, sn.Data);
+            Assert.Equal<long>(v64, sn);
             Assert.Equal(v32, sn.ToInt());
             Assert.Equal(hex, sn.ToHex());
             sn = new ScriptNum(hex);
-            Assert.Equal(v64, sn.Data);
+            Assert.Equal<long>(v64, sn);
             Assert.Equal(v32, sn.ToInt());
             Assert.Equal(hex, sn.ToHex());
         }
@@ -188,11 +188,11 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         public void Test_Negative_Encoding(long v64, int v32, string hex)
         {
             var sn = new ScriptNum(v64);
-            Assert.Equal(v64, sn.Data);
+            Assert.Equal<long>(v64, sn);
             Assert.Equal(v32, sn.ToInt());
             Assert.Equal(hex, sn.ToHex());
             sn = new ScriptNum(hex);
-            Assert.Equal(v64, sn.Data);
+            Assert.Equal<long>(v64, sn);
             Assert.Equal(v32, sn.ToInt());
             Assert.Equal(hex, sn.ToHex());
         }
@@ -202,11 +202,11 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         {
             foreach (var tv in tvs) {
                 var sn = new ScriptNum(tv.v64);
-                Assert.Equal(tv.v64, sn.Data);
+                Assert.Equal<long>(tv.v64, sn);
                 Assert.Equal(tv.v32, sn.ToInt());
                 Assert.Equal(tv.hex, sn.ToHex());
                 sn = new ScriptNum(tv.hex);
-                Assert.Equal(tv.v64, sn.Data);
+                Assert.Equal<long>(tv.v64, sn);
                 Assert.Equal(tv.v32, sn.ToInt());
                 Assert.Equal(tv.hex, sn.ToHex());
             }

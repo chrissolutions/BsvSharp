@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -127,15 +126,16 @@ namespace CafeLib.BsvSharp.Scripting
         public static ScriptNum operator %(ScriptNum a, ScriptNum b) => new ScriptNum(a.Data % b.Data);
         public static ScriptNum operator +(ScriptNum a, ScriptNum b) => new ScriptNum(a.Data + b.Data);
         public static ScriptNum operator -(ScriptNum a, ScriptNum b) => new ScriptNum(a.Data - b.Data);
-        public static ScriptNum operator -(ScriptNum a) => new ScriptNum(-a.Data);
+        public static ScriptNum operator -(ScriptNum a) => new(-a.Data);
         public static bool operator <(ScriptNum a, ScriptNum b) => a.Data < b.Data;
         public static bool operator >(ScriptNum a, ScriptNum b) => a.Data > b.Data;
         public static bool operator <=(ScriptNum a, ScriptNum b) => a.Data <= b.Data;
         public static bool operator >=(ScriptNum a, ScriptNum b) => a.Data >= b.Data;
         public static bool operator ==(ScriptNum a, ScriptNum b) => a.Data == b.Data;
         public static bool operator !=(ScriptNum a, ScriptNum b) => a.Data != b.Data;
-        public static implicit operator ScriptNum(Int64 a) => new ScriptNum(a);
-        public static implicit operator ScriptNum(bool a) => a ? One : Zero;
+        public static implicit operator ScriptNum(bool rhs) => rhs ? One : Zero;
+        public static implicit operator ScriptNum(long rhs) => new(rhs);
+        public static implicit operator long(ScriptNum rhs) => rhs.Data;
 
         #region Helpers
 
