@@ -64,7 +64,7 @@ namespace CafeLib.BsvSharp.Numerics
 
         public bool ToBool() => Buffer.Any(x => x != 0 && x != 0x80);
 
-        public int ToInt32() => new ScriptNum(Span).GetInt();
+        public int ToInt32() => new ScriptNum(Span).ToInt();
 
         public VarType BitAnd(VarType b)
         {
@@ -222,7 +222,7 @@ namespace CafeLib.BsvSharp.Numerics
 
             if (size > 0)
             {
-                data.Slice(0, (int)length).CopyTo(bytes.AsSpan());
+                data[..(int)length].CopyTo(bytes.AsSpan());
 
                 // Remove the sign bit, add padding 0x00 bytes, restore the sign bit.
                 // If number is positive, they start cleared, nothing to do.

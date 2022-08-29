@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -9,7 +8,6 @@ using System.Diagnostics;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.Core.Buffers;
-using CafeLib.Core.Encodings;
 
 namespace CafeLib.BsvSharp.Scripting
 {
@@ -22,11 +20,9 @@ namespace CafeLib.BsvSharp.Scripting
     /// values to be returned as a vector of bytes but throwing an exception if
     /// arithmetic is done or the result is interpreted as an integer.
     /// </summary>
-    public readonly struct ScriptNum
+    public readonly struct ScriptNum : IEquatable<ScriptNum>
     {
         private const uint MaximumElementSize = 4;
-
-        private static readonly IEncoder Hex = Encoders.HexReverse;
 
         public static readonly ScriptNum Zero = new(0);
         public static readonly ScriptNum One = new(1);
@@ -34,11 +30,11 @@ namespace CafeLib.BsvSharp.Scripting
         public class OverflowError : Exception { public OverflowError(string message) : base(message) { } }
         public class MinEncodeError : Exception { public MinEncodeError(string message) : base(message) { } }
 
-        private readonly long _value;
+        public long Data { get; }
 
         public ScriptNum(long value)
         {
-            _value = value;
+            Data = value;
         }
 
         public ScriptNum(ReadOnlyByteSpan bytes, bool fRequireMinimal = false, uint nMaximumSize = MaximumElementSize)
@@ -48,33 +44,33 @@ namespace CafeLib.BsvSharp.Scripting
 
             if (fRequireMinimal && !IsMinimallyEncoded(bytes, nMaximumSize)) throw new MinEncodeError("non-minimally encoded script number");
 
-            _value = SetValueFromBytes(bytes);
+            Data = Deserialze(bytes);
         }
 
         public ScriptNum(string hex)
-            : this(Hex.Decode(hex))
+            : this(Encoders.HexReverse.Decode(hex))
         {
         }
 
         public VarType ToValType() => new(ToArray());
 
-        public string GetHex() => Hex.Encode(ToArray());
+        public string ToHex() => Encoders.HexReverse.Encode(ToArray());
 
-        public long GetValue() => _value;
-
-        public int GetInt()
+        public int ToInt()
         {
-            if(_value > int.MaxValue) return int.MaxValue;
-            if(_value < int.MinValue) return int.MinValue;
-            return (int)_value;
+            if(Data > int.MaxValue) return int.MaxValue;
+            if(Data < int.MinValue) return int.MinValue;
+            return (int)Data;
         }
 
-        public byte[] ToArray() => Serialize(_value);
+        public byte[] ToArray() => Serialize(Data);
 
-        public override string ToString() => $"{_value}L, {GetInt()}, \"{GetHex()}\"";
+        public override string ToString() => $"{Data}L, {ToInt()}, \"{ToHex()}\"";
 
-        public override int GetHashCode() => GetInt();
-        public override bool Equals(object o) => o is ScriptNum num && _value == num._value;
+        public override int GetHashCode() => ToInt();
+
+        public bool Equals(ScriptNum o) => o is ScriptNum num && Data == num.Data;
+        public override bool Equals(object o) => Equals((ScriptNum)o);
 
         /// <summary>
         /// Look at a sequence of bytes as an encoded number.
@@ -123,31 +119,35 @@ namespace CafeLib.BsvSharp.Scripting
             return (tooLong, isNeg, extraBytes);
         }
 
-        public static ScriptNum operator *(ScriptNum a, ScriptNum b) => new ScriptNum(a._value * b._value);
-        public static ScriptNum operator /(ScriptNum a, ScriptNum b) => new ScriptNum(a._value / b._value);
-        public static ScriptNum operator %(ScriptNum a, ScriptNum b) => new ScriptNum(a._value % b._value);
-        public static ScriptNum operator +(ScriptNum a, ScriptNum b) => new ScriptNum(a._value + b._value);
-        public static ScriptNum operator -(ScriptNum a, ScriptNum b) => new ScriptNum(a._value - b._value);
-        public static ScriptNum operator -(ScriptNum a) => new ScriptNum(-a._value);
-        public static bool operator <(ScriptNum a, ScriptNum b) => a._value < b._value;
-        public static bool operator >(ScriptNum a, ScriptNum b) => a._value > b._value;
-        public static bool operator <=(ScriptNum a, ScriptNum b) => a._value <= b._value;
-        public static bool operator >=(ScriptNum a, ScriptNum b) => a._value >= b._value;
-        public static bool operator ==(ScriptNum a, ScriptNum b) => a._value == b._value;
-        public static bool operator !=(ScriptNum a, ScriptNum b) => a._value != b._value;
-        public static implicit operator ScriptNum(Int64 a) => new ScriptNum(a);
+        public static ScriptNum operator *(ScriptNum a, ScriptNum b) => new ScriptNum(a.Data * b.Data);
+        public static ScriptNum operator /(ScriptNum a, ScriptNum b) => new ScriptNum(a.Data / b.Data);
+        public static ScriptNum operator %(ScriptNum a, ScriptNum b) => new ScriptNum(a.Data % b.Data);
+        public static ScriptNum operator +(ScriptNum a, ScriptNum b) => new ScriptNum(a.Data + b.Data);
+        public static ScriptNum operator -(ScriptNum a, ScriptNum b) => new ScriptNum(a.Data - b.Data);
+        public static ScriptNum operator -(ScriptNum a) => new ScriptNum(-a.Data);
+        public static bool operator <(ScriptNum a, ScriptNum b) => a.Data < b.Data;
+        public static bool operator >(ScriptNum a, ScriptNum b) => a.Data > b.Data;
+        public static bool operator <=(ScriptNum a, ScriptNum b) => a.Data <= b.Data;
+        public static bool operator >=(ScriptNum a, ScriptNum b) => a.Data >= b.Data;
+        public static bool operator ==(ScriptNum a, ScriptNum b) => a.Data == b.Data;
+        public static bool operator !=(ScriptNum a, ScriptNum b) => a.Data != b.Data;
         public static implicit operator ScriptNum(bool a) => a ? One : Zero;
+        public static implicit operator ScriptNum(long a) => new(a);
+        public static implicit operator long(ScriptNum rhs) => rhs.Data;
 
         #region Helpers
 
         /// <summary>
-        /// 
+        /// Used to serialize the script number data.
         /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
+        /// <param name="value">value</param>
+        /// <returns>serialized byte array</returns>
         private static byte[] Serialize(long value)
         {
-            if (value == 0) return new byte[0];
+            if (value == 0)
+            {
+                return Array.Empty<byte>();
+            }
 
             var neg = value < 0;
             var absvalue = (ulong)(neg ? -value : value);
@@ -181,24 +181,24 @@ namespace CafeLib.BsvSharp.Scripting
         }
         
         /// <summary>
-        /// 
+        /// Deserialize bytes into a script number data.
         /// </summary>
-        /// <param name="vch"></param>
-        /// <returns></returns>
-        private static long SetValueFromBytes(ReadOnlyByteSpan vch)
+        /// <param name="bytes"></param>
+        /// <returns>script number data</returns>
+        private static long Deserialze(ReadOnlyByteSpan bytes)
         {
-            if (vch.Length == 0)
+            if (bytes.Length == 0)
                 return 0;
 
             long result = 0;
-            for (var i = 0; i < vch.Length; ++i)
-                result |= ((Int64)vch[i]) << 8 * i;
+            for (var i = 0; i < bytes.Length; ++i)
+                result |= ((long)bytes[i]) << 8 * i;
 
             // If the input vector's most significant byte is 0x80, remove it from
             // the result's msb and return a negative.
-            var last = vch.Length - 1;
-            if ((vch[last] & 0x80) != 0) {
-                return -((Int64)((UInt64)result & ~(0x80UL << (8 * last))));
+            var last = bytes.Length - 1;
+            if ((bytes[last] & 0x80) != 0) {
+                return -((long)((ulong)result & ~(0x80UL << (8 * last))));
             }
 
             return result;
@@ -298,7 +298,7 @@ namespace CafeLib.BsvSharp.Scripting
             data = Span<byte>.Empty;
             return true;
         }
-        
+
         #endregion
     }
 }
