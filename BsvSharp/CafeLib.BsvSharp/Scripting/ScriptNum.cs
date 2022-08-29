@@ -54,7 +54,7 @@ namespace CafeLib.BsvSharp.Scripting
 
         public VarType ToValType() => new(ToArray());
 
-        public string ToHex() => Hex.Encode(ToArray());
+        public string ToHex() => Encoders.HexReverse.Encode(ToArray());
 
         public int ToInt()
         {
@@ -68,8 +68,6 @@ namespace CafeLib.BsvSharp.Scripting
         public override string ToString() => $"{Data}L, {ToInt()}, \"{ToHex()}\"";
 
         public override int GetHashCode() => ToInt();
-        public bool Equals(ScriptNum o) => o is ScriptNum num && Data == num.Data;
-        public override bool Equals(object o) => Equals((ScriptNum)o);
 
         public bool Equals(ScriptNum o) => o is ScriptNum num && Data == num.Data;
         public override bool Equals(object o) => Equals((ScriptNum)o);
@@ -121,20 +119,21 @@ namespace CafeLib.BsvSharp.Scripting
             return (tooLong, isNeg, extraBytes);
         }
 
-        public static ScriptNum operator *(ScriptNum a, ScriptNum b) => new ScriptNum(a._value * b._value);
-        public static ScriptNum operator /(ScriptNum a, ScriptNum b) => new ScriptNum(a._value / b._value);
-        public static ScriptNum operator %(ScriptNum a, ScriptNum b) => new ScriptNum(a._value % b._value);
-        public static ScriptNum operator +(ScriptNum a, ScriptNum b) => new ScriptNum(a._value + b._value);
-        public static ScriptNum operator -(ScriptNum a, ScriptNum b) => new ScriptNum(a._value - b._value);
-        public static ScriptNum operator -(ScriptNum a) => new ScriptNum(-a._value);
-        public static bool operator <(ScriptNum a, ScriptNum b) => a._value < b._value;
-        public static bool operator >(ScriptNum a, ScriptNum b) => a._value > b._value;
-        public static bool operator <=(ScriptNum a, ScriptNum b) => a._value <= b._value;
-        public static bool operator >=(ScriptNum a, ScriptNum b) => a._value >= b._value;
-        public static bool operator ==(ScriptNum a, ScriptNum b) => a._value == b._value;
-        public static bool operator !=(ScriptNum a, ScriptNum b) => a._value != b._value;
-        public static implicit operator ScriptNum(Int64 a) => new ScriptNum(a);
-        public static implicit operator ScriptNum(bool a) => a ? One : Zero;
+        public static ScriptNum operator *(ScriptNum a, ScriptNum b) => new ScriptNum(a.Data * b.Data);
+        public static ScriptNum operator /(ScriptNum a, ScriptNum b) => new ScriptNum(a.Data / b.Data);
+        public static ScriptNum operator %(ScriptNum a, ScriptNum b) => new ScriptNum(a.Data % b.Data);
+        public static ScriptNum operator +(ScriptNum a, ScriptNum b) => new ScriptNum(a.Data + b.Data);
+        public static ScriptNum operator -(ScriptNum a, ScriptNum b) => new ScriptNum(a.Data - b.Data);
+        public static ScriptNum operator -(ScriptNum a) => new ScriptNum(-a.Data);
+        public static bool operator <(ScriptNum a, ScriptNum b) => a.Data < b.Data;
+        public static bool operator >(ScriptNum a, ScriptNum b) => a.Data > b.Data;
+        public static bool operator <=(ScriptNum a, ScriptNum b) => a.Data <= b.Data;
+        public static bool operator >=(ScriptNum a, ScriptNum b) => a.Data >= b.Data;
+        public static bool operator ==(ScriptNum a, ScriptNum b) => a.Data == b.Data;
+        public static bool operator !=(ScriptNum a, ScriptNum b) => a.Data != b.Data;
+        public static implicit operator ScriptNum(bool rhs) => rhs ? One : Zero;
+        public static implicit operator ScriptNum(long rhs) => new(rhs);
+        public static implicit operator long(ScriptNum rhs) => rhs.Data;
 
         #region Helpers
 
@@ -184,9 +183,9 @@ namespace CafeLib.BsvSharp.Scripting
         /// <summary>
         /// Deserialize bytes into a script number data.
         /// </summary>
-        /// <param name="vch"></param>
-        /// <returns></returns>
-        private static long SetValueFromBytes(ReadOnlyByteSpan vch)
+        /// <param name="bytes">bytes to deserialize</param>
+        /// <returns>script number data</returns>
+        private static long Deserialize(ReadOnlyByteSpan bytes)
         {
             if (bytes.Length == 0)
                 return 0;
