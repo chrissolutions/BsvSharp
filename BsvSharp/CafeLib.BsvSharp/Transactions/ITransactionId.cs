@@ -1,9 +1,11 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
 using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Transactions
 {
-    [SuppressMessage("ReSharper", "UnusedMemberInSuper.Global")]
     public interface ITransactionId
     {
         UInt256 TxHash { get; }

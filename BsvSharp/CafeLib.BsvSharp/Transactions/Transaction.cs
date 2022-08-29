@@ -1,4 +1,8 @@
-﻿using System;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using System;
 using System.Buffers;
 using System.Linq;
 using CafeLib.BsvSharp.Builders;

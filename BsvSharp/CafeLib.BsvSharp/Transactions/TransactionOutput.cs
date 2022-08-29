@@ -1,10 +1,8 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Extensions;
@@ -16,7 +14,6 @@ using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Transactions
 {
-    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
     public class TransactionOutput : ITransactionId, IDataSerializer, IEquatable<TransactionOutput>
     {
         private ScriptBuilder _scriptBuilder;
@@ -114,14 +111,6 @@ namespace CafeLib.BsvSharp.Transactions
         /// Write TxOut to data writer
         /// </summary>
         /// <param name="writer">data writer</param>
-        /// <param name="parameters">parameters</param>
-        /// <returns>data writer</returns>
-        public IDataWriter WriteTo(IDataWriter writer, object parameters) => WriteTo(writer);
-        
-        /// <summary>
-        /// Write TxOut to data writer
-        /// </summary>
-        /// <param name="writer">data writer</param>
         /// <returns>data writer</returns>
         public IDataWriter WriteTo(IDataWriter writer)
         {
@@ -132,7 +121,7 @@ namespace CafeLib.BsvSharp.Transactions
             return writer;
         }
 
-        public override int GetHashCode() => HashCode.Combine(_scriptBuilder, TxHash, Index, IsChangeOutput);
+        public override int GetHashCode() => HashCode.Combine(TxHash, Index, IsChangeOutput);
 
         public bool Equals(TransactionOutput other)
         {
