@@ -37,6 +37,11 @@ namespace CafeLib.BsvSharp.Scripting
             Data = value;
         }
 
+        public ScriptNum(ReadOnlyByteSpan bytes, uint nMaximumSize)
+            : this (bytes, false, nMaximumSize)
+        {
+        }
+
         public ScriptNum(ReadOnlyByteSpan bytes, bool fRequireMinimal = false, uint nMaximumSize = MaximumElementSize)
             : this()
         {
@@ -48,7 +53,7 @@ namespace CafeLib.BsvSharp.Scripting
         }
 
         public ScriptNum(string hex)
-            : this(Encoders.HexReverse.Decode(hex))
+            : this(Encoders.HexReverse.Decode(hex), hex.Length / 2 <= MaximumElementSize ? MaximumElementSize : (uint)hex.Length / 2)
         {
         }
 
