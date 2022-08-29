@@ -347,7 +347,7 @@ namespace CafeLib.BsvSharp.Scripting
                                 // (xn ... x2 x1 x0 n - xn ... x2 x1 x0 xn)
                                 // (xn ... x2 x1 x0 n - ... x2 x1 x0 xn)
                                 if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                var n = _stack.Pop().ToScriptNum(fRequireMinimal).GetInt();
+                                var n = _stack.Pop().ToScriptNum(fRequireMinimal).ToInt();
                                 if (n < 0 || n >= _stack.Count) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
                                 if (op.Code == Opcode.OP_ROLL)
                                     _stack.Roll(n);
@@ -753,7 +753,7 @@ namespace CafeLib.BsvSharp.Scripting
                                     // (data position -- x1 x2)
                                     if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
-                                    var position = _stack.Pop().ToScriptNum(fRequireMinimal).GetInt();
+                                    var position = _stack.Pop().ToScriptNum(fRequireMinimal).ToInt();
                                     var data = _stack.Pop();
 
                                     // Make sure the split point is apropriate.
@@ -774,7 +774,7 @@ namespace CafeLib.BsvSharp.Scripting
                                     // (in size -- out)
                                     if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
-                                    var size = _stack.Pop().ToScriptNum(fRequireMinimal).GetInt();
+                                    var size = _stack.Pop().ToScriptNum(fRequireMinimal).ToInt();
                                     if (size < 0 || size > RootService.GetNetwork(_networkType).Consensus.MaxScriptElementSize)
                                         return SetError(out error, ScriptError.PUSH_SIZE);
 

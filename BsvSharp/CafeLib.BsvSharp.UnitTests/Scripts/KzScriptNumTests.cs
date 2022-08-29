@@ -102,12 +102,12 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         {
             var sn = new ScriptNum(v64);
             Assert.Equal(v64, sn.GetValue());
-            Assert.Equal(v32, sn.GetInt());
-            Assert.Equal(hex, sn.GetHex());
+            Assert.Equal(v32, sn.ToInt());
+            Assert.Equal(hex, sn.ToHex());
             sn = new ScriptNum(hex);
             Assert.Equal(v64, sn.GetValue());
-            Assert.Equal(v32, sn.GetInt());
-            Assert.Equal(hex, sn.GetHex());
+            Assert.Equal(v32, sn.ToInt());
+            Assert.Equal(hex, sn.ToHex());
         }
         
         [Theory]
@@ -124,12 +124,12 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         {
             var sn = new ScriptNum(v64);
             Assert.Equal(v64, sn.GetValue());
-            Assert.Equal(v32, sn.GetInt());
-            Assert.Equal(hex, sn.GetHex());
+            Assert.Equal(v32, sn.ToInt());
+            Assert.Equal(hex, sn.ToHex());
             sn = new ScriptNum(hex);
             Assert.Equal(v64, sn.GetValue());
-            Assert.Equal(v32, sn.GetInt());
-            Assert.Equal(hex, sn.GetHex());
+            Assert.Equal(v32, sn.ToInt());
+            Assert.Equal(hex, sn.ToHex());
         }
         
         
@@ -147,12 +147,12 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         {
             var sn = new ScriptNum(v64);
             Assert.Equal(v64, sn.GetValue());
-            Assert.Equal(v32, sn.GetInt());
-            Assert.Equal(hex, sn.GetHex());
+            Assert.Equal(v32, sn.ToInt());
+            Assert.Equal(hex, sn.ToHex());
             sn = new ScriptNum(hex);
             Assert.Equal(v64, sn.GetValue());
-            Assert.Equal(v32, sn.GetInt());
-            Assert.Equal(hex, sn.GetHex());
+            Assert.Equal(v32, sn.ToInt());
+            Assert.Equal(hex, sn.ToHex());
         }
         
         [Theory]
@@ -168,12 +168,12 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         {
             var sn = new ScriptNum(v64);
             Assert.Equal(v64, sn.GetValue());
-            Assert.Equal(v32, sn.GetInt());
-            Assert.Equal(hex, sn.GetHex());
+            Assert.Equal(v32, sn.ToInt());
+            Assert.Equal(hex, sn.ToHex());
             sn = new ScriptNum(hex);
             Assert.Equal(v64, sn.GetValue());
-            Assert.Equal(v32, sn.GetInt());
-            Assert.Equal(hex, sn.GetHex());
+            Assert.Equal(v32, sn.ToInt());
+            Assert.Equal(hex, sn.ToHex());
         }
         
         
@@ -189,12 +189,12 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         {
             var sn = new ScriptNum(v64);
             Assert.Equal(v64, sn.GetValue());
-            Assert.Equal(v32, sn.GetInt());
-            Assert.Equal(hex, sn.GetHex());
+            Assert.Equal(v32, sn.ToInt());
+            Assert.Equal(hex, sn.ToHex());
             sn = new ScriptNum(hex);
             Assert.Equal(v64, sn.GetValue());
-            Assert.Equal(v32, sn.GetInt());
-            Assert.Equal(hex, sn.GetHex());
+            Assert.Equal(v32, sn.ToInt());
+            Assert.Equal(hex, sn.ToHex());
         }
 
         [Fact]
@@ -203,12 +203,12 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             foreach (var tv in tvs) {
                 var sn = new ScriptNum(tv.v64);
                 Assert.Equal(tv.v64, sn.GetValue());
-                Assert.Equal(tv.v32, sn.GetInt());
-                Assert.Equal(tv.hex, sn.GetHex());
+                Assert.Equal(tv.v32, sn.ToInt());
+                Assert.Equal(tv.hex, sn.ToHex());
                 sn = new ScriptNum(tv.hex);
                 Assert.Equal(tv.v64, sn.GetValue());
-                Assert.Equal(tv.v32, sn.GetInt());
-                Assert.Equal(tv.hex, sn.GetHex());
+                Assert.Equal(tv.v32, sn.ToInt());
+                Assert.Equal(tv.hex, sn.ToHex());
             }
         }
     }

@@ -64,7 +64,7 @@ namespace CafeLib.BsvSharp.Numerics
 
         public bool ToBool() => Buffer.Any(x => x != 0 && x != 0x80);
 
-        public int ToInt32() => new ScriptNum(Span).GetInt();
+        public int ToInt32() => new ScriptNum(Span).ToInt();
 
         public VarType BitAnd(VarType b)
         {
