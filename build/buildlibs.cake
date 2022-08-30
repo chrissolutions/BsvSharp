@@ -3,6 +3,7 @@
 
 var builder = new Builder(Context);
 var target = Argument("target", "Build");
+Console.WriteLine(DateTime.Now);
 
 Task("CleanSolution")
     .IsDependentOn("FindSolution")
