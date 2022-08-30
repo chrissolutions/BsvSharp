@@ -7,21 +7,27 @@ using System.Threading.Tasks;
 using CafeLib.BsvSharp.Api.Paymail;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
+using CafeLib.Core.Support;
 using Xunit;
 
 namespace CafeLib.BsvSharp.Api.UnitTests {
-    public class PaymailClientTests
+    public class PaymailClientTests : IAsyncLifetime
     {
-        [Fact]
-        public async Task EnsureCapabilityFor()
+        public static PaymailClient Paymail { get; } = new PaymailClient();
+
+        public async Task InitializeAsync()
         {
-            const string domain = "moneybutton.com";
-            var r = new PaymailClient();
-            var pkiOk = await r.DomainHasCapability(domain, Capability.Pki);
-            var pdOk = await r.DomainHasCapability(domain, Capability.PaymentDestination);
-            var svOk = await r.DomainHasCapability(domain, Capability.SenderValidation);
-            var vpkoOk = await r.DomainHasCapability(domain, Capability.VerifyPublicKeyOwner);
-            var raOk = await r.DomainHasCapability(domain, Capability.ReceiverApprovals);
+            await Retry.Run(10, async x =>
+            {
+                await Paymail.CacheDomain("moneybutton.com");
+                await Paymail.CacheDomain("kizmet.org");
+                await Paymail.CacheDomain("kzbsv.org");
+            });
+        }
+
+        public Task DisposeAsync()
+        {
+            return Task.CompletedTask;
         }
 
         [Theory]
@@ -39,21 +45,17 @@ namespace CafeLib.BsvSharp.Api.UnitTests {
         )]
         public async Task GetPubKey(string email, string publicKey)
         {
-            var r = new PaymailClient();
-
             //var privkey = KzElectrumSv.GetMasterPrivKey("<replace with actual wallet seed>").Derive($"0/{int.MaxValue}").PrivKey;
             //var privkey = PrivateKey.FromB58("KxXvocKqZtdHvZP5HHNShrwDQVz2muNPisrzoyeyhXc4tZhBj1nM");
             //var pubkey = privkey.GetPubKey();
             var pubkey = new PublicKey(publicKey);
-            var k = await r.GetPublicKey(email);
+            var k = await Paymail.GetPublicKey(email);
             Assert.Equal(k, pubkey);
         }
 
         [Fact]
         public async Task VerifyPubKey()
         {
-            var r = new PaymailClient();
-
             foreach (var tc in new []
             {
                 new { r = true, p = "kzpaymailasp@kzbsv.org", k = "02c4aa80834a289b43870b56a6483c924b57650eebe6e5185b19258c76656baa35" },
@@ -64,7 +66,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests {
             })
             {
                 var pubkey = new PublicKey(tc.k);
-                var ok = await r.VerifyPubKey(tc.p, pubkey);
+                var ok = await Paymail.VerifyPubKey(tc.p, pubkey);
                 if (tc.r)
                     Assert.True(ok);
                 else
@@ -82,10 +84,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests {
             // Public key returned by GetPubKey("testpaymail@kizmet.org"): M/0/{int.MaxValue}
             // Private key for that public key: m/0/{int.MaxValue}
             // var key = KzElectrumSv.GetMasterPrivKey("<replace with actual wallet seed>").Derive($"0/{int.MaxValue}").PrivKey;
-            var key = PrivateKey.FromBase58("KxXvocKqZtdHvZP5HHNShrwDQVz2muNPisrzoyeyhXc4tZhBj1nM");
+            var key = PrivateKey.FromWif("KxXvocKqZtdHvZP5HHNShrwDQVz2muNPisrzoyeyhXc4tZhBj1nM");
 
-            var r = new PaymailClient();
-            var s = await r.GetOutputScript(key, "tonesnotes@moneybutton.com", "testpaymail@kizmet.org");
+            var s = await Paymail.GetOutputScript(key, "tonesnotes@moneybutton.com", "testpaymail@kizmet.org");
             Assert.True(s.Length > 0);
         }
 
@@ -99,7 +100,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests {
 
             var message = $"{paymail}{amount}{when}{purpose}";
 
-            var privkey = PrivateKey.FromBase58("KxWjJiTRSA7oExnvbWRaCizYB42XMKPxyD6ryzANbdXCJw1fo4sR");
+            var privkey = PrivateKey.FromWif("KxWjJiTRSA7oExnvbWRaCizYB42XMKPxyD6ryzANbdXCJw1fo4sR");
             var signature = privkey.SignMessage(message).ToString();
             Assert.Equal("H7mUf95shi5aTyzDnI7DQWSoGAI2nbPG+56IsSkINJdtAYvhr5ivp2ZdQr91vASAwlm62pAhzoEJ0lcS2ja7llI=", signature);
 

@@ -10,7 +10,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
 
     public class KzElectrumSv
     {
-        public static ExtPrivateKey GetMasterPrivateKey(string passphrase, string password = null) =>
-            ExtPrivateKey.MasterBip39(passphrase, password, passwordPrefix: "electrum");
+        public static HdPrivateKey GetMasterPrivateKey(string passphrase, string password = null) =>
+            HdPrivateKey.MasterBip39(passphrase, password, passwordPrefix: "electrum");
     }
 }

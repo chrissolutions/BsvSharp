@@ -9,6 +9,7 @@ using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Units;
+using CafeLib.Core.Support;
 using CafeLib.Web.Request;
 using DnsClient;
 using Newtonsoft.Json;
@@ -31,6 +32,17 @@ namespace CafeLib.BsvSharp.Api.Paymail
              _cache = new ConcurrentDictionary<string, CapabilitiesResponse>();
              Headers.Add("User-Agent", "KzPaymailClient");
              Headers.Add("Accept", WebContentType.Json);
+        }
+
+        /// <summary>
+        /// Cache a domain.
+        /// </summary>
+        /// <param name="domain">domain</param>
+        /// <returns>true if domain is cached</returns>
+        public async Task<bool> CacheDomain(string domain)
+        {
+            await GetApiDescriptionFor(domain);
+            return _cache.ContainsKey(domain);
         }
 
         /// <summary>
@@ -127,7 +139,7 @@ namespace CafeLib.BsvSharp.Api.Paymail
             var response = await PostAsync(url, json);
             // e.g. {"output":"76a914bdfbe8a16162ba467746e382a081a1857831811088ac"} 
             var outputScript = JsonConvert.DeserializeObject<GetOutputScriptResponse>(response);
-            return outputScript != null ? new Script(outputScript.Output) : Script.None;
+            return outputScript != null ? Script.FromHex(outputScript.Output) : Script.None;
         }
 
         /// <summary>
@@ -195,22 +207,25 @@ namespace CafeLib.BsvSharp.Api.Paymail
 
         private async Task<CapabilitiesResponse> GetApiDescriptionFor(string domain, bool ignoreCache = false)
         {
-            if (!ignoreCache && _cache.TryGetValue(domain, out var ba))
-                return ba;
+            if (!ignoreCache && _cache.TryGetValue(domain, out var capabilities))
+                return capabilities;
 
             var hostname = domain;
-            var dns = new LookupClient();
-            var r2 = await dns.QueryAsync($"_bsvalias._tcp.{domain}", QueryType.SRV);
-            if (!r2.HasError && r2.Answers.Count == 1)
+            await Retry.Run(async x =>
             {
-                var srv = r2.Answers[0] as DnsClient.Protocol.SrvRecord;
-                hostname = $"{srv?.Target.Value[..^1]}:{srv?.Port}";
-            }
+                var dns = new LookupClient();
+                var response = await dns.QueryAsync($"_bsvalias._tcp.{domain}", QueryType.SRV);
+                if (!response.HasError && response.Answers.Count == 1)
+                {
+                    var srv = response.Answers[0] as DnsClient.Protocol.SrvRecord;
+                    hostname = $"{srv?.Target.Value[..^1]}:{srv?.Port}";
+                }
+            });
 
             try
             {
                 var json = await GetAsync($"https://{hostname}/.well-known/bsvalias");
-                var capabilities = JsonConvert.DeserializeObject<CapabilitiesResponse>(json);
+                capabilities = JsonConvert.DeserializeObject<CapabilitiesResponse>(json);
                 _cache[domain] = capabilities;
                 return capabilities;
             }
