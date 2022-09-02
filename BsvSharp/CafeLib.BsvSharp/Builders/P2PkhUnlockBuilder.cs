@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -20,8 +19,8 @@ namespace CafeLib.BsvSharp.Builders
         public P2PkhUnlockBuilder(PublicKey publicKey)
             : base(publicKey, TemplateId.Pay2PublicKeyHash)
         {
-            Push(new byte[72]) // This will become the CHECKSIG signature
-                .Push(publicKey);
+            AddData(new byte[72]) // This will become the CHECKSIG signature
+                .AddData(publicKey);
         }
         
         public P2PkhUnlockBuilder(Script script)
@@ -39,8 +38,8 @@ namespace CafeLib.BsvSharp.Builders
         {
             base.Clear();
             
-            Push(Signatures.FirstOrDefault().ToTxFormat().Data)
-                .Push(PublicKey);
+            AddData(Signatures.FirstOrDefault().ToTxFormat().Data)
+                .AddData(PublicKey);
 
             return base.ToScript();
         }
@@ -54,13 +53,13 @@ namespace CafeLib.BsvSharp.Builders
 
             Set(scriptSig);
 
-            if (Ops.Count != 2)
+            if (Operands.Count != 2)
             {
                 throw new ScriptException("Wrong number of data elements for P2PKH ScriptSig");
             }
 
-            AddSignature(new Signature(Ops.First().Operand.Data));
-            PublicKey = new PublicKey(Ops.Last().Operand.Data);
+            AddSignature(new Signature(Operands.First().Operand.Data));
+            PublicKey = new PublicKey(Operands.Last().Operand.Data);
         }
     }
 }

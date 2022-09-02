@@ -1,15 +1,12 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace CafeLib.BsvSharp.Units
 {
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
-    public readonly struct Amount : IComparable<Amount>, IComparable
+    public readonly struct Amount : IEquatable<Amount>, IComparable<Amount>, IComparable
     {
         public static Amount Zero = new(0L);
         public static Amount Null => -1L;
@@ -73,7 +70,7 @@ namespace CafeLib.BsvSharp.Units
 
         public decimal ToBitcoin() => (decimal)Satoshis / (long)(BitcoinUnit.Bitcoin);
 
-        public string ToString(bool group, bool units, BitcoinUnit unit = BitcoinUnit.MilliBitcoin)
+        private string ToString(bool group, bool units, BitcoinUnit unit = BitcoinUnit.MilliBitcoin)
         {
             // Satoshis
             // 2_100_000_000_000_000
@@ -112,9 +109,10 @@ namespace CafeLib.BsvSharp.Units
 
         public static string ToString(long value) => new Amount(value).ToString();
 
-        public override int GetHashCode() => Satoshis.GetHashCode();
-        public override bool Equals(object obj) => obj is Amount amount && this == amount;
         public bool Equals(Amount o) => Satoshis == o.Satoshis;
+        public override bool Equals(object obj) => obj is Amount amount && Equals(amount);
+
+        public override int GetHashCode() => Satoshis.GetHashCode();
 
         public static implicit operator Amount(long value) => new(value);
         public static implicit operator long(Amount value) => value.Satoshis;
@@ -130,7 +128,8 @@ namespace CafeLib.BsvSharp.Units
 
         public int CompareTo(Amount other) => Satoshis.CompareTo(other.Satoshis);
 
-        public int CompareTo(object obj) {
+        public int CompareTo(object obj)
+        {
             return obj switch
             {
                 Amount a => CompareTo(a),

@@ -6,9 +6,11 @@
 using System.Linq;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
+using CafeLib.BsvSharp.Keys.Base58;
 using CafeLib.BsvSharp.Passphrase;
 using CafeLib.Core.Numerics;
 using Xunit;
+// ReSharper disable StringLiteralTypo
 
 namespace CafeLib.BsvSharp.UnitTests.Keys 
 {
@@ -166,10 +168,10 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             Assert.NotNull(mnemonic); // If checksum doesn't match returns null.
             Assert.True(mnemonic.Entropy.SequenceEqual(bytes));
             var seed512 = UInt512.FromHex(seed, true);
-            var seedBip39 = ExtPrivateKey.Bip39Seed(words, "TREZOR");
+            var seedBip39 = HdPrivateKey.Bip39Seed(words, "TREZOR");
             Assert.Equal(seed512, seedBip39);
-            var privkeyFromWords = ExtPrivateKey.FromWords(words, "TREZOR");
-            var privkeyFromB58 = new Base58ExtPrivateKey(b58PrivateKey).GetKey();
+            var privkeyFromWords = HdPrivateKey.FromWords(words, "TREZOR");
+            var privkeyFromB58 = new Base58HdPrivateKey(b58PrivateKey).GetKey();
             Assert.Equal(privkeyFromB58, privkeyFromWords);
         }
 
@@ -190,7 +192,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         {
             var _ = entropy;
             var seed512 = UInt512.FromHex(seed, true);
-            var seedBip39 = ExtPrivateKey.Bip39Seed(words, password);
+            var seedBip39 = HdPrivateKey.Bip39Seed(words, password);
             Assert.Equal(seed512, seedBip39);
         }
     }

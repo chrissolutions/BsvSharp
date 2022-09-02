@@ -2,13 +2,13 @@
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Network;
-using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Services;
 using CafeLib.BsvSharp.Signatures;
 using CafeLib.BsvSharp.Transactions;
 using CafeLib.Core.Numerics;
 using Xunit;
+// ReSharper disable StringLiteralTypo
 
 namespace CafeLib.BsvSharp.Testnet.UnitTests
 {
@@ -23,7 +23,7 @@ namespace CafeLib.BsvSharp.Testnet.UnitTests
         public void Create_Testnet_Address_From_Wif_PrivateKey()
         {
             var privateKey = PrivateKey.FromWif("92VYMmwFLXRwXn5688edGxYYgMFsc3fUXYhGp17WocQhU6zG1kd");
-            var publicKey = privateKey.CreatePublicKey();
+            var publicKey = PublicKey.FromPrivateKey(privateKey);
             var address = publicKey.ToAddress();
             Assert.Equal(NetworkType.Test, address.NetworkType);
             Assert.Equal("moiAvLUw16qgrwhFGo1eDnXHC2wPMYiv7Y", address.ToString());
@@ -40,13 +40,29 @@ namespace CafeLib.BsvSharp.Testnet.UnitTests
         [Fact]
         public void Convert_Testnet_PrivateKey_To_PublicKey()
         {
-            var privhex = "906977a061af29276e40bf377042ffbde414e496ae2260bbf1fa9d085637bfff";
-            var pubhex = "02a1633cafcc01ebfb6d78e39f687a1f0995c62fc95f51ead10a02ee0be551b5dc";
+            const string privHex = "906977a061af29276e40bf377042ffbde414e496ae2260bbf1fa9d085637bfff";
+            const string pubHex = "02a1633cafcc01ebfb6d78e39f687a1f0995c62fc95f51ead10a02ee0be551b5dc";
 
-            var privateKey = new PrivateKey(privhex);
+            var privateKey = new PrivateKey(privHex);
             var publicKey = privateKey.CreatePublicKey();
             
-            Assert.Equal(pubhex, publicKey.ToHex());
+            Assert.Equal(pubHex, publicKey.ToHex());
+        }
+
+        [Fact]
+        public void Create_PrivateKey_Compressed_Test()
+        {
+            var privateKey = PrivateKey.FromRandom();
+            var keyStr = privateKey.ToString();
+            Assert.Contains(RootService.GetNetwork().PrivateKeyCompressed, x => x == (byte)keyStr[0]);
+        }
+
+        [Fact]
+        public void Create_PrivateKey_Uncompressed_Test()
+        {
+            var privateKey = new PrivateKey();
+            var keyStr = privateKey.ToString();
+            Assert.Equal(RootService.GetNetwork().PrivateKeyUncompressed[0], (byte)keyStr[0]);
         }
 
         [Fact]
@@ -82,7 +98,7 @@ namespace CafeLib.BsvSharp.Testnet.UnitTests
 
             var utxo = new Utxo
             {
-                TxHash = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
+                TxId = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
                 Index = 0,
                 ScriptPubKey = new P2PkhLockBuilder(fromAddress).ToScript(),
                 Amount = 100000
@@ -91,7 +107,7 @@ namespace CafeLib.BsvSharp.Testnet.UnitTests
             var tx = new Transaction();
             tx.SpendFromUtxo(utxo, new P2PkhUnlockBuilder(publicKey));
             tx.SpendTo(toAddress, 100000L, new P2PkhLockBuilder(toAddress));
-            tx.SignInput(0, privateKey, SignatureHashEnum.All);
+            tx.Sign(0, privateKey, SignatureHashEnum.All);
 
             // we then extract the signature from the first input
             var scriptSig = tx.Inputs[0].ScriptSig;

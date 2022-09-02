@@ -6,13 +6,27 @@
 using System.Threading.Tasks;
 using CafeLib.BsvSharp.Api.Paymail;
 using CafeLib.BsvSharp.Keys;
+using CafeLib.Core.Support;
 using Xunit;
 
 namespace CafeLib.BsvSharp.Api.UnitTests
 {
-    public class PaymailApiTests
+    public class PaymailApiTests : IAsyncLifetime
     {
-        public PaymailClient Paymail { get; } = new PaymailClient();
+        public static PaymailClient Paymail { get; } = new PaymailClient();
+
+        public async Task InitializeAsync()
+        {
+            await Retry.Run(10, async x =>
+            {
+                await Paymail.CacheDomain("moneybutton.com");
+            });
+        }
+
+        public Task DisposeAsync()
+        {
+            return Task.CompletedTask;
+        }
 
         [Theory]
         [InlineData("moneybutton.com", Capability.Pki, true)]
@@ -73,7 +87,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             // Public key returned by GetPublicKey("testpaymail@kizmet.org"): M/0/{int.MaxValue}
             // Private key for that public key: m/0/{int.MaxValue}
             // var key = KzElectrumSv.GetMasterPrivKey("<replace with actual wallet seed>").Derive($"0/{int.MaxValue}").PrivKey;
-            var key = PrivateKey.FromBase58("KxXvocKqZtdHvZP5HHNShrwDQVz2muNPisrzoyeyhXc4tZhBj1nM");
+            var key = PrivateKey.FromWif("KxXvocKqZtdHvZP5HHNShrwDQVz2muNPisrzoyeyhXc4tZhBj1nM");
 
             var r = new PaymailClient();
             var s = await r.GetOutputScript(key, "tonesnotes@moneybutton.com", "testpaymail@kizmet.org");

@@ -1,9 +1,7 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
-using System.Diagnostics.CodeAnalysis;
 using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
@@ -23,14 +21,13 @@ namespace CafeLib.BsvSharp.Transactions
     /// Not used for making dynamic changes (building scripts).
     /// See <see cref="Transaction"/> when dynamically building a transaction input.
     /// </summary>
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
-    public class TxIn : ITxId, IDataSerializer
+    public class TransactionInput : ITransactionId, IDataSerializer
     {
         /// <summary>
         /// This is the ScriptPub of the referenced Prevout.
         /// Used to sign and verify this input.
         /// </summary>
-        private readonly ScriptBuilder _scriptBuilder;
+        private ScriptBuilder _scriptBuilder;
 
         /// <summary>
         /// Setting nSequence to this value for every input in a transaction disables nLockTime.
@@ -70,7 +67,7 @@ namespace CafeLib.BsvSharp.Transactions
 
         public OutPoint PrevOut { get; private set; }
 
-        public Script UtxoScript { get; private set; }
+        public Script UtxoScript { get; internal set; }
 
         public uint SequenceNumber { get; set; }
 
@@ -92,7 +89,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <summary>
         /// TxIn default constructor.
         /// </summary>
-        public TxIn()
+        internal TransactionInput()
         {
         }
 
@@ -104,12 +101,12 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="utxoScript"></param>
         /// <param name="sequenceNumber"></param>
         /// <param name="scriptBuilder"></param>
-        public TxIn(OutPoint prevOutPoint, Amount amount, Script utxoScript, uint sequenceNumber, ScriptBuilder scriptBuilder = null)
+        public TransactionInput(OutPoint prevOutPoint, Amount amount, Script utxoScript, uint sequenceNumber, ScriptBuilder scriptBuilder = null)
         {
             PrevOut = prevOutPoint;
             Amount = amount;
             UtxoScript = utxoScript;
-            _scriptBuilder = scriptBuilder ?? new DefaultSignedUnlockBuilder();
+            _scriptBuilder = scriptBuilder ?? new DefaultUnlockBuilder();
             SequenceNumber = sequenceNumber;
         }
 
@@ -121,8 +118,8 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="amount"></param>
         /// <param name="utxoScript"></param>
         /// <param name="scriptBuilder"></param>
-        public TxIn(UInt256 prevTxId, int outIndex, Amount amount, Script utxoScript, ScriptBuilder scriptBuilder)
-            : this(prevTxId, outIndex, amount, utxoScript, SequenceFinal -1, scriptBuilder)
+        public TransactionInput(UInt256 prevTxId, int outIndex, Amount amount, Script utxoScript, ScriptBuilder scriptBuilder)
+            : this(new OutPoint(prevTxId, outIndex), amount, utxoScript, SequenceFinal, scriptBuilder)
         {
         }
 
@@ -132,11 +129,32 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="prevTxId"></param>
         /// <param name="outIndex"></param>
         /// <param name="amount"></param>
-        /// <param name="utxoScript"></param>
+        public TransactionInput(UInt256 prevTxId, int outIndex, Amount amount)
+            : this(new OutPoint(prevTxId, outIndex), amount, Script.None, SequenceFinal, null)
+        {
+        }
+
+        /// <summary>
+        /// Transaction input constructor.
+        /// </summary>
+        /// <param name="prevTxId"></param>
+        /// <param name="outIndex"></param>
+        /// <param name="amount"></param>
         /// <param name="sequenceNumber"></param>
+        public TransactionInput(UInt256 prevTxId, int outIndex, Amount amount, uint sequenceNumber)
+            : this(new OutPoint(prevTxId, outIndex), amount, Script.None, sequenceNumber, null)
+        {
+        }
+
+        /// <summary>
+        /// Transaction input constructor.
+        /// </summary>
+        /// <param name="prevTxId"></param>
+        /// <param name="outIndex"></param>
+        /// <param name="amount"></param>
         /// <param name="scriptBuilder"></param>
-        public TxIn(UInt256 prevTxId, int outIndex, Amount amount, Script utxoScript = new(), uint sequenceNumber = SequenceFinal, ScriptBuilder scriptBuilder = null)
-            : this(new OutPoint(prevTxId, outIndex), amount, utxoScript, sequenceNumber, scriptBuilder)
+        public TransactionInput(UInt256 prevTxId, int outIndex, Amount amount, ScriptBuilder scriptBuilder = null)
+            : this(new OutPoint(prevTxId, outIndex), amount, Script.None, SequenceFinal, scriptBuilder)
         {
         }
 
@@ -145,12 +163,27 @@ namespace CafeLib.BsvSharp.Transactions
         {
             writer.Write(Encoders.HexReverse.Decode(TxId));
             writer.Write(Index);
-            writer.Write(UtxoScript);
+            writer.Write(_scriptBuilder);
             writer.Write(SequenceNumber);
             return writer;
         }
 
-       internal bool Sign(Transaction tx, PrivateKey privateKey, SignatureHashEnum sighashType = SignatureHashEnum.All | SignatureHashEnum.ForkId)
+        public bool TryReadTxIn(ref ByteSequenceReader r)
+        {
+            var prevOut = new OutPoint();
+            if (!prevOut.TryReadOutPoint(ref r)) return false;
+            PrevOut = prevOut;
+
+            var script = new Script();
+            if (!script.TryReadScript(ref r)) return false;
+            _scriptBuilder = script;
+
+            if (!r.TryReadLittleEndian(out uint sequenceNumber)) return false;
+            SequenceNumber = sequenceNumber;
+            return true;
+        }
+
+        internal bool Sign(Transaction tx, PrivateKey privateKey, SignatureHashEnum sighashType = SignatureHashEnum.All | SignatureHashEnum.ForkId)
         {
             var sigHash = new SignatureHashType(sighashType);
             var signatureHash = TransactionSignatureChecker.ComputeSignatureHash(UtxoScript, tx, tx.Inputs.IndexOf(this), sigHash, Amount);
@@ -166,21 +199,6 @@ namespace CafeLib.BsvSharp.Transactions
 
             IsFullySigned = false;
             return false;
-        }
-
-        public bool TryReadTxIn(ref ByteSequenceReader r)
-        {
-            var prevOut = new OutPoint();
-            if (!prevOut.TryReadOutPoint(ref r)) return false;
-            PrevOut = prevOut;
-
-            var script = new Script();
-            if (!script.TryReadScript(ref r)) return false;
-            UtxoScript = script;
-
-            if (!r.TryReadLittleEndian(out uint sequenceNumber)) return false;
-            SequenceNumber = sequenceNumber;
-            return true;
         }
     }
 }

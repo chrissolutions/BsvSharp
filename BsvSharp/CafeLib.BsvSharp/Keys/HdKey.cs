@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -8,15 +7,21 @@ using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Keys
 {
-    public abstract class ExtKey
+    /// <summary>
+    /// Hierarchical Deterministic Key.
+    /// </summary>
+    public abstract class HdKey
     {
-        public const uint HardenedBit = 0x80000000;
+        protected const uint HardenedBit = 0x80000000;
         public const int Bip32KeySize = 74;
 
+        /// <summary>
+        /// Key depth.
+        /// </summary>
         public byte Depth { get; protected set; }
 
         /// <summary>
-        /// 
+        /// Child key.
         /// </summary>
         protected uint Child { get; set; }
 
@@ -26,12 +31,12 @@ namespace CafeLib.BsvSharp.Keys
         public int Fingerprint { get; protected set; }
 
         /// <summary>
-        /// 
+        /// Indicates whether the key is hardened.
         /// </summary>
         public bool Hardened => Child >= HardenedBit;
 
         /// <summary>
-        /// 
+        /// Chain code.
         /// </summary>
         public UInt256 ChainCode { get; protected set; }
 
@@ -46,10 +51,16 @@ namespace CafeLib.BsvSharp.Keys
         public uint IndexWithHardened => Child;
 
         /// <summary>
-        /// 
+        /// Encode the key.
         /// </summary>
         /// <param name="code"></param>
         public abstract void Encode(ByteSpan code);
+
+        /// <summary>
+        /// Decode the key.
+        /// </summary>
+        /// <param name="code"></param>
+        public abstract void Decode(ReadOnlyByteSpan code);
 
         /// <summary>
         /// 
@@ -57,7 +68,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="index"></param>
         /// <param name="hardened"></param>
         /// <returns></returns>
-        protected abstract ExtKey DeriveBase(int index, bool hardened);
+        protected abstract HdKey DeriveBase(int index, bool hardened);
 
         /// <summary>
         /// Computes the key specified by a key path.
@@ -66,7 +77,7 @@ namespace CafeLib.BsvSharp.Keys
         /// </summary>
         /// <param name="kp"></param>
         /// <returns>null on derivation failure. Otherwise the derived private key.</returns>
-        public ExtKey DeriveBase(KeyPath kp)
+        protected HdKey DeriveBase(KeyPath kp)
         {
             var k = this;
             foreach (var i in kp)
@@ -79,10 +90,10 @@ namespace CafeLib.BsvSharp.Keys
 
         public override int GetHashCode() => Depth.GetHashCode() ^ Fingerprint.GetHashCode() ^ Child.GetHashCode() ^ ChainCode.GetHashCode();
 
-        public bool Equals(ExtKey o) => !(o is null) && Depth == o.Depth && Fingerprint == o.Fingerprint && Child == o.Child && ChainCode == o.ChainCode;
-        public override bool Equals(object obj) => obj is ExtKey key && Equals(key);
+        public bool Equals(HdKey o) => o is not null && Depth == o.Depth && Fingerprint == o.Fingerprint && Child == o.Child && ChainCode == o.ChainCode;
+        public override bool Equals(object obj) => obj is HdKey key && Equals(key);
 
-        public static bool operator ==(ExtKey x, ExtKey y) => x?.Equals(y) ?? y is null;
-        public static bool operator !=(ExtKey x, ExtKey y) => !(x == y);
+        public static bool operator ==(HdKey x, HdKey y) => x?.Equals(y) ?? y is null;
+        public static bool operator !=(HdKey x, HdKey y) => !(x == y);
     }
 }

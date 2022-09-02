@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -43,10 +42,8 @@ namespace CafeLib.BsvSharp.Scripting
         public bool EvalScript(Script script, ScriptFlags flags, ISignatureChecker checker, out ScriptError error)
         {
             var ros = new ReadOnlyByteSequence(script.Data);
-            // ReSharper disable once UnusedVariable
-            var pc = ros.Start;
+            var pStart = ros.Start;
             var pend = ros.End;
-            var pBeginCodeHash = ros.Start;
             var op = new Operand();
             var vfExec = new ScriptStack<bool>();
             var altStack = new ScriptStack<VarType>();
@@ -349,7 +346,7 @@ namespace CafeLib.BsvSharp.Scripting
                                 // (xn ... x2 x1 x0 n - xn ... x2 x1 x0 xn)
                                 // (xn ... x2 x1 x0 n - ... x2 x1 x0 xn)
                                 if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                var n = _stack.Pop().ToScriptNum(fRequireMinimal).GetInt();
+                                var n = _stack.Pop().ToScriptNum(fRequireMinimal).ToInt();
                                 if (n < 0 || n >= _stack.Count) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
                                 if (op.Code == Opcode.OP_ROLL)
                                     _stack.Roll(n);
@@ -689,7 +686,7 @@ namespace CafeLib.BsvSharp.Scripting
                             case Opcode.OP_CODESEPARATOR:
                                 {
                                     // Hash starts after the code separator
-                                    pBeginCodeHash = ros.Data.Start;
+                                    pStart = ros.Data.Start;
                                 }
                                 break;
 
@@ -708,13 +705,12 @@ namespace CafeLib.BsvSharp.Scripting
                                     }
 
                                     // Subset of script starting at the most recent code separator.
-                                    var subScript = script.Slice(pBeginCodeHash, pend);
+                                    var subScript = script.Slice(pStart, pend);
 
                                     // Remove signature for pre-fork scripts
                                     CleanupScriptCode(subScript, vchSig, flags);
 
-                                    bool fSuccess = checker.CheckSignature(vchSig, vchPubKey, subScript, flags);
-
+                                    bool fSuccess = VerifySignature(checker, vchSig, vchPubKey, subScript, flags);
                                     if (!fSuccess && (flags & ScriptFlags.VERIFY_NULLFAIL) != 0 && vchSig.Length > 0)
                                     {
                                         return SetError(out error, ScriptError.SIG_NULLFAIL);
@@ -756,7 +752,7 @@ namespace CafeLib.BsvSharp.Scripting
                                     // (data position -- x1 x2)
                                     if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
-                                    var position = _stack.Pop().ToScriptNum(fRequireMinimal).GetInt();
+                                    var position = _stack.Pop().ToScriptNum(fRequireMinimal).ToInt();
                                     var data = _stack.Pop();
 
                                     // Make sure the split point is apropriate.
@@ -777,7 +773,7 @@ namespace CafeLib.BsvSharp.Scripting
                                     // (in size -- out)
                                     if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
-                                    var size = _stack.Pop().ToScriptNum(fRequireMinimal).GetInt();
+                                    var size = _stack.Pop().ToScriptNum(fRequireMinimal).ToInt();
                                     if (size < 0 || size > RootService.GetNetwork(_networkType).Consensus.MaxScriptElementSize)
                                         return SetError(out error, ScriptError.PUSH_SIZE);
 
@@ -833,7 +829,7 @@ namespace CafeLib.BsvSharp.Scripting
         }
 
         private static SignatureHashType GetHashType(VarType vchSig)
-            => new SignatureHashType(vchSig.Length == 0 ? SignatureHashEnum.Unsupported : (SignatureHashEnum)vchSig.LastByte);
+            => new(vchSig.Length == 0 ? SignatureHashEnum.Unsupported : (SignatureHashEnum)vchSig.LastByte);
 
 
         private static void CleanupScriptCode(Script scriptCode, VarType vchSig, ScriptFlags flags)
@@ -931,6 +927,20 @@ namespace CafeLib.BsvSharp.Scripting
             }
 
             return true;
+        }
+
+        private static bool VerifySignature(ISignatureChecker checker, VarType vchSig, VarType vchPubKey, Script subScript, ScriptFlags flags)
+        {
+            bool fSuccess = false;
+            try
+            {
+                fSuccess = checker.CheckSignature(vchSig, vchPubKey, subScript, flags);
+            }
+            catch
+            {
+            }
+
+            return fSuccess;
         }
 
         private static bool IsLowDerSignature(VarType vchSig, ref ScriptError error)

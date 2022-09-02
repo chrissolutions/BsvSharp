@@ -77,16 +77,16 @@ namespace CafeLib.BsvSharp.UnitTests.Network
 
             var utxo = new Utxo
             {
-                TxHash = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
+                TxId = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
                 Index = 0,
                 ScriptPubKey = new P2PkhLockBuilder(fromAddress).ToScript(),
                 Amount = 100000
             };
 
-            var tx = new Transaction();
-            tx.SpendFromUtxo(utxo, new P2PkhUnlockBuilder(publicKey));
-            tx.SpendTo(toAddress, 100000L, new P2PkhLockBuilder(toAddress));
-            tx.SignInput(0, privateKey, SignatureHashEnum.All);
+            var tx = new Transaction()
+                .SpendFromUtxo(utxo, new P2PkhUnlockBuilder(publicKey))
+                .SpendTo(toAddress, 100000L, new P2PkhLockBuilder(toAddress))
+                .Sign(0, privateKey, SignatureHashEnum.All);
 
             // we then extract the signature from the first input
             var scriptSig = tx.Inputs[0].ScriptSig;

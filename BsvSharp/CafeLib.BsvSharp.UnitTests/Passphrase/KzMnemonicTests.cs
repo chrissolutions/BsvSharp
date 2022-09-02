@@ -133,16 +133,16 @@ namespace CafeLib.BsvSharp.UnitTests.Passphrase
         public void MnemonicToAddress()
         {
             const string words = "dutch expire chief blue paddle flush upset health catch drill turtle slot";
-            var m = ExtPrivateKey.MasterBip39(words);
+            var m = HdPrivateKey.MasterBip39(words);
             var path = new KeyPath("m/44'/0'/0'");
             var hdPrivateKey = m.Derive(path);
             var privateKey = hdPrivateKey.PrivateKey;
-            var hdPublicKey = hdPrivateKey.GetExtPublicKey();
+            var hdPublicKey = hdPrivateKey.GetHdPublicKey();
             var publicKey = hdPublicKey.PublicKey;
             var address = hdPublicKey.PublicKey.ToAddress();
 
             Assert.Equal("L4qUUQ5egQ31LC2gGCP4wmuauM9RbLtKhPfk5AJTFemDapDSWH1E", privateKey.ToString());
-            Assert.Equal("12ApBetoCb4CH6ye4K8ro52iBpGHRkdKMr", publicKey.ToString());
+            Assert.Equal("12ApBetoCb4CH6ye4K8ro52iBpGHRkdKMr", publicKey.ToAddress().ToString());
             Assert.Equal("12ApBetoCb4CH6ye4K8ro52iBpGHRkdKMr", address.ToString());
         }
 

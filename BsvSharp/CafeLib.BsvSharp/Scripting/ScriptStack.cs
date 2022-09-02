@@ -1,14 +1,15 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace CafeLib.BsvSharp.Scripting
 {
-    internal class ScriptStack<T>
+    internal class ScriptStack<T> : IEnumerable<T>
     {
         private T[] _array;
 
@@ -19,9 +20,10 @@ namespace CafeLib.BsvSharp.Scripting
             _array = new T[DefaultCapacity];
         }
 
-        public ScriptStack(int capacity)
+        public ScriptStack(ScriptStack<T> stack)
         {
-            _array = new T[capacity];
+            _array = new T[stack.Count];
+            Array.Copy(stack._array, _array, stack.Count);
         }
 
         public int Count { get; private set; }
@@ -45,48 +47,26 @@ namespace CafeLib.BsvSharp.Scripting
             }
         }
 
-        public T Peek()
+        public T Peek(int index = -1)
         {
-            return _array[Count - 1];
-        }
-
-        public bool TryPeek(out T result)
-        {
-            if (Count == 0) {
-                result = default;
-                return false;
-            }
-            result = _array[Count - 1];
-            return true;
+            var position = index < 0 ? -index : index;
+            return _array[Count - position];
         }
 
         public T Pop()
         {
             var item = _array[--Count];
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>()) {
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
                 _array[Count] = default;     // Free memory quicker.
             }
             return item;
         }
 
-        public bool TryPop(out T result)
-        {
-            if (Count == 0) {
-                result = default;
-                return false;
-            }
-
-            result = _array[--Count];
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>()) {
-                _array[Count] = default;     // Free memory quicker.
-            }
-            return true;
-        }
-
         public void Push(T item)
         {
             if (Count == _array.Length)
-                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+                Array.Resize(ref _array, _array.Length == 0 ? DefaultCapacity : 2 * _array.Length);
             _array[Count++] = item;
         }
 
@@ -97,10 +77,13 @@ namespace CafeLib.BsvSharp.Scripting
 
         public void Drop2()
         {
-            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>()) {
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
                 _array[--Count] = default;
                 _array[--Count] = default;
-            } else {
+            }
+            else
+            {
                 Count -= 2;
             }
         }
@@ -109,7 +92,7 @@ namespace CafeLib.BsvSharp.Scripting
         {
             // (x1 x2 -- x1 x2 x1 x2)
             if (Count + 2 > _array.Length)
-                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+                Array.Resize(ref _array, _array.Length == 0 ? DefaultCapacity : 2 * _array.Length);
             _array[Count++] = _array[Count - 3];
             _array[Count++] = _array[Count - 3];
         }
@@ -123,7 +106,7 @@ namespace CafeLib.BsvSharp.Scripting
         {
             // (x1 x2 x3 -- x1 x2 x3 x1 x2 x3)
             if (Count + 3 > _array.Length)
-                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+                Array.Resize(ref _array, _array.Length == 0 ? DefaultCapacity : 2 * _array.Length);
             _array[Count++] = _array[Count - 4];
             _array[Count++] = _array[Count - 4];
             _array[Count++] = _array[Count - 4];
@@ -133,7 +116,7 @@ namespace CafeLib.BsvSharp.Scripting
         {
             // (x1 x2 -- x1 x2 x1)
             if (Count + 1 > _array.Length)
-                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+                Array.Resize(ref _array, _array.Length == 0 ? DefaultCapacity : 2 * _array.Length);
             _array[Count++] = _array[Count - 3];
         }
 
@@ -141,7 +124,7 @@ namespace CafeLib.BsvSharp.Scripting
         {
             // (x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2)
             if (Count + 2 > _array.Length)
-                Array.Resize(ref _array, (_array.Length == 0) ? DefaultCapacity : 2 * _array.Length);
+                Array.Resize(ref _array, _array.Length == 0 ? DefaultCapacity : 2 * _array.Length);
             _array[Count++] = _array[Count - 5];
             _array[Count++] = _array[Count - 5];
         }
@@ -171,9 +154,7 @@ namespace CafeLib.BsvSharp.Scripting
         public void Swap()
         {
             // (x1 x2 -- x2 x1)
-            var x1 = _array[Count - 2];
-            _array[Count - 2] = _array[Count - 1];
-            _array[Count - 1] = x1;
+            (_array[Count - 2], _array[Count - 1]) = (_array[Count - 1], _array[Count - 2]);
         }
 
         public void Swap2()
@@ -199,10 +180,8 @@ namespace CafeLib.BsvSharp.Scripting
         public void Tuck()
         {
             // (x1 x2 -- x2 x1 x2)
-            var x2 = _array[Count - 1];
-            _array[Count - 1] = _array[Count - 2];
-            _array[Count - 2] = x2;
-            Push(x2);
+            (_array[Count - 2], _array[Count - 1]) = (_array[Count - 1], _array[Count - 2]);
+            Push(_array[Count - 2]);
         }
 
         public void Roll(int n)
@@ -218,6 +197,17 @@ namespace CafeLib.BsvSharp.Scripting
         {
             // (xn ... x2 x1 x0 - xn ... x2 x1 x0 xn)
             Push(_array[Count - 1 - n]);
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            for (var i = 0; i < Count; ++i)
+                yield return _array[i];
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

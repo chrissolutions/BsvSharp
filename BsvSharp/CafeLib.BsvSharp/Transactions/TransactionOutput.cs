@@ -1,10 +1,8 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Extensions;
@@ -16,15 +14,14 @@ using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Transactions
 {
-    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
-    public class TxOut : ITxId, IDataSerializer, IEquatable<TxOut>
+    public class TransactionOutput : ITransactionId, IDataSerializer, IEquatable<TransactionOutput>
     {
         private ScriptBuilder _scriptBuilder;
 
         /// <summary>
         /// Empty transaction output
         /// </summary>
-        public static readonly TxOut Empty = new();
+        public static readonly TransactionOutput Empty = new();
 
         /// <summary>
         /// Owner Transaction Hash.
@@ -43,7 +40,7 @@ namespace CafeLib.BsvSharp.Transactions
 
         public UInt256 Hash => TxHash;
 
-        public TxOut()
+        public TransactionOutput()
         {
             TxHash = UInt256.Zero;
             Index = -1;
@@ -56,8 +53,8 @@ namespace CafeLib.BsvSharp.Transactions
         /// the script.
         /// </summary>
         /// <returns></returns>
-        public bool IsDataOut => _scriptBuilder.Ops.Any() && _scriptBuilder.Ops[0].Operand.Code == Opcode.OP_FALSE
-                   || _scriptBuilder.Ops.Count >= 2 && _scriptBuilder.Ops[0].Operand.Code == Opcode.OP_RETURN;
+        public bool IsDataOut => _scriptBuilder.Operands.Any() && _scriptBuilder.Operands[0].Operand.Code == Opcode.OP_FALSE
+                   || _scriptBuilder.Operands.Count >= 2 && _scriptBuilder.Operands[0].Operand.Code == Opcode.OP_RETURN;
 
         /// <summary>
         /// 
@@ -66,7 +63,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="index"></param>
         /// <param name="scriptBuilder"></param>
         /// <param name="isChangeOutput"></param>
-        public TxOut(UInt256 txHash, int index, ScriptBuilder scriptBuilder, bool isChangeOutput = false)
+        public TransactionOutput(UInt256 txHash, int index, ScriptBuilder scriptBuilder, bool isChangeOutput = false)
             : this (txHash, index, Amount.Zero, scriptBuilder, isChangeOutput)
         {
         }
@@ -79,7 +76,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="amount"></param>
         /// <param name="scriptBuilder"></param>
         /// <param name="isChangeOutput"></param>
-        public TxOut(UInt256 txHash, int index, Amount amount, ScriptBuilder scriptBuilder, bool isChangeOutput = false)
+        public TransactionOutput(UInt256 txHash, int index, Amount amount, ScriptBuilder scriptBuilder, bool isChangeOutput = false)
         {
             TxHash = txHash;
             Index = index;
@@ -114,14 +111,6 @@ namespace CafeLib.BsvSharp.Transactions
         /// Write TxOut to data writer
         /// </summary>
         /// <param name="writer">data writer</param>
-        /// <param name="parameters">parameters</param>
-        /// <returns>data writer</returns>
-        public IDataWriter WriteTo(IDataWriter writer, object parameters) => WriteTo(writer);
-        
-        /// <summary>
-        /// Write TxOut to data writer
-        /// </summary>
-        /// <param name="writer">data writer</param>
         /// <returns>data writer</returns>
         public IDataWriter WriteTo(IDataWriter writer)
         {
@@ -132,19 +121,19 @@ namespace CafeLib.BsvSharp.Transactions
             return writer;
         }
 
-        public override int GetHashCode() => HashCode.Combine(_scriptBuilder, TxHash, Index, IsChangeOutput);
+        public override int GetHashCode() => HashCode.Combine(TxHash, Index, IsChangeOutput);
 
-        public bool Equals(TxOut other)
+        public bool Equals(TransactionOutput other)
         {
             return other is not null && Equals(_scriptBuilder, other._scriptBuilder) && TxHash.Equals(other.TxHash) && Index == other.Index && Amount.Equals(other.Amount) && IsChangeOutput == other.IsChangeOutput;
         }
 
         public override bool Equals(object obj)
         {
-            return obj is TxOut other && Equals(other);
+            return obj is TransactionOutput other && Equals(other);
         }
 
-        public static bool operator ==(TxOut x, TxOut y) => x?.Equals(y) ?? y is null;
-        public static bool operator !=(TxOut x, TxOut y) => !(x == y);
+        public static bool operator ==(TransactionOutput x, TransactionOutput y) => x?.Equals(y) ?? y is null;
+        public static bool operator !=(TransactionOutput x, TransactionOutput y) => !(x == y);
     }
 }

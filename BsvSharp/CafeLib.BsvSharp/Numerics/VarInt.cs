@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -11,7 +10,7 @@ namespace CafeLib.BsvSharp.Numerics
     public readonly struct VarInt
     {
         private const int SizeofVarByte = sizeof(byte);
-        private const int SizeofVarChar = sizeof(char) + sizeof(byte) ;
+        private const int SizeofVarChar = sizeof(char) + sizeof(byte);
         private const int SizeofVarInt = sizeof(int) + sizeof(byte);
         private const int SizeofVarLong = sizeof(long) + sizeof(byte);
 
@@ -91,7 +90,7 @@ namespace CafeLib.BsvSharp.Numerics
             return bytes;
         }
 
-        public static (int length, byte prefix) GetInfo(long value)
+        private static (int length, byte prefix) GetInfo(long value)
         {
             int len;
             byte prefix;

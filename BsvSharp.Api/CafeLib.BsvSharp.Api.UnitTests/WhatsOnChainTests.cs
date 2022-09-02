@@ -4,12 +4,15 @@
 #endregion
 
 using System;
+using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using CafeLib.BsvSharp.Api.WhatsOnChain.Models.Mapi;
 using CafeLib.BsvSharp.Network;
 using CafeLib.Core.Extensions;
 using CafeLib.Web.Request;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Xunit;
 // ReSharper disable StringLiteralTypo
@@ -18,11 +21,17 @@ namespace CafeLib.BsvSharp.Api.UnitTests
 {
     public class WhatsOnChainTests
     {
-        private WhatsOnChain.WhatsOnChain Api { get; } = new WhatsOnChain.WhatsOnChain();
+        private WhatsOnChain.WhatsOnChain Api { get; }
 
-        #region Health
+        public WhatsOnChainTests()
+        {
+            AppConfig.SetupApiEnvironmentVariable("apikey");
+            Api = new WhatsOnChain.WhatsOnChain("apikey");
+        }
 
-        [Fact]
+    #region Health
+
+    [Fact]
         public async Task GetHealth_Test()
         {
             var response = await Api.GetHealth();
@@ -225,7 +234,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             var quote = response.Result;
             Assert.NotNull(quote);
             Assert.NotNull(quote.Payload);
-            Assert.Equal("taal", quote.ProviderName);
+            Assert.Equal("WhatsOnChain", quote.ProviderName);
         }
 
         [Fact]
@@ -254,7 +263,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests
         }
 
         [Theory]
-        [InlineData("010000000200010000000000000000000000000000000000000000000000000000000000000000000049483045022100d180fd2eb9140aeb4210c9204d3f358766eb53842b2a9473db687fa24b12a3cc022079781799cd4f038b85135bbe49ec2b57f306b2bb17101b17f71f000fcab2b6fb01ffffffff0002000000000000000000000000000000000000000000000000000000000000000000004847304402205f7530653eea9b38699e476320ab135b74771e1c48b81a5d041e2ca84b9be7a802200ac8d1f40fb026674fe5a5edd3dea715c27baa9baca51ed45ea750ac9dc0a55e81ffffffff010100000000000000015100000000")]
+        [InlineData("0100000001d4790f513c3750e1840ba45cc13f61aa692518de11d6852d232ccb84a571e1d7000000006a473044022029668b358c18eb6040c9a8f50841b9d7390907a22723824bbf82834cf8dad40302202b9054940f87a16b4709c57aa5ff0709364588837595830bc8b4364eb7e930ce41210375b340609c95136506bb1bf5b7c3e7e7081f49dddf3e17f9d620e2ed3a54c5f4ffffffff020000000000000000176a026d0212706f737420746f206d656d6f2e6361736821aff50000000000001976a9142d6632cfcf0653d86f4739622c8418e5af8f9b9988ac00000000")]
         public async Task Broadcast_Test(string txRaw)
         {
             var response = await Api.BroadcastTransaction(txRaw);

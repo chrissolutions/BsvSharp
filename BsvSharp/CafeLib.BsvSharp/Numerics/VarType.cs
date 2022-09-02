@@ -1,12 +1,10 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
 using System;
 using System.Buffers.Binary;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Scripting;
@@ -15,7 +13,6 @@ using CafeLib.Core.Buffers.Arrays;
 
 namespace CafeLib.BsvSharp.Numerics
 {
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public struct VarType : IEquatable<VarType>
     {
         private ByteArrayBuffer _buffer;
@@ -35,7 +32,7 @@ namespace CafeLib.BsvSharp.Numerics
         public bool IsEmpty => Length == 0;
         public int Length => Buffer.Length;
         public byte FirstByte => Buffer[0];
-        public byte LastByte => Buffer[Length - 1];
+        public byte LastByte => Buffer[^1];
 
         /// <summary>
         /// Buffer indexer.
@@ -67,7 +64,7 @@ namespace CafeLib.BsvSharp.Numerics
 
         public bool ToBool() => Buffer.Any(x => x != 0 && x != 0x80);
 
-        public int ToInt32() => new ScriptNum(Span).GetInt();
+        public int ToInt32() => new ScriptNum(Span).ToInt();
 
         public VarType BitAnd(VarType b)
         {
@@ -225,7 +222,7 @@ namespace CafeLib.BsvSharp.Numerics
 
             if (size > 0)
             {
-                data.Slice(0, (int)length).CopyTo(bytes.AsSpan());
+                data[..(int)length].CopyTo(bytes.AsSpan());
 
                 // Remove the sign bit, add padding 0x00 bytes, restore the sign bit.
                 // If number is positive, they start cleared, nothing to do.
@@ -308,8 +305,8 @@ namespace CafeLib.BsvSharp.Numerics
         public (VarType x1, VarType x2) Split(int position)
         {
             var s = Span;
-            var x1 = new VarType(s.Slice(0, position).ToArray());
-            var x2 = new VarType(s.Slice(position).ToArray());
+            var x1 = new VarType(s[..position].ToArray());
+            var x2 = new VarType(s[position..].ToArray());
             return (x1, x2);
         }
 

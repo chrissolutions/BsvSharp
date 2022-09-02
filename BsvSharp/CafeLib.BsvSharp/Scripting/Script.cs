@@ -1,9 +1,14 @@
-﻿using System;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
@@ -35,41 +40,27 @@ namespace CafeLib.BsvSharp.Scripting
         {
         }
 
-        public Script(string hex)
-            : this(Encoders.Hex.Decode(hex))
+        public static Script FromHex(string hex)
         {
+            return new Script(Encoders.Hex.Decode(hex));
+        }
+
+        public static Script FromString(string script)
+        {
+            return ScriptBuilder.ParseScript(script);
         }
 
         /// <summary>
         /// Serialize Script to data writer
         /// </summary>
         /// <param name="writer">data writer</param>
-        /// <returns>data writer</returns>
-        public IDataWriter WriteTo(IDataWriter writer) => WriteTo(writer, new {withoutCodeSeparators = false});
-        
-        /// <summary>
-        /// Serialize Script to data writer
-        /// </summary>
-        /// <param name="writer">data writer</param>
         /// <param name="parameters">parameters</param>
         /// <returns>data writer</returns>
-        public IDataWriter WriteTo(IDataWriter writer, object parameters)
+        public IDataWriter WriteTo(IDataWriter writer)
         {
-            dynamic args = parameters;
-            if (args.withoutCodeSeparators) 
-            {
-                var ops = Decode().Where(o => o.Code != Opcode.OP_CODESEPARATOR).ToArray();
-                writer.Write(ops.Length.AsVarIntBytes());
-                foreach (var op in ops)
-                    writer.Write(op);
-            }
-            else 
-            {
-                writer
-                    .Write(Data.Length.AsVarIntBytes())
-                    .Write(Data);
-
-            }
+            writer
+                .Write(Data.Length.AsVarIntBytes())
+                .Write(Data);
             return writer;
         }
         
@@ -89,16 +80,16 @@ namespace CafeLib.BsvSharp.Scripting
             }
         }
 
-        public void Write(BinaryWriter s)
+        public void Write(BinaryWriter writer)
         {
             if (Data.IsEmpty)
             {
-                s.Write(-1);
+                writer.Write(-1);
             }
             else
             {
-                s.Write(Data.Length);
-                s.Write(Data.Span);
+                writer.Write(Data.Length);
+                writer.Write(Data.Span);
             }
         }
 
@@ -132,7 +123,7 @@ namespace CafeLib.BsvSharp.Scripting
             return (s.TryReadScript(ref sr, withoutLength), s);
         }
 
-        public int FindAndDelete(VarType vchSig)
+        internal int FindAndDelete(VarType vchSig)
         {
             var nFound = 0;
             var s = new ReadOnlyByteSequence(Data);
@@ -160,26 +151,6 @@ namespace CafeLib.BsvSharp.Scripting
 
             Data = new VarType(r);
             return nFound;
-#if false
-            CScript result;
-            iterator pc = begin(), pc2 = begin();
-            opcodetype opcode;
-
-            do {
-                result.insert(result.end(), pc2, pc);
-                while (static_cast<size_t>(end() - pc) >= b.size() &&
-                       std::equal(b.begin(), b.end(), pc)) {
-                    pc = pc + b.size();
-                    ++nFound;
-                }
-                pc2 = pc;
-            } while (GetOp(pc, opcode));
-
-            if (nFound > 0) {
-                result.insert(result.end(), pc2, end());
-                *this = result;
-            }
-#endif
         }
 
         /// <summary>
@@ -188,12 +159,12 @@ namespace CafeLib.BsvSharp.Scripting
         /// <returns></returns>
         public readonly IEnumerable<Operand> Decode()
         {
-            var ros = new ReadOnlyByteSequence(Data);
+            var sequence = new ReadOnlyByteSequence(Data);
 
-            while (ros.Length > 0)
+            while (sequence.Length > 0)
             {
                 var op = new Operand();
-                if (op.TryReadOperand(ref ros))
+                if (op.TryReadOperand(ref sequence))
                 {
                     yield return op;
                 }
@@ -354,6 +325,11 @@ namespace CafeLib.BsvSharp.Scripting
             return script.Length == 25 && script[0] == 0x76 && script[1] == 0xA9 && script[2] == 0x14 && script[23] == 0x88 && script[24] == 0xAC;
         }
 
+        public bool IsPay2ScriptHash()
+        {
+            return Data.Length == 23 && Data[0] == (byte)Opcode.OP_HASH160 && Data[1] == 0x14 && Data[^1] == (byte)Opcode.OP_EQUAL;
+        }
+
         /// <summary>
         /// Template 3 OpRetPush4
         /// OP_0 OP_RETURN [4] ...
@@ -442,7 +418,7 @@ namespace CafeLib.BsvSharp.Scripting
             return result;
         }
 
-        public static (bool unspendable, TemplateId templateId) ParseKnownScriptPubTemplates(ReadOnlySpan<byte> scriptPubBuf0, int? height) {
+        public static (bool unspendable, TemplateId templateId) ParseKnownScriptPubTemplates(ReadOnlyByteSpan scriptPubBuf0, int? height) {
 
             // Check for OP_RETURN outputs, these are unspendable and are flagged with a -1 SpentByTxId value.
             // After Genesis, bare OP_RETURN is spendable (anything that pushes true on sig script can spend.

@@ -25,20 +25,20 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         }
 
         [Fact]
-        public void TestPublicKeyData()
+        public void PublicKey_Data_Test()
         {
             const string publicHex = "02a1633cafcc01ebfb6d78e39f687a1f0995c62fc95f51ead10a02ee0be551b5dc";
-            var publicKey = new PublicKey(publicHex);
+            var publicKey = PublicKey.FromHex(publicHex);
             var bytes = publicKey.ToArray();
             Assert.Equal(0, publicKey.Data.SequenceCompareTo(bytes));
         }
 
         [Fact]
-        public void TestPublicKeyAddress()
+        public void PublicKey_Address_Test()
         {
             const string privateHex = "906977a061af29276e40bf377042ffbde414e496ae2260bbf1fa9d085637bfff";
             const string publicHex = "02a1633cafcc01ebfb6d78e39f687a1f0995c62fc95f51ead10a02ee0be551b5dc";
-            const string publicKey = "17JarKo61PkpuZG3GyofzGmFSCskGRBUT3";
+            const string publicKeyAddress = "17JarKo61PkpuZG3GyofzGmFSCskGRBUT3";
 
             var privkey = PrivateKey.FromHex(privateHex);
             var pubkey = privkey.CreatePublicKey();
@@ -47,7 +47,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             Assert.Equal(privateHex, privkey.ToHex());
             Assert.Equal(publicHex, pubkey.ToHex());
             Assert.True(privkey.VerifyPubKey(pubkey));
-            Assert.Equal(publicKey, address.ToString());
+            Assert.Equal(publicKeyAddress, address.ToString());
         }
 
         [Fact]
@@ -57,6 +57,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             var publicKey = new PublicKey(publicKeyHex);
             var result = publicKey.ToHex();
             Assert.Equal(publicKeyHex, result);
+            Assert.Equal(publicKey.ToString(), result);
         }
     }
 }

@@ -1,18 +1,21 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using System;
 
 namespace CafeLib.BsvSharp.Signatures
 {
     /// <summary>
     /// Signature hash type.
     /// </summary>
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
-    public class SignatureHashType
+    public struct SignatureHashType : IEquatable<SignatureHashType>
     {
         private SignatureHashEnum SignatureHash => (SignatureHashEnum)RawSigHashType;
 
         public SignatureHashType()
         {
-            RawSigHashType = (uint)SignatureHashEnum.All;
+            RawSigHashType = (uint)SignatureHashEnum.Unsupported;
         }
 
         public SignatureHashType(SignatureHashEnum sigHash)
@@ -68,8 +71,34 @@ namespace CafeLib.BsvSharp.Signatures
 
         public uint GetForkValue() { return RawSigHashType >> 8; }
 
-        public override string ToString() {
-            return string.Empty;
+        public override string ToString()
+        {
+            return $"{RawSigHashType}";
+        }
+
+        public bool Equals(SignatureHashType other)
+        {
+            return RawSigHashType == other.RawSigHashType;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is SignatureHashType type && Equals(type);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(SignatureHash, IsDefined, HasForkId, HasAnyoneCanPay, RawSigHashType, IsBaseNone, IsBaseSingle);
+        }
+
+        public static bool operator ==(SignatureHashType left, SignatureHashType right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(SignatureHashType left, SignatureHashType right)
+        {
+            return !(left == right);
         }
     }
 }

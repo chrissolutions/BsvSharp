@@ -35,15 +35,19 @@ namespace CafeLib.BsvSharp.Network
         {
         }
 
+        public byte[] PrivateKeyCompressed => new Lazy<byte[]>(() => CreateKey(Base58Type.PrivateKeyCompressed)).Value;
+
+        public byte[] PrivateKeyUncompressed => new Lazy<byte[]>(() => CreateKey(Base58Type.PrivateKeyUncompressed)).Value;
+
         public byte[] PublicKeyAddress => new Lazy<byte[]>(() => CreateKey(Base58Type.PubkeyAddress)).Value;
 
         public byte[] ScriptAddress => new Lazy<byte[]>(() => CreateKey(Base58Type.ScriptAddress)).Value;
 
         public byte[] SecretKey => new Lazy<byte[]>(() => CreateKey(Base58Type.SecretKey)).Value;
 
-        public byte[] ExtPublicKey => new Lazy<byte[]>(() => CreateKey(Base58Type.ExtPublicKey)).Value;
+        public byte[] HdPublicKey => new Lazy<byte[]>(() => CreateKey(Base58Type.HdPublicKey)).Value;
 
-        public byte[] ExtSecretKey => new Lazy<byte[]>(() => CreateKey(Base58Type.ExtSecretKey)).Value;
+        public byte[] HdSecretKey => new Lazy<byte[]>(() => CreateKey(Base58Type.HdSecretKey)).Value;
 
         private byte[] Base58Prefix(Base58Type type) => Base58Prefixes[(int)type];
 

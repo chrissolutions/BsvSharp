@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -97,23 +96,23 @@ namespace CafeLib.BsvSharp.Chain
             return blockHeader.TryReadBlockHeader(ref reader) ? blockHeader : throw new FormatException(nameof(buffer));
         }
 
-        public bool TryReadBlockHeader(ref ByteSequenceReader r)
+        public bool TryReadBlockHeader(ref ByteSequenceReader reader)
         {
-            if (r.Data.Remaining < BlockHeaderSize)
+            if (reader.Data.Remaining < BlockHeaderSize)
                 return false;
 
-            var start = r.Data.Position;
+            var start = reader.Data.Position;
 
-            if (!r.TryReadLittleEndian(out _version)) return false;
-            if (!r.TryReadUInt256(ref _prevBlockHash)) return false;
-            if (!r.TryReadUInt256(ref _merkleRootHash)) return false;
-            if (!r.TryReadLittleEndian(out _timestamp)) return false;
-            if (!r.TryReadLittleEndian(out _bits)) return false;
-            if (!r.TryReadLittleEndian(out _nonce)) return false;
+            if (!reader.TryReadLittleEndian(out _version)) return false;
+            if (!reader.TryReadUInt256(ref _prevBlockHash)) return false;
+            if (!reader.TryReadUInt256(ref _merkleRootHash)) return false;
+            if (!reader.TryReadLittleEndian(out _timestamp)) return false;
+            if (!reader.TryReadLittleEndian(out _bits)) return false;
+            if (!reader.TryReadLittleEndian(out _nonce)) return false;
 
-            var end = r.Data.Position;
+            var end = reader.Data.Position;
 
-            var blockBytes = r.Data.Sequence.Slice(start, end).ToArray();
+            var blockBytes = reader.Data.Sequence.Slice(start, end).ToArray();
             var hash1 = Hashes.ComputeSha256(blockBytes);
             var hash2 = Hashes.ComputeSha256(hash1);
             hash2.CopyTo(_hash.Span);

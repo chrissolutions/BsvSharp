@@ -1,9 +1,10 @@
-﻿using CafeLib.BsvSharp.Encoding;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Keys;
-using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Signatures;
-using CafeLib.Core.Buffers;
-using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
 using CafeLib.Cryptography.BouncyCastle.Asn1.X9;
@@ -14,8 +15,6 @@ namespace CafeLib.BsvSharp.Extensions
     {
         // ReSharper disable once InconsistentNaming
         private static readonly X9ECParameters Secp256k1 = ECKey.CreateCurve();
-
-        //private int SerializedPublicKeyLength => IsCompressed ? Secp256k1.SERIALIZED_COMPRESSED_PUBKEY_LENGTH : Secp256k1.SERIALIZED_UNCOMPRESSED_PUBKEY_LENGTH;
 
         public static PublicKey CreatePublicKey(this PrivateKey privateKey)
         {
@@ -34,7 +33,7 @@ namespace CafeLib.BsvSharp.Extensions
         /// <param name="hash">hash to sign</param>
         /// <param name="hashType"></param>
         /// <returns>signature bytes</returns>
-        public static Signature SignTxSignature(this PrivateKey privateKey, UInt256 hash, SignatureHashType hashType = null)
+        public static Signature SignTxSignature(this PrivateKey privateKey, UInt256 hash, SignatureHashType hashType = default)
         {
             var signer = new DeterministicECDSA();
             signer.SetPrivateKey(privateKey.ECKey.PrivateKey);
@@ -50,7 +49,7 @@ namespace CafeLib.BsvSharp.Extensions
         /// <returns>signature</returns>
         public static Signature SignMessage(this PrivateKey key, string message)
         {
-            return key.SignMessageHash(GetMessageHash(message.Utf8ToBytes()));
+            return key.SignMessageHash(SignatureMessage.GetMessageHash(message));
         }
 
         /// <summary>
@@ -76,25 +75,10 @@ namespace CafeLib.BsvSharp.Extensions
             return rkey != null && rkey == key;
         }
 
-        public static bool VerifyMessage(this UInt160 keyId, UInt256 message, string signature)
+        public static bool VerifyMessage(this UInt160 keyId, string message, string signature)
         {
-            var rkey = PublicKey.FromSignedHash(GetMessageHash(message.Span), Encoders.Base64.Decode(signature));
+            var rkey = PublicKey.FromSignedHash(SignatureMessage.GetMessageHash(message), Encoders.Base64.Decode(signature));
             return rkey != null && rkey.GetId() == keyId;
         }
-
-        public static bool VerifyMessage(this UInt160 keyId, string message, string signature)
-            => VerifyMessage(keyId, (UInt256)message.Utf8ToBytes(), signature);
-
-        #region Helpers
-
-        internal static UInt256 GetMessageHash(ReadOnlyByteSpan message)
-        {
-            const string bitcoinSignedMessageHeader = "Bitcoin Signed Message:\n";
-            var bitcoinSignedMessageHeaderBytes = Encoders.Utf8.Decode(bitcoinSignedMessageHeader);
-            var msgBytes = new [] {(byte)bitcoinSignedMessageHeaderBytes.Length}.Concat(bitcoinSignedMessageHeaderBytes, new VarInt((ulong)message.Length).ToArray(), message);
-            return Hashes.Hash256(msgBytes);
-        }
-
-        #endregion
     }
 }

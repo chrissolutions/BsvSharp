@@ -1,10 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.Core.Buffers;
 
 namespace CafeLib.BsvSharp.Extensions
 {
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static class BufferExtensions
     {
         public static string ToHex(this ByteSpan data) => Encoders.Hex.Encode(data);

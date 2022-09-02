@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using CafeLib.BsvSharp.Api.WhatsOnChain.Models;
 using CafeLib.BsvSharp.Api.WhatsOnChain.Models.Mapi;
 using CafeLib.BsvSharp.Mapi;
+using CafeLib.BsvSharp.Mapi.Responses;
 using CafeLib.BsvSharp.Network;
 using CafeLib.Core.Support;
 using CafeLib.Web.Request;
@@ -20,14 +21,43 @@ namespace CafeLib.BsvSharp.Api.WhatsOnChain
     public class WhatsOnChain : MerchantClient
     {
         private const string BaseUrl = "https://mapi.taal.com";
-        private const string ClientName = "taal";
+        private const string ClientName = "WhatsOnChain";
 
+        #region Constructors
+
+        /// <summary>
+        /// WhatsOnChain default constructor.
+        /// </summary>
+        /// <param name="networkType">Bitcoin network type</param>
         public WhatsOnChain(NetworkType networkType = NetworkType.Main)
             : base(ClientName, BaseUrl, networkType)
         {
-            Headers.Add("Content-Type", WebContentType.Json);
-            Headers.Add("User-Agent", typeof(WhatsOnChain).Namespace);
         }
+
+        /// <summary>
+        /// WhatsOnChain constructor.
+        /// </summary>
+        /// <param name="apiEnvKey">Name of environment variable assigned to the API key</param>
+        /// <param name="networkType">Bitcoin network type</param>
+        public WhatsOnChain(string apiEnvKey, NetworkType networkType = NetworkType.Main)
+            : base(ClientName, BaseUrl, apiEnvKey, networkType)
+        {
+        }
+
+        #endregion
+
+        #region ApiKey
+
+        /// <summary>
+        /// Set the API key.
+        /// </summary>
+        /// <param name="apiKey"></param>
+        public void SetApiKey(string apiKey)
+        {
+            AddAuthorizationKey(apiKey);
+        }
+
+        #endregion
 
         #region Address
 

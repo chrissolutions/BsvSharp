@@ -1,15 +1,12 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using CafeLib.BsvSharp.Scripting;
 
 namespace CafeLib.BsvSharp.Extensions
 {
-    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     public static class OperandExtensions
     {
         private static readonly IDictionary<Opcode, string> OpcodeMap = new Dictionary<Opcode, string>
@@ -225,10 +222,10 @@ namespace CafeLib.BsvSharp.Extensions
         };
 
         /// <summary>
-        /// 
+        /// Obtain the opcode name from map.
         /// </summary>
-        /// <param name="opcode"></param>
-        /// <returns></returns>
+        /// <param name="opcode">opcode</param>
+        /// <returns>opcode name</returns>
         public static string GetOpcodeName(this Opcode opcode)
         {
             return OpcodeMap.TryGetValue(opcode, out var name)

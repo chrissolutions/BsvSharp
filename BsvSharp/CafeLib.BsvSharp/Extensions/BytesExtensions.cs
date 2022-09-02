@@ -1,6 +1,9 @@
-﻿using System;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using CafeLib.BsvSharp.Encoding;
@@ -10,7 +13,6 @@ using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Extensions
 {
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static class BytesExtensions
     {
         public static int AggregateHashCode(this IEnumerable<byte> bytes) => bytes?.Aggregate(17, (current, b) => current * 31 + b) ?? 0;

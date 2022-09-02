@@ -1,4 +1,8 @@
-﻿namespace CafeLib.BsvSharp.Units
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+namespace CafeLib.BsvSharp.Units
 {
     /// <summary>
     /// Used to record how a transaction output value is constrained.

@@ -28,8 +28,8 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         [InlineData("OP_0", "OP_IF OP_VER OP_ELSE OP_1 OP_ENDIF", true)]
         public void VerifyTrivialScriptTest(string scriptSig, string scriptPub, bool result)
         {
-            var sig = ScriptBuilder.ParseScript(scriptSig);
-            var pub = ScriptBuilder.ParseScript(scriptPub);
+            var sig = Script.FromString(scriptSig);
+            var pub = Script.FromString(scriptPub);
             var ok = ScriptInterpreter.VerifyScript(sig, pub, ScriptFlags.VERIFY_NONE, DefaultChecker, out _);
             Assert.Equal(result, ok);
         }
@@ -45,25 +45,25 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
         }
 
         [Fact]
-        public void Verify_Script_From_Simple_Transaction()
+        public void VerifyScript_From_Simple_Transaction()
         {
-            var privateKey = PrivateKey.FromBase58("L24Rq5hPWMexw5mQi7tchYw6mhtr5ApiHZMN8KJXCkskEv7bTV61");
+            var privateKey = PrivateKey.FromWif("L24Rq5hPWMexw5mQi7tchYw6mhtr5ApiHZMN8KJXCkskEv7bTV61");
             var publicKey = privateKey.CreatePublicKey();
             var fromAddress = publicKey.ToAddress();
             var toAddress = new Address("1BpbpfLdY7oBS9gK7aDXgvMgr1DPvNhEB2");
 
             var utxo = new Utxo
             {
-                TxHash = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
+                TxId = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
                 Index = 0,
                 ScriptPubKey = new P2PkhLockBuilder(fromAddress).ToScript(),
                 Amount = 100000
             };
 
-            var tx = new Transaction();
-            tx.SpendFromUtxo(utxo, new P2PkhUnlockBuilder(publicKey));
-            tx.SpendTo(toAddress, 100000L, new P2PkhLockBuilder(toAddress));
-            tx.SignInput(0, privateKey, SignatureHashEnum.All);
+            var tx = new Transaction()
+                .SpendFromUtxo(utxo, new P2PkhUnlockBuilder(publicKey))
+                .SpendTo(toAddress, 100000L, new P2PkhLockBuilder(toAddress))
+                .Sign(0, privateKey, SignatureHashEnum.All);
 
             // we then extract the signature from the first input
             var scriptSig = tx.Inputs[0].ScriptSig;
@@ -71,6 +71,43 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             const ScriptFlags flags = ScriptFlags.VERIFY_P2SH | ScriptFlags.VERIFY_STRICTENC;
             var checker = new TransactionSignatureChecker(tx, 0, utxo.Amount);
             var verified = ScriptInterpreter.VerifyScript(scriptSig, utxo.ScriptPubKey, flags, checker, out var _);
+            Assert.True(verified);
+        }
+
+        [Theory]
+        [InlineData(
+            "71 0x304402200a5c6163f07b8d3b013c4d1d6dba25e780b39658d79ba37af7057a3b7f15ffa102201fd9b4eaa9943f734928b99a83592c2e7bf342ea2680f6a2bb705167966b742001",
+            "65 0x0479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8 OP_CHECKSIG"
+        )]
+        [InlineData(
+            "71 0x30440220d7a0417c3f6d1a15094d1cf2a3378ca0503eb8a57630953a9e2987e21ddd0a6502207a6266d686c99090920249991d3d42065b6d43eb70187b219c0db82e4f94d1a201",
+            "33 0x038282263212c609d9ea2a6e3e172de238d8c39cabd5ac1ca10646e23fd5f51508 OP_CHECKSIG"
+        )]
+        public void VerifyScript_Using_TransactionSignatureChecker(string scriptSigText, string scriptPubKeyText)
+        {
+            var scriptSig = Script.FromString(scriptSigText);
+            var scriptPubKey = Script.FromString(scriptPubKeyText);
+
+            var txCredit = new Transaction();
+            var coinbaseUnlockBuilder = new DefaultUnlockBuilder(Script.FromString("OP_0 OP_0"));
+            var txCreditInput = new TransactionInput(UInt256.Zero, -1, Amount.Zero, new(), coinbaseUnlockBuilder);
+            txCredit.AddInput(txCreditInput);
+
+            //add output to credit Transaction
+            var txOutLockBuilder = new DefaultLockBuilder(scriptPubKey);
+            var txCredOut = new TransactionOutput(UInt256.Zero, 0, txOutLockBuilder);
+            txCredit.AddOutput(txCredOut);
+
+            //setup spend Transaction
+            var txSpend = new Transaction();
+            var defaultUnlockBuilder = new DefaultUnlockBuilder(scriptSig);
+            var txSpendInput = new TransactionInput(txCredit.TxHash, 0, Amount.Zero, new(), defaultUnlockBuilder);
+            txSpend.AddInput(txSpendInput);
+            var txSpendOutput = new TransactionOutput(UInt256.Zero, 0, Amount.Zero, null);
+            txSpend.AddOutput(txSpendOutput);
+
+            var checker = new TransactionSignatureChecker(txSpend, 0, Amount.Zero);
+            var verified = ScriptInterpreter.VerifyScript(scriptSig, scriptPubKey, ScriptFlags.VERIFY_NONE, checker, out var error);
             Assert.True(verified);
         }
     }

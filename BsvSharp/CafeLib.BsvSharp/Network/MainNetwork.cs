@@ -66,11 +66,14 @@ namespace CafeLib.BsvSharp.Network
         {
             // Deployment of BIP68, BIP112, and BIP113.
             var prefixes = new byte[(int)Base58Type.MaxBase58Types][];
+            prefixes[(int)Base58Type.PrivateKeyCompressed] = new byte[] { (byte)'L', (byte)'K' };
+            prefixes[(int)Base58Type.PrivateKeyUncompressed] = new byte[] { (byte)'5' };
+            prefixes[(int)Base58Type.PubkeyAddress] = new byte[] { 0 };
             prefixes[(int)Base58Type.PubkeyAddress] = new byte[] { 0 };
             prefixes[(int)Base58Type.ScriptAddress] = new byte[] { 5 };
-            prefixes[(int)Base58Type.SecretKey] = new byte[] { 128 };
-            prefixes[(int)Base58Type.ExtPublicKey] = new byte[] { 0x04, 0x88, 0xB2, 0x1E };
-            prefixes[(int)Base58Type.ExtSecretKey] = new byte[] { 0x04, 0x88, 0xAD, 0xE4 };
+            prefixes[(int)Base58Type.SecretKey] = new[] { (byte)NetworkVersion.Main };
+            prefixes[(int)Base58Type.HdPublicKey] = new byte[] { 0x04, 0x88, 0xB2, 0x1E };
+            prefixes[(int)Base58Type.HdSecretKey] = new byte[] { 0x04, 0x88, 0xAD, 0xE4 };
             return prefixes;
         }
     }

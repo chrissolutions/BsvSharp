@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -8,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CafeLib.BsvSharp.Encoding;
+using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.Core.Buffers;
@@ -24,38 +24,19 @@ namespace CafeLib.BsvSharp.Builders
         private bool _isFinal;
 
         /// <summary>
-        /// true if script is associated with a scriptPub.
-        /// false if script is associated with a scriptSig.
-        /// null if script purpose is unknown.
-        /// </summary>
-        private bool? _isPub;
-
-        /// <summary>
         /// The sequence of operations where each operation is an opcode and optional data.
         /// To support testing and unimplemented features, an operation's IsRaw flag can be set in
         /// which case the opcode is ignored and the data is treated as unparsed script code.
         /// </summary>
-        public List<OperandBuilder> Ops { get; protected set; } = new List<OperandBuilder>();
-        
+        public List<OperandBuilder> Operands { get; protected set; } = new List<OperandBuilder>();
+
         /// <summary>
         /// true when no more additions, deletions or changes to existing operations will occur.
         /// </summary>
         public bool IsFinal
         {
-            get => _isFinal && Ops.All(op => op.IsFinal);
+            get => _isFinal && Operands.All(op => op.IsFinal);
             protected set => _isFinal = value;
-        }
-
-        public bool IsPub
-        {
-            get => _isPub == true; 
-            set => _isPub = value ? true : null;
-        }
-
-        public bool IsSig
-        {
-            get => _isPub == false; 
-            set => _isPub = value ? false : null;
         }
 
         /// <summary>
@@ -67,13 +48,12 @@ namespace CafeLib.BsvSharp.Builders
         /// <summary>
         /// ScriptBuilder default constructor.
         /// </summary>
-        public ScriptBuilder()
+        protected ScriptBuilder()
         {
         }
 
-        protected ScriptBuilder(bool isPub, TemplateId templateId)
+        protected ScriptBuilder(TemplateId templateId)
         {
-            _isPub = isPub;
             TemplateId = templateId;
         }
 
@@ -89,51 +69,51 @@ namespace CafeLib.BsvSharp.Builders
 
         public virtual ScriptBuilder Clear()
         {
-            Ops.Clear(); 
+            Operands.Clear(); 
             return this;
         }
 
         public ScriptBuilder Set(Script script)
         {
-            Ops.Clear(); 
+            Operands.Clear(); 
             return Add(script);
         }
 
-        public ScriptBuilder Add(Opcode opc)
+        public ScriptBuilder Add(Opcode opcode)
         {
-            Ops.Add(new Operand(opc));
+            Operands.Add(new Operand(opcode));
             return this;
         }
 
-        public ScriptBuilder Add(Opcode opc, VarType v)
+        public ScriptBuilder Add(Opcode opcode, VarType v)
         {
-            Ops.Add(new Operand(opc, v)); 
+            Operands.Add(new Operand(opcode, v)); 
             return this;
         }
 
         public ScriptBuilder Add(OperandBuilder opBuilder)
         {
-            Ops.Add(opBuilder); 
+            Operands.Add(opBuilder); 
             return this;
         }
 
         public ScriptBuilder Add(Script script)
         {
-            Ops.AddRange(script.Decode().Select(o => new OperandBuilder(o)));
+            Operands.AddRange(script.Decode().Select(o => new OperandBuilder(o)));
             return this;
         }
 
         public ScriptBuilder Add(string hex)
         {
             var script = !string.IsNullOrWhiteSpace(hex)
-                ? new Script(hex)
+                ? Script.FromHex(hex)
                 : new Script(new[] {(byte) Opcode.OP_FALSE, (byte) Opcode.OP_RETURN});
             return Add(script);
         }
 
         public virtual ScriptBuilder Add(byte[] raw)
         {
-            Ops.Add(new OperandBuilder(new VarType(raw)));
+            Operands.Add(new OperandBuilder(new VarType(raw)));
             return this;
         }
 
@@ -141,17 +121,17 @@ namespace CafeLib.BsvSharp.Builders
         /// Push a zero as a non-final placeholder.
         /// </summary>
         /// <returns></returns>
-        public ScriptBuilder Push() => Add(new OperandBuilder { IsFinal = false, IsRaw = false, Operand = new Operand(Opcode.OP_0) });
+        public ScriptBuilder AddData() => Add(new OperandBuilder { IsFinal = false, IsRaw = false, Operand = new Operand(Opcode.OP_0) });
 
-        public ScriptBuilder Push(ReadOnlyByteSpan data)
+        public ScriptBuilder AddData(ReadOnlyByteSpan data)
         {
-            Ops.Add(Operand.Push(data)); 
+            Operands.Add(Operand.Pushdata(data)); 
             return this;
         }
 
-        public ScriptBuilder Push(long v)
+        public ScriptBuilder AddData(long v)
         {
-            Ops.Add(Operand.Push(v));
+            Operands.Add(Operand.Pushdata(v));
             return this;
         }
 
@@ -159,17 +139,17 @@ namespace CafeLib.BsvSharp.Builders
         /// Build Script.
         /// </summary>
         /// <returns>script</returns>
-        public virtual Script ToScript() => new Script(ToBytes());
+        public virtual Script ToScript() => new(ToArray());
 
         /// <summary>
         /// Convert script builder to byte array.
         /// </summary>
         /// <returns></returns>
-        public byte[] ToBytes()
+        public byte[] ToArray()
         {
-            var bytes = new byte[Ops.Sum(o => o.Length)];
+            var bytes = new byte[Operands.Sum(o => o.Length)];
             var span = (ByteSpan)bytes;
-            foreach (var op in Ops) 
+            foreach (var op in Operands) 
             {
                 op.TryCopyTo(ref span);
             }
@@ -177,17 +157,15 @@ namespace CafeLib.BsvSharp.Builders
             return bytes;
         }
 
-        //public string ToHex() => ToBytes().ToHex();
-
         public override string ToString()
         {
-            return string.Join(' ', Ops.Select(o => o.ToVerboseString()));
+            return string.Join(' ', Operands.Select(o => o.ToVerboseString()));
         }
 
         public string ToTemplateString()
         {
             var sb = new StringBuilder();
-            foreach (var bop in Ops) 
+            foreach (var bop in Operands) 
             {
                 var op = bop.Operand;
                 var len = op.Data.Length;
@@ -201,50 +179,42 @@ namespace CafeLib.BsvSharp.Builders
         /// <summary>
         /// Converts hex and ascii strings to a specific byte count, if len has a value and disagrees it is an error.
         /// Converts integer values to little endian bytes where the most significant bit is set if negative.
-        /// For integer values, if len has a value, the result is expanded if necessary. If len is too small it is an error.
         /// </summary>
-        /// <param name="s"></param>
-        /// <param name="len"></param>
-        /// <returns></returns>
-        private static byte[] ParseCompactValueToBytes(string s, uint? len = null) => ParseLiteralValueToBytes(s, len).bytes;
+        /// <param name="value">value to parse into bytes</param>
+        /// <returns>byte array</returns>
+        private static byte[] ParseValueToBytes(string value) => ParseLiteralValueToBytes(value).bytes;
 
         /// <summary>
         /// Parses signed decimals, hexadecimal strings prefixed with 0x, and ascii strings enclosed in single quotes.
         /// Each format is converted to a byte array.
         /// Converts hex and ascii strings to a specific byte count, if len has a value and disagrees it is an error.
         /// Converts integer values to little endian bytes where the most significant bit is set if negative.
-        /// For integer values, if len has a value, the result is expanded if necessary. If len is too small it is an error.
         /// </summary>
-        /// <param name="s"></param>
-        /// <param name="len"></param>
+        /// <param name="token">token to parse</param>
         /// <returns>Tuple of the parsed byte[] data and a boolean true if the literal was specified in hexadecimal.
         /// Returns null for bytes if can't be parsed as a literal.</returns>
-        private static (byte[] bytes, bool isHex) ParseLiteralValueToBytes(string s, uint? len = null)
+        private static (byte[] bytes, bool isHex) ParseLiteralValueToBytes(string token)
         {
-            var bytes = (byte[])null;
-            var isHex = false;
+            switch (token)
+            {
+                case var _ when token.StartsWith("0x"):
+                    var bytes = Encoders.Hex.Decode(token[2..]);
+                    return (bytes, true);
 
-            if (s.StartsWith("'") && s.EndsWith("'"))
-            {
-                s = s.Substring(1, s.Length - 2);
-                if (s.Contains("'"))
-                    throw new InvalidOperationException();
-                bytes = System.Text.Encoding.ASCII.GetBytes(s);
-            } 
-            else if (s.StartsWith("0x"))
-            {
-                isHex = true;
-                bytes = Encoders.Hex.Decode(s[2..]);
-            } 
-            else if (long.TryParse(s, out var v))
-            {
-                bytes = new ScriptNum(v).ToArray();
+                case var _ when token.StartsWith("'") && token.EndsWith("'"):
+                    token = token[1..^1];
+                    if (token.Contains('\''))
+                        throw new ScriptException("Syntax error");
+                    bytes = Encoders.Ascii.Decode(token);
+                    return (bytes, false);
+
+                case var _ when long.TryParse(token, out var v):
+                    bytes = new ScriptNum(v).ToArray();
+                    return (bytes, false);
+
+                default:
+                    return (null, false);
             }
-
-            if (len.HasValue && bytes != null && len.Value != bytes.Length)
-                throw new InvalidOperationException();
-            
-            return (bytes, isHex);
         }
 
         /// <summary>
@@ -261,55 +231,75 @@ namespace CafeLib.BsvSharp.Builders
         internal static ScriptBuilder ParseTestScript(string testScript)
         {
             var sb = new ScriptBuilder();
-            var ps = testScript.Split(' ', StringSplitOptions.RemoveEmptyEntries).AsSpan();
-            while (ps.Length > 0) {
-                var arg = 0;
-                var (bytes, isHex) = ParseLiteralValueToBytes(ps[arg]);
+            var tokens = testScript.Split(' ', StringSplitOptions.RemoveEmptyEntries).AsSpan();
+            while (tokens.Length > 0) {
+                var index = 0;
+                var (bytes, isHex) = ParseLiteralValueToBytes(tokens[index]);
                 if (bytes != null) {
                     if (isHex)
                         // Hex literals are treated as raw, unparsed bytes added to the script.
                         sb.Add(bytes);
                     else
-                        sb.Push(bytes);
-                } else {
-                    var data = (byte[])null;
-                    if (!Enum.TryParse("OP_" + ps[arg], out Opcode opcode))
+                        sb.AddData(bytes);
+                }
+                else
+                {
+                    byte[] data = null;
+                    if (!Enum.TryParse($"OP_{tokens[index]}", out Opcode opcode))
                         throw new InvalidOperationException();
-                    if (opcode is > Opcode.OP_0 and < Opcode.OP_PUSHDATA1) {
-                        // add next single byte value to op.
-                        arg++;
-                        data = ParseCompactValueToBytes(ps[arg]);
-                        if (data == null) {
-                            // Put this arg back. Treat missing data as zero length.
-                            data = Array.Empty<byte>();
-                            arg--;
+                    switch (opcode)
+                    {
+                        case > Opcode.OP_0 and < Opcode.OP_PUSHDATA1:
+                        {
+                            // add next single byte value to op.
+                            index++;
+                            data = ParseValueToBytes(tokens[index]);
+                            if (data == null)
+                            {
+                                // Put this token back. Treat missing data as zero length.
+                                data = Array.Empty<byte>();
+                                index--;
+                            }
+
+                            break;
                         }
-                    } else if (opcode is >= Opcode.OP_PUSHDATA1 and <= Opcode.OP_PUSHDATA4) {
-                        // add next one, two, or four byte value as length of following data value to op.
-                        arg++;
-                        var lengthBytes = ParseCompactValueToBytes(ps[arg]);
-                        var len = 0u;
-                        if (!BitConverter.IsLittleEndian)
-                            throw new NotSupportedException();
-                        if (opcode == Opcode.OP_PUSHDATA1) {
-                            // add next one byte value as length of following data value to op.
-                            if (lengthBytes.Length != 1)
-                                throw new InvalidOperationException();
-                            len = lengthBytes[0];
-                        } else if (opcode == Opcode.OP_PUSHDATA2) {
-                            // add next two byte value as length of following data value to op.
-                            if (lengthBytes.Length != 2)
-                                throw new InvalidOperationException();
-                            len = BitConverter.ToUInt16(lengthBytes);
-                        } else if (opcode == Opcode.OP_PUSHDATA4) {
-                            // add next four byte value as length of following data value to op.
-                            if (lengthBytes.Length != 4)
-                                throw new InvalidOperationException();
-                            len = BitConverter.ToUInt32(lengthBytes);
-                        }
-                        if (len > 0) {
-                            arg++;
-                            data = arg < ps.Length ? ParseCompactValueToBytes(ps[arg], len) : Array.Empty<byte>();
+                        case >= Opcode.OP_PUSHDATA1 and <= Opcode.OP_PUSHDATA4:
+                        {
+                            // add next one, two, or four byte value as length of following data value to op.
+                            index++;
+                            var lengthBytes = ParseValueToBytes(tokens[index]);
+                            if (!BitConverter.IsLittleEndian)
+                                throw new NotSupportedException();
+                            var len = opcode switch
+                            {
+                                // add next one byte value as length of following data value to op.
+                                Opcode.OP_PUSHDATA1 when lengthBytes.Length != 1 =>
+                                    throw new ScriptException("Length bytes does not equal 1 for OP_PUSHDATA1."), 
+
+                                Opcode.OP_PUSHDATA1 => lengthBytes[0],
+                                
+                                // add next two byte value as length of following data value to op.
+                                Opcode.OP_PUSHDATA2 when lengthBytes.Length != 2 =>
+                                    throw new ScriptException("Length bytes does not equal 2 for OP_PUSHDATA2."),
+
+                                Opcode.OP_PUSHDATA2 => BitConverter.ToUInt16(lengthBytes),
+                                
+                                // add next four byte value as length of following data value to op.
+                                Opcode.OP_PUSHDATA4 when lengthBytes.Length != 4 => 
+                                    throw new ScriptException("Length bytes does not equal 4 for OP_PUSHDATA4."),
+
+                                Opcode.OP_PUSHDATA4 => BitConverter.ToUInt32(lengthBytes),
+                                
+                                // ReSharper disable once UnreachableSwitchArmDueToIntegerAnalysis
+                                _ => 0u
+                            };
+                            
+                            if (len > 0) {
+                                index++;
+                                data = index < tokens.Length ? ParseValueToBytes(tokens[index]) : Array.Empty<byte>();
+                            }
+
+                            break;
                         }
                     }
                     if (data == null)
@@ -317,75 +307,11 @@ namespace CafeLib.BsvSharp.Builders
                     else
                         sb.Add(opcode, new VarType(data));
                 }
-                ps = ps[Math.Min(arg + 1, ps.Length)..];
+                tokens = tokens[Math.Min(index + 1, tokens.Length)..];
             }
             return sb;
         }
-
-                    //if (!isOp && ps[arg] == "OP") {
-                    //    arg++;
-                    //    var opcodeBytes = ParseCompactValueToBytes(ps[arg]);
-                    //    if (opcodeBytes == null || opcodeBytes.Length > 1)
-                    //        throw new InvalidOperationException();
-                    //    op = (KzOpcode)opcodeBytes[0];
-                    //}
-        public static ScriptBuilder ParseCompact(string compactScript)
-        {
-            var sb = new ScriptBuilder();
-            var ps = compactScript.Split(' ', StringSplitOptions.RemoveEmptyEntries).AsSpan();
-            while (ps.Length > 0) {
-                var s = ps[0];
-                var bytes = ParseCompactValueToBytes(s);
-                if (bytes != null) {
-                    sb.Push(bytes);
-                    ps = ps.Slice(1);
-                } else if (Enum.TryParse("OP_" + s, out Opcode op)) {
-                    var args = 1;
-                    var data = (byte[])null;
-                    if (op > Opcode.OP_0 && op < Opcode.OP_PUSHDATA1) {
-                        // add next single byte value to op.
-                        args = 2;
-                        data = ParseCompactValueToBytes(ps[1]);
-                        if (data.Length >= (int)Opcode.OP_PUSHDATA1)
-                            throw new InvalidOperationException();
-                    } else if (op >= Opcode.OP_PUSHDATA1 && op <= Opcode.OP_PUSHDATA4) {
-                        // add next one, two, or four byte value as length of following data value to op.
-                        args = 2;
-                        var lengthBytes = ParseCompactValueToBytes(ps[1]);
-                        var len = 0u;
-                        if (!BitConverter.IsLittleEndian)
-                            throw new NotSupportedException();
-                        if (op == Opcode.OP_PUSHDATA1) {
-                            // add next one byte value as length of following data value to op.
-                            if (lengthBytes.Length != 1)
-                                throw new InvalidOperationException();
-                            len = lengthBytes[0];
-                        } else if (op == Opcode.OP_PUSHDATA2) {
-                            // add next two byte value as length of following data value to op.
-                            if (lengthBytes.Length != 2)
-                                throw new InvalidOperationException();
-                            len = BitConverter.ToUInt16(lengthBytes);
-                        } else if (op == Opcode.OP_PUSHDATA4) {
-                            // add next four byte value as length of following data value to op.
-                            if (lengthBytes.Length != 4)
-                                throw new InvalidOperationException();
-                            len = BitConverter.ToUInt32(lengthBytes);
-                        }
-                        if (len > 0) {
-                            args = 3;
-                            data = ParseCompactValueToBytes(ps[2], len);
-                        }
-                    }
-                    if (data == null)
-                        sb.Add(op);
-                    else
-                        sb.Add(op, new VarType(data));
-                    ps = ps[args..];
-                } else
-                    throw new InvalidOperationException();
-            }
-            return sb;
-        }
+        
 
         /// <summary>
         /// Parse encoded script.
@@ -425,19 +351,22 @@ namespace CafeLib.BsvSharp.Builders
                             {
                                 case Opcode.OP_PUSHDATA1:
                                     // add next one byte value as length of following data value to op.
-                                    if (data.Length != 1) throw new InvalidOperationException();
+                                    if (data.Length != 1)
+                                        throw new ScriptException("Length bytes does not equal 1 for OP_PUSHDATA1.");
                                     len = data[0];
                                     break;
                                     
                                 case Opcode.OP_PUSHDATA2:
                                     // add next two byte value as length of following data value to op.
-                                    if (data.Length != 2) throw new InvalidOperationException();
+                                    if (data.Length != 2)
+                                        throw new ScriptException("Length bytes does not equal 2 for OP_PUSHDATA2.");
                                     len = BitConverter.ToUInt16(data);
                                     break;
                                     
                                 case Opcode.OP_PUSHDATA4:
                                     // add next four byte value as length of following data value to op.
-                                    if (data.Length != 4) throw new InvalidOperationException();
+                                    if (data.Length != 4)
+                                        throw new ScriptException("Length bytes does not equal 4 for OP_PUSHDATA4.");
                                     len = BitConverter.ToUInt32(data);
                                     break;
                             }
@@ -466,7 +395,7 @@ namespace CafeLib.BsvSharp.Builders
                     var bytes = Encoders.Hex.Decode(tokens[i]);
                     if (bytes != null)
                     {
-                        builder.Push(bytes);
+                        builder.AddData(bytes);
                     }
                 }
             }
@@ -485,19 +414,21 @@ namespace CafeLib.BsvSharp.Builders
             var tokens = script.Split(' ', StringSplitOptions.RemoveEmptyEntries).AsSpan();
             for (var i = 0; i < tokens.Length; ++i)
             {
-                if (!Enum.TryParse<Opcode>(tokens[i], out var op)) throw new InvalidOperationException();
-                switch (op)
+                if (!Enum.TryParse<Opcode>(tokens[i], out var opcode))
+                    throw new ScriptException($"Opcode {tokens[i]} is not found.");
+                switch (opcode)
                 {
                     case Opcode.OP_0:
                     case Opcode.OP_1NEGATE:
-                        builder.Add(op);
+                        builder.Add(opcode);
                         break;
 
                     case < Opcode.OP_PUSHDATA1:
                     {
                         var data = Encoders.Hex.Decode(tokens[++i]);
-                        if (data.Length >= (int)Opcode.OP_PUSHDATA1) throw new InvalidOperationException();
-                        builder.Add(op, data);
+                        if (data.Length >= (int)Opcode.OP_PUSHDATA1) 
+                            throw new ScriptException($"Length error '{data.Length}' for '{opcode}'.");
+                        builder.Add(opcode, data);
                         break;
                     }
 
@@ -506,12 +437,12 @@ namespace CafeLib.BsvSharp.Builders
                     case Opcode.OP_PUSHDATA4:
                     {
                         var data = Encoders.Hex.Decode(tokens[i+=2]);
-                        builder.Add(op, new VarType(data));
+                        builder.Add(opcode, new VarType(data));
                         break;
                     }
 
                     default:
-                        builder.Add(op);
+                        builder.Add(opcode);
                         break;
                 }
             }
@@ -520,6 +451,6 @@ namespace CafeLib.BsvSharp.Builders
         }
         
         public static implicit operator Script(ScriptBuilder sb) => sb.ToScript();
-        public static implicit operator ScriptBuilder(Script v) => new ScriptBuilder(v);
+        public static implicit operator ScriptBuilder(Script v) => new(v);
     }
 }

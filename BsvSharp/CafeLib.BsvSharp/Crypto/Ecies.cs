@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -51,8 +50,8 @@ namespace CafeLib.BsvSharp.Crypto
             }
         }
 
-        public bool ShortTag { get; set; }
-        public bool NoKey { get; set; }
+        public bool ShortTag { get; init; }
+        public bool NoKey { get; init; }
 
         /// <summary>
         /// Two parties set matching pairs of priv and pub keys.

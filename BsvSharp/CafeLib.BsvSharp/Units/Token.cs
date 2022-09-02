@@ -1,10 +1,8 @@
 ﻿#region Copyright
-// Copyright (c) 2021 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace CafeLib.BsvSharp.Units
 {
@@ -12,7 +10,6 @@ namespace CafeLib.BsvSharp.Units
     /// In practice, the value of an amount is often required in terms of a non-Bitcoin fiat or foreign currency.
     /// There are three quantities
     /// </summary>
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class Token
     {
         private Amount _amount;

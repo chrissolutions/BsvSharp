@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -123,8 +122,7 @@ namespace CafeLib.BsvSharp.Persistence
 
                 return;
             }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Based on the underlying implementation of MemoryMappedFile
                 // See https://github.com/dotnet/corefx/blob/master/src/System.IO.MemoryMappedFiles/src/System/IO/MemoryMappedFiles/MemoryMappedView.Windows.cs

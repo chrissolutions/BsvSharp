@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using System.Collections.Generic;
 using System.Linq;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.Core.Buffers.Arrays;
@@ -64,7 +68,7 @@ namespace CafeLib.BsvSharp.Builders
             _dataCache.ForEach(x =>
             {
                 if (x is null || !x.Any()) return;
-                Push(x.ToArray());
+                AddData(x.ToArray());
             });
 
             return base.ToScript();

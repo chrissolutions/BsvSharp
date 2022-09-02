@@ -1,5 +1,19 @@
 Open BSV License
+
+BsvSharp
+Copyright (c) 2022 Chris Solutions
+
+BsvSharp is a fork of KzBSV version 0.2.0
 Copyright (c) 2019 tonesnotes
+
+Parts of this software are based on TwoStack WalletSDK
+Copyright (c) 2019-2020 Stephan M. February <stephan@werkswinkel.com>
+
+Other parts of this software are based on bsv.js
+Copyright (c) 2016-2020 Yours Inc.
+Copyright (c) 2013-2017 BitPay, Inc.
+Copyright (c) 2014-2016 Ryan X. Charles
+Copyright (c) 2009 Satoshi Nakamoto
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

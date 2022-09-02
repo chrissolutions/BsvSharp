@@ -1,8 +1,7 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
-// ReSharper disable InconsistentNaming
+
 namespace CafeLib.BsvSharp.Scripting
 {
     /// <summary>
@@ -11,8 +10,9 @@ namespace CafeLib.BsvSharp.Scripting
     public enum Opcode : byte
     {
         // push value
-        OP_0 = 0x00,
+        OP_0 = 0,
         OP_FALSE = OP_0,
+
         // The following opcodes specify how many of the following bytes to push.
         OP_PUSH1 = 1,
         OP_PUSH2 = 2,
@@ -89,14 +89,19 @@ namespace CafeLib.BsvSharp.Scripting
         OP_PUSH73 = 73,
         OP_PUSH74 = 74,
         OP_PUSH75 = 75,
+
         // The byte following this opcode specifies how many bytes after it to push.
         OP_PUSHDATA1 = 0x4c,
+
         // The two bytes following this opcode specify how many bytes after it to push.
         OP_PUSHDATA2 = 0x4d,
+
         // The four bytes following this opcode specify how many bytes after it to push.
         OP_PUSHDATA4 = 0x4e,
+
         OP_1NEGATE = 0x4f,
         OP_RESERVED = 0x50,
+
         // The following opcodes push the specified value.
         OP_1 = 0x51,
         OP_TRUE = OP_1,
@@ -207,15 +212,11 @@ namespace CafeLib.BsvSharp.Scripting
         OP_CODESEPARATOR = 0xab,
         OP_CHECKSIG = 0xac,
         OP_CHECKSIGVERIFY = 0xad,
-        OP_CHECKMULTISIG = 0xae,
-        OP_CHECKMULTISIGVERIFY = 0xaf,
 
         // expansion
         OP_NOP1 = 0xb0,
-        OP_CHECKLOCKTIMEVERIFY = 0xb1,
-        OP_NOP2 = OP_CHECKLOCKTIMEVERIFY,
-        OP_CHECKSEQUENCEVERIFY = 0xb2,
-        OP_NOP3 = OP_CHECKSEQUENCEVERIFY,
+        OP_NOP2 = 0xb1,
+        OP_NOP3 = 0xb2,
         OP_NOP4 = 0xb3,
         OP_NOP5 = 0xb4,
         OP_NOP6 = 0xb5,
@@ -224,8 +225,14 @@ namespace CafeLib.BsvSharp.Scripting
         OP_NOP9 = 0xb8,
         OP_NOP10 = 0xb9,
 
+        // BTC Core technical debt.
+        OP_CHECKMULTISIG = 0xae,
+        OP_CHECKMULTISIGVERIFY = 0xaf,
+        OP_CHECKLOCKTIMEVERIFY = OP_NOP2,
+        OP_CHECKSEQUENCEVERIFY = OP_NOP3,
+
         // The first op_code value after all defined opcodes
-        FIRST_UNDEFINED_OP_VALUE,
+        FIRST_UNDEFINED_OP_VALUE = OP_NOP4,
 
         // template matching params
         OP_SMALLINTEGER = 0xfa,

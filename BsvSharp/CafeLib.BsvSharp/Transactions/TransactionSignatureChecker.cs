@@ -1,12 +1,9 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
-using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Numerics;
-using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Signatures;
 using CafeLib.BsvSharp.Units;
@@ -14,7 +11,7 @@ using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Transactions
 {
-    public class TransactionSignatureChecker : ISignatureChecker
+    public struct TransactionSignatureChecker : ISignatureChecker
     {
         private readonly Transaction _tx;
         private readonly int _txInIndex;
@@ -79,7 +76,7 @@ namespace CafeLib.BsvSharp.Transactions
             // prevent this condition. Alternatively we could test all
             // inputs, but testing just this input minimizes the data
             // required to prove correct CHECKLOCKTIMEVERIFY execution.
-            return TxIn.SequenceFinal != _tx.Inputs[_txInIndex].SequenceNumber;
+            return TransactionInput.SequenceFinal != _tx.Inputs[_txInIndex].SequenceNumber;
         }
 
         /// <summary>
@@ -104,14 +101,14 @@ namespace CafeLib.BsvSharp.Transactions
             // consensus constrained. Testing that the transaction's sequence
             // number do not have this bit set prevents using this property
             // to get around a CHECKSEQUENCEVERIFY check.
-            if ((txToSequence & TxIn.SequenceLocktimeDisableFlag) != 0)
+            if ((txToSequence & TransactionInput.SequenceLocktimeDisableFlag) != 0)
             {
                 return false;
             }
 
             // Mask off any bits that do not have consensus-enforced meaning
             // before doing the integer comparisons
-            const uint nLockTimeMask = TxIn.SequenceLocktimeTypeFlag | TxIn.SequenceLocktimeMask;
+            const uint nLockTimeMask = TransactionInput.SequenceLocktimeTypeFlag | TransactionInput.SequenceLocktimeMask;
             var txToSequenceMasked = txToSequence & nLockTimeMask;
             var nSequenceMasked = sequenceNumber & nLockTimeMask;
 
@@ -124,10 +121,10 @@ namespace CafeLib.BsvSharp.Transactions
             // the nSequenceMasked in the transaction.
             if (
                 !(
-                    txToSequenceMasked < TxIn.SequenceLocktimeTypeFlag &&
-                    nSequenceMasked < TxIn.SequenceLocktimeTypeFlag ||
-                    txToSequenceMasked >= TxIn.SequenceLocktimeTypeFlag &&
-                    nSequenceMasked >= TxIn.SequenceLocktimeTypeFlag
+                    txToSequenceMasked < TransactionInput.SequenceLocktimeTypeFlag &&
+                    nSequenceMasked < TransactionInput.SequenceLocktimeTypeFlag ||
+                    txToSequenceMasked >= TransactionInput.SequenceLocktimeTypeFlag &&
+                    nSequenceMasked >= TransactionInput.SequenceLocktimeTypeFlag
                 )
             )
             {
@@ -139,16 +136,6 @@ namespace CafeLib.BsvSharp.Transactions
             return nSequenceMasked <= txToSequenceMasked;
         }
 
-        /// <summary>
-        /// Compute signature hash.
-        /// </summary>
-        /// <param name="scriptCode"></param>
-        /// <param name="txTo"></param>
-        /// <param name="nIn"></param>
-        /// <param name="sigHashType"></param>
-        /// <param name="amount"></param>
-        /// <param name="flags"></param>
-        /// <returns></returns>
         public static UInt256 ComputeSignatureHash
         (
             Script scriptCode,
@@ -159,129 +146,7 @@ namespace CafeLib.BsvSharp.Transactions
             ScriptFlags flags = ScriptFlags.ENABLE_SIGHASH_FORKID
         )
         {
-            if (sigHashType.HasForkId && (flags & ScriptFlags.ENABLE_SIGHASH_FORKID) != 0)
-            {
-                var hashPrevOuts = new UInt256();
-                var hashSequence = new UInt256();
-                var hashOutputs = new UInt256();
-
-                if (!sigHashType.HasAnyoneCanPay)
-                {
-                    hashPrevOuts = GetPrevOutHash(txTo);
-                }
-
-                var baseNotSingleOrNone =
-                    (sigHashType.GetBaseType() != BaseSignatureHashEnum.Single) &&
-                    (sigHashType.GetBaseType() != BaseSignatureHashEnum.None);
-
-                if (!sigHashType.HasAnyoneCanPay && baseNotSingleOrNone)
-                {
-                    hashSequence = GetSequenceHash(txTo);
-                }
-
-                if (baseNotSingleOrNone)
-                {
-                    hashOutputs = GetOutputsHash(txTo);
-                }
-                else if (sigHashType.GetBaseType() == BaseSignatureHashEnum.Single && nIn < txTo.Outputs.Count)
-                {
-                    using var hw = new HashWriter();
-                    hw.Write(txTo.Outputs[nIn]);
-                    hashOutputs = hw.GetHashFinal();
-                }
-
-                using var writer = new HashWriter();
-                writer
-                    // Version
-                    .Write(txTo.Version)
-                    // Input prevouts/nSequence (none/all, depending on flags)
-                    .Write(hashPrevOuts)
-                    .Write(hashSequence)
-                    // The input being signed (replacing the scriptSig with scriptCode +
-                    // amount). The prevout may already be contained in hashPrevout, and the
-                    // nSequence may already be contain in hashSequence.
-                    .Write(txTo.Inputs[nIn].PrevOut)
-                    .Write(scriptCode)
-                    .Write(amount)
-                    .Write(txTo.Inputs[nIn].SequenceNumber)
-                    // Outputs (none/one/all, depending on flags)
-                    .Write(hashOutputs)
-                    // Locktime
-                    .Write(txTo.LockTime)
-                    // Sighash type
-                    .Write(sigHashType.RawSigHashType);
-
-                return writer.GetHashFinal();
-            }
-
-            if (nIn >= txTo.Inputs.Count)
-            {
-                //  nIn out of range
-                return UInt256.One;
-            }
-
-            // Check for invalid use of SIGHASH_SINGLE
-            if (sigHashType.GetBaseType() == BaseSignatureHashEnum.Single && nIn >= txTo.Outputs.Count)
-            {
-                //  nOut out of range
-                return UInt256.One;
-            }
-
-            {
-                // Original digest algorithm...
-                var hasAnyoneCanPay = sigHashType.HasAnyoneCanPay;
-                // ReSharper disable once UnusedVariable
-                var numberOfInputs = hasAnyoneCanPay ? 1 : txTo.Inputs.Count;
-                using var writer = new HashWriter();
-                // Start with the version...
-                writer.Write(txTo.Version);
-                // Add Input(s)...
-                if (hasAnyoneCanPay)
-                {
-                    // AnyoneCanPay serializes only the input being signed.
-                    var i = txTo.Inputs[nIn];
-                    writer
-                        .Write((byte)1)
-                        .Write(i.PrevOut)
-                        .Write(scriptCode, true)
-                        .Write(i.SequenceNumber);
-                }
-                else
-                {
-                    // Non-AnyoneCanPay case. Process all inputs but handle input being signed in its own way.
-                    var isSingleOrNone = sigHashType.IsBaseSingle || sigHashType.IsBaseNone;
-                    writer.Write(txTo.Inputs.Count.AsVarIntBytes());
-                    for (var nInput = 0; nInput < txTo.Inputs.Count; nInput++)
-                    {
-                        var i = txTo.Inputs[nInput];
-                        writer.Write(i.PrevOut);
-                        if (nInput != nIn)
-                            writer.Write(Script.None);
-                        else
-                            writer.Write(scriptCode, true);
-                        if (nInput != nIn && isSingleOrNone)
-                            writer.Write(0);
-                        else
-                            writer.Write(i.SequenceNumber);
-                    }
-                }
-                // Add Output(s)...
-                var nOutputs = sigHashType.IsBaseNone ? 0 : sigHashType.IsBaseSingle ? nIn + 1 : txTo.Outputs.Count;
-                writer.Write(nOutputs.AsVarIntBytes());
-                for (var nOutput = 0; nOutput < nOutputs; nOutput++)
-                {
-                    if (sigHashType.IsBaseSingle && nOutput != nIn)
-                        writer.Write(TxOut.Empty);
-                    else
-                        writer.Write(txTo.Outputs[nOutput]);
-                }
-                // Finish up...
-                writer
-                    .Write(txTo.LockTime)
-                    .Write(sigHashType.RawSigHashType)
-                    ;
-                return writer.GetHashFinal();
-            }
+            return SignatureHash.ComputeSignatureHash(txTo, nIn, sigHashType, scriptCode, amount, flags);
         }
 
         #region Helpers
@@ -298,39 +163,6 @@ namespace CafeLib.BsvSharp.Transactions
             var hashType = new SignatureHashType(signature.LastByte);
             var sigHash = ComputeSignatureHash(subScript, _tx, _txInIndex, hashType, amount, flags);
             return publicKey.Verify(sigHash, signature);
-        }
-
-        private static UInt256 GetPrevOutHash(Transaction txTo)
-        {
-            using var hw = new HashWriter();
-            foreach (var i in txTo.Inputs)
-            {
-                hw.Write(i.PrevOut);
-            }
-
-            return hw.GetHashFinal();
-        }
-
-        private static UInt256 GetSequenceHash(Transaction txTo)
-        {
-            using var hw = new HashWriter();
-            foreach (var i in txTo.Inputs)
-            {
-                hw.Write(i.SequenceNumber);
-            }
-
-            return hw.GetHashFinal();
-        }
-
-        private static UInt256 GetOutputsHash(Transaction txTo)
-        {
-            using var hw = new HashWriter();
-            foreach (var o in txTo.Outputs)
-            {
-                hw.Write(o);
-            }
-
-            return hw.GetHashFinal();
         }
 
         #endregion

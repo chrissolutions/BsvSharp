@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -13,7 +12,7 @@ namespace CafeLib.BsvSharp.Scripting
         public override Script ReadJson(JsonReader reader, Type objectType, Script existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             var s = (string)reader.Value;
-            return new Script(s);
+            return Script.FromHex(s);
         }
 
         public override void WriteJson(JsonWriter writer, Script value, JsonSerializer serializer)

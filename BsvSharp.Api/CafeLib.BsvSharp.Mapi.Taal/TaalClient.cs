@@ -9,47 +9,20 @@ namespace CafeLib.BsvSharp.Mapi.Taal
     {
         private const string BaseUrl = "https://mapi.taal.com";
         private const string ClientName = "taal";
-        private const string DefaultApiKey = "Taal.ApiKey";
 
-        internal string ApiKey { get; }
-
-        public TaalClient()
-            : this(GetApiKey(), BaseUrl)
+        public TaalClient(string apiEnv)
+            : this(apiEnv, BaseUrl)
         {
         }
 
-        public TaalClient(string apiKey)
-            : this(apiKey, NetworkType.Main)
+        public TaalClient(string apiEnv, string url = BaseUrl)
+            : this(apiEnv, NetworkType.Main, url)
         {
         }
 
-        public TaalClient(string apiKey, string url = BaseUrl)
-            : this(apiKey, NetworkType.Main, url)
+        public TaalClient(string apiEnv, NetworkType networkType = NetworkType.Main, string url = BaseUrl)
+            : base(ClientName, url, apiEnv, networkType)
         {
-        }
-
-        public TaalClient(string apiKey, NetworkType networkType = NetworkType.Main, string url = BaseUrl)
-            : base(ClientName, url, networkType)
-        {
-            ApiKey = apiKey ?? GetApiKey();
-        }
-
-        /// <summary>
-        /// Get API key.
-        /// </summary>
-        private static string GetApiKey() => DefaultApiKey;
-
-        public override Task<ApiResponse<TransactionSubmitResponse>> SubmitTransaction(string txRaw)
-        {
-            try
-            {
-                Headers.Add("Authorization", $"Bearer {ApiKey}");
-                return base.SubmitTransaction(txRaw);
-            }
-            finally
-            {
-                Headers.Remove("Authorization");
-            }
         }
     }
 }

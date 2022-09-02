@@ -33,3 +33,4 @@ _ReSharper*/
 packages/
 Repo/
 buildapi.cmd
+/BsvSharp.Api/CafeLib.BsvSharp.Api.UnitTests/apikey.json

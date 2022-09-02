@@ -1,4 +1,8 @@
-﻿using CafeLib.BsvSharp.Keys;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.Core.Numerics;
 
@@ -7,7 +11,7 @@ namespace CafeLib.BsvSharp.Builders
     public class LockingScriptBuilder : ScriptBuilder
     {
         public UInt160 PubKeyHash { get; }
-        
+
         public LockingScriptBuilder(Address address, TemplateId templateId = TemplateId.Unknown)
             : this(address.PubKeyHash, templateId)
         {
@@ -19,9 +23,14 @@ namespace CafeLib.BsvSharp.Builders
         }
 
         protected LockingScriptBuilder(UInt160 pubKeyHash, TemplateId templateId)
-            :base(true, templateId)
+            : base(templateId)
         {
             PubKeyHash = pubKeyHash;
+        }
+
+        protected LockingScriptBuilder(Script script)
+            : base(script)
+        {
         }
     }
 }

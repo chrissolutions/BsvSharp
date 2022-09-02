@@ -1,12 +1,18 @@
-﻿namespace CafeLib.BsvSharp.Encoding
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+namespace CafeLib.BsvSharp.Encoding
 {
     public enum Base58Type
     {
+        PrivateKeyCompressed,
+        PrivateKeyUncompressed,
         PubkeyAddress,
         ScriptAddress,
         SecretKey,
-        ExtPublicKey,
-        ExtSecretKey,
+        HdPublicKey,
+        HdSecretKey,
 
         MaxBase58Types
     };

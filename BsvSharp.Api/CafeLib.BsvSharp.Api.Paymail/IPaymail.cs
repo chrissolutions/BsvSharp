@@ -8,6 +8,13 @@ namespace CafeLib.BsvSharp.Api.Paymail
     public interface IPaymail
     {
         /// <summary>
+        /// Cache a domain.
+        /// </summary>
+        /// <param name="domain"></param>
+        /// <returns>task</returns>
+        Task<bool> CacheDomain(string domain);
+
+        /// <summary>
         /// Determine whether domain has capability.
         /// </summary>
         /// <param name="domain"></param>

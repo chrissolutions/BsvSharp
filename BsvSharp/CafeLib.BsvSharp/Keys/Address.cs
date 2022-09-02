@@ -1,15 +1,15 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using System;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Services;
-using CafeLib.Core.Encodings;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
-using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Keys
 {
@@ -32,12 +32,9 @@ namespace CafeLib.BsvSharp.Keys
     /// * next 20 bytes - the hash value computed by taking the `ripemd160(sha256(PUBLIC_KEY))`
     /// * last 4 bytes  - a checksum value taken from the first four bytes of sha256(sha256(previous_21_bytes))
     /// </summary>
-    [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
     public class Address : IEquatable<Address>
     {
-        private static readonly HexEncoder Hex = Encoders.Hex;
-        private static readonly Base58CheckEncoder Base58Check = Encoders.Base58Check;
-        private byte[] _bytes;
+        private UInt160 _address;
 
         /// <summary>
         /// Address default constructor.
@@ -69,19 +66,12 @@ namespace CafeLib.BsvSharp.Keys
         {
             get
             {
-                switch (Version)
+                return Version switch
                 {
-                    case 0:
-                    case 111:
-                        return AddressType.PubkeyHash;
-
-                    case 5:
-                    case 196:
-                        return AddressType.ScriptHash;
-
-                    default:
-                        throw new FormatException($"{nameof(Version)} is not a valid address type.");
-                }
+                    0 or 111 => AddressType.PubkeyHash,
+                    5 or 196 => AddressType.ScriptHash,
+                    _ => throw new FormatException($"{nameof(Version)} is not a valid address type."),
+                };
             }
         }
 
@@ -89,19 +79,12 @@ namespace CafeLib.BsvSharp.Keys
         {
             get
             {
-                switch (Version)
+                return Version switch
                 {
-                    case 0:
-                    case 5:
-                        return NetworkType.Main;
-
-                    case 111:
-                    case 196:
-                        return NetworkType.Test;
-
-                    default:
-                        throw new FormatException($"{nameof(Version)} is not a valid network type.");
-                }
+                    0 or 5 => NetworkType.Main,
+                    111 or 196 => NetworkType.Test,
+                    _ => throw new FormatException($"{nameof(Version)} is not a valid network type."),
+                };
             }
         }
 
@@ -155,26 +138,26 @@ namespace CafeLib.BsvSharp.Keys
             return address;
         }
 
-
         /// <summary>
         /// Serialize this address object to a base58-encoded string.
         /// This method is an alias for the [toBase58()] method
         /// </summary>
         /// <returns>base58 encoded address</returns>
-        public override string ToString() => Base58Check.Encode(_bytes);
+        public override string ToString() => Encoders.Base58Check.Encode(new[] { (byte)Version }.Concat(_address.ToArray()));
 
         /// <summary>
         /// Returns the public key hash `ripemd160(sha256(public_key))` encoded as a hexadecimal string
         /// </summary>
         /// <returns>encoded public key hash</returns>
-        public string ToHex() => Hex.Encode(_bytes);
+        public string ToHex() => Encoders.Hex.Encode(new[] { (byte)Version }.Concat(_address.ToArray()));
         
-        public override int GetHashCode() => _bytes.GetHashCodeOfValues();
+        public override int GetHashCode() => ToString().GetHashCode();
 
-        public bool Equals(Address o) => o is not null && _bytes.SequenceEqual(o._bytes);
+        public bool Equals(Address o) => o is not null && Version == o.Version && _address == o._address;
         public override bool Equals(object obj) => Equals((Address)obj);
 
-        public static implicit operator UInt160(Address rhs) => new(rhs._bytes[1..]);
+        public static implicit operator UInt160(Address rhs) => rhs._address;
+
         public static bool operator ==(Address x, Address y) => x?.Equals(y) ?? y is null;
         public static bool operator !=(Address x, Address y) => !(x == y);
 
@@ -182,20 +165,21 @@ namespace CafeLib.BsvSharp.Keys
 
         private void FromBase58CheckInternal(string source)
         {
-            _bytes = Base58Check.Decode(source);
-            Version = _bytes[0];
+            var bytes = Encoders.Base58Check.Decode(source);
+            Version = bytes[0];
+            _address = new UInt160(bytes[1..]);
         }
 
         private void FromHexInternal(string hexPubKey, NetworkType networkType)
         {
             Version = RootService.GetNetwork(networkType).PublicKeyAddress[0];
-            _bytes = new[]{(byte)Version}.Concat(Hex.Decode(hexPubKey).Hash160().ToArray());
+            _address = Encoders.Hex.Decode(hexPubKey).Hash160();
         }
 
         private void FromScriptInternal(Script script, NetworkType networkType)
         {
             Version = RootService.GetNetwork(networkType).PublicKeyAddress[0];
-            _bytes = new[]{(byte)Version}.Concat(Hex.Decode(script.ToHexString()).Hash160().ToArray());
+            _address = Encoders.Hex.Decode(script.ToHexString()).Hash160();
         }
 
         #endregion

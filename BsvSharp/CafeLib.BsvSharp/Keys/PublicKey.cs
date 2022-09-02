@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -10,14 +9,13 @@ using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Services;
+using CafeLib.BsvSharp.Signatures;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
 using CafeLib.Cryptography.BouncyCastle.Math;
 using CafeLib.Cryptography.BouncyCastle.Math.EC;
-// ReSharper disable NonReadonlyMemberInGetHashCode
-// ReSharper disable InconsistentNaming
 
 namespace CafeLib.BsvSharp.Keys
 {
@@ -111,18 +109,6 @@ namespace CafeLib.BsvSharp.Keys
         }
 
         /// <summary>
-        /// Creates a copy of this key.
-        /// </summary>
-        /// <returns></returns>
-        public PublicKey Clone()
-        {
-            var clone = new PublicKey();
-            if (_keyData != null)
-                clone._keyData = _keyData.ToArray();
-            return clone;
-        }
-
-        /// <summary>
         /// True if key is stored in an array of 33 bytes.
         /// False if invalid or uncompressed.
         /// </summary>
@@ -165,9 +151,14 @@ namespace CafeLib.BsvSharp.Keys
                 Invalidate();
         }
 
-        private void Invalidate()
+        /// <summary>
+        /// Create public key from private key
+        /// </summary>
+        /// <param name="privateKey">private key</param>
+        /// <returns>public key</returns>
+        public static PublicKey FromPrivateKey(PrivateKey privateKey)
         {
-            _keyData = null;
+            return privateKey.CreatePublicKey();
         }
 
         /// <summary>
@@ -176,7 +167,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="hash"></param>
         /// <param name="signatureEncoded"></param>
         /// <returns></returns>
-        public PublicKey RecoverKey(UInt256 hash, ReadOnlyByteSpan signatureEncoded)
+        public static PublicKey RecoverKey(UInt256 hash, ReadOnlyByteSpan signatureEncoded)
         {
             if (signatureEncoded.Length < 65)
                 throw new ArgumentException("Signature truncated, expected 65 bytes and got " + signatureEncoded.Length);
@@ -209,10 +200,8 @@ namespace CafeLib.BsvSharp.Keys
         /// Create public key from hex string.
         /// </summary>
         /// <param name="hex">hex string</param>
-        /// <returns></returns>
+        /// <returns>public key</returns>
         public static PublicKey FromHex(string hex) => new(hex);
-
-        public static PublicKey FromBase58(string base58) => new(Encoders.Hex.Encode(Encoders.Base58.Decode(base58)));
 
         /// <summary>
         /// Recover public key from message and signature.
@@ -227,7 +216,7 @@ namespace CafeLib.BsvSharp.Keys
         public static PublicKey FromSignedMessage(string message, string signature)
         {
             var signatureBytes = Encoders.Base64.Decode(signature);
-            var hash = KeyExtensions.GetMessageHash(message.Utf8ToBytes());
+            var hash = SignatureMessage.GetMessageHash(message);
             return FromSignedHash(hash, signatureBytes);
         }
 
@@ -239,8 +228,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <returns></returns>
         public static PublicKey FromSignedHash(UInt256 hash, ReadOnlyByteSpan signature)
         {
-            var key = new PublicKey();
-            return key.RecoverKey(hash, signature);
+            return RecoverKey(hash, signature);
         }
 
         /// <summary>
@@ -288,7 +276,7 @@ namespace CafeLib.BsvSharp.Keys
         /// Obtain a public key string.
         /// </summary>
         /// <returns></returns>
-        public override string ToString() => ToAddress().ToString();
+        public override string ToString() => ToHex();
 
         /// <summary>
         /// Derive a child public key.
@@ -296,7 +284,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="nChild"></param>
         /// <param name="chainCode"></param>
         /// <returns>child public key</returns>
-        public (PublicKey, UInt256 ccChild) Derive(uint nChild, UInt256 chainCode)
+        internal (PublicKey, UInt256 ccChild) Derive(uint nChild, UInt256 chainCode)
         {
             byte[] lr;
             var l = new byte[32];
@@ -350,6 +338,14 @@ namespace CafeLib.BsvSharp.Keys
         #region Helpers
 
         /// <summary>
+        /// Invalidate the public key.
+        /// </summary>
+        private void Invalidate()
+        {
+            _keyData = null;
+        }
+
+        /// <summary>
         /// Get the public key from the elliptical curve key.
         /// </summary>
         /// <param name="ecKey"></param>
@@ -384,7 +380,11 @@ namespace CafeLib.BsvSharp.Keys
         /// <returns></returns>
         private bool VerifyTxSig(UInt256 hash, VarType sig)
         {
-            return ECKey.Verify(hash, ECDSASignature.FromDER(sig));
+            var sigBytes = sig[0..(sig.Length-1)];
+            var signature = ECDSASignature.FromDER(sigBytes);
+            var r = new BigInteger(1, signature.R.ToByteArray());
+            var s = new BigInteger(1, signature.S.ToByteArray());
+            return ECKey.Verify(hash, new ECDSASignature(r, s));
         }
 
         #endregion

@@ -1,9 +1,4 @@
-﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
-// Distributed under the Open BSV software license, see the accompanying file LICENSE.
-#endregion
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -35,7 +30,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
 
         private static readonly Utxo UtxoWith1Coin = new Utxo
         {
-            TxHash = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
+            TxId = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
             Index = 1,
             ScriptPubKey = new P2PkhLockBuilder(FromAddress).ToScript(),
             Amount = RootService.Network.Consensus.SatoshisPerCoin
@@ -43,7 +38,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
 
         private static readonly Utxo UtxoWith1MillionSatoshis = new Utxo
         {
-            TxHash = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
+            TxId = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
             Index = 0,
             ScriptPubKey = new P2PkhLockBuilder(FromAddress).ToScript(),
             Amount = 1000000L
@@ -51,7 +46,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
 
         private static readonly Utxo UtxoWith100000Satoshis = new Utxo 
         {
-            TxHash = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
+            TxId = UInt256.FromHex("a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458"),
             Index = 0,
             ScriptPubKey = new P2PkhLockBuilder(FromAddress).ToScript(),
             Amount = 100000
@@ -63,7 +58,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         [InlineData("0000000000000000000000000000000000000000000000000000000000000001")]
         public void Verify_TxId_Test(string txId)
         {
-            var txIn = new TxIn(UInt256.FromHex(txId), 0, 1000L);
+            var txIn = new TransactionInput(UInt256.FromHex(txId), 0, 1000L);
             Assert.Equal(txId, txIn.TxHash.ToString());
         }
 
@@ -101,20 +96,57 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         {
             var changeScriptBuilder = new P2PkhLockBuilder(ChangeAddress);
 
-            var transaction = new Transaction();
-                transaction.SpendFrom(UtxoWith1MillionSatoshis.TxHash,
-                                      UtxoWith1MillionSatoshis.Index, 
-                                      UtxoWith1MillionSatoshis.Amount, 
-                                      UtxoWith1MillionSatoshis.ScriptPubKey);
-                transaction.SpendTo(ToAddress, 500000L, new P2PkhLockBuilder(ToAddress));
-                transaction.SendChangeTo(ChangeAddress, changeScriptBuilder);
-                transaction.WithFeePerKb(100000);
+            var tx = new Transaction()
+                .SpendFrom(UtxoWith1MillionSatoshis.TxId,
+                                      UtxoWith1MillionSatoshis.Index,
+                                      UtxoWith1MillionSatoshis.Amount,
+                                      UtxoWith1MillionSatoshis.ScriptPubKey)
+                .SpendTo(ToAddress, 500000L, new P2PkhLockBuilder(ToAddress))
+                .SendChangeTo(ChangeAddress, changeScriptBuilder)
+                .WithFeePerKb(100000)
+                .Sign(PrivateKeyFromWif);
 
-            transaction.SignInput(0, PrivateKeyFromWif);
+            Assert.Equal(2, tx.Outputs.Count);
+            Assert.Equal(477400L, tx.Outputs[1].Amount.Satoshis);
+            Assert.Equal(changeScriptBuilder.ToScript().ToString(), tx.Outputs[1].Script.ToString());
+        }
 
-            Assert.Equal(2, transaction.Outputs.Count);
-            Assert.Equal(472899L, transaction.Outputs[1].Amount.Satoshis);
-            Assert.Equal(changeScriptBuilder.ToScript().ToString(), transaction.Outputs[1].Script.ToString());
+        [Fact]
+        public void Spend_Transaction_With_500sats_FeePerKb()
+        {
+            const string txHex = "01000000013acb1933b924795545b45d12be478240f005ce32b3802f61714cca8c895159970200000000ffffffff0208070000000000001976a914556047d5ca688f1b6c51c8abc08aa8b16b941d9588ac160d0000000000001976a914767b244a0f1f3af0e7387e872782bbbe2c6fb86a88ac00000000";
+
+            var utxo = new Utxo
+            {
+                TxId = UInt256.FromHex("975951898cca4c71612f80b332ce05f0408247be125db445557924b93319cb3a"),
+                Index = 2,
+                ScriptPubKey = Script.FromHex("76a91434f23a48e5b7c103ce7abfeb707406f0a255646288ac"),
+                Amount = new Amount(5263L, BitcoinUnit.Satoshi)
+            };
+
+            var tx = new Transaction()
+                .SpendFromUtxo(utxo)
+                .SpendTo(new Address("18nRmzxrygHmsh5DQuVFYDZXGwcZ3CbVuk"), 1800L)
+                .SendChangeTo(new Address("1BoUFgA8ZnSFxARg9BgrXgmtZLj2ssrYuw"))
+                .WithFeePerKb(500);
+
+            Assert.Equal(txHex, tx.ToString());
+        }
+
+        [Fact]
+        public void Spend_Transaction_500000_From_UtxoWith1MillionSatoshis()
+        {
+            var tx = new Transaction()
+                .SpendFrom(UtxoWith1MillionSatoshis.TxId,
+                            UtxoWith1MillionSatoshis.Index,
+                            UtxoWith1MillionSatoshis.Amount,
+                            UtxoWith1MillionSatoshis.ScriptPubKey)
+                .SpendTo(new Address("mrU9pEmAx26HcbKVrABvgL7AwA5fjNFoDc"), 500000L)
+                .SendChangeTo(new Address("mgBCJAsvzgT2qNNeXsoECg2uPKrUsZ76up"))
+                .WithFeePerKb(500);
+
+            Assert.Equal(2, tx.Outputs.Count);
+            Assert.Equal(499887L, tx.Outputs[1].Amount.Satoshis);
         }
 
         [Fact]
@@ -139,7 +171,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         public void Fail_If_No_Change_Address()
         {
             var tx = new Transaction()
-                .SpendFrom(UtxoWith1Coin.TxHash, UtxoWith1Coin.Index, UtxoWith1Coin.Amount, UtxoWith1Coin.ScriptPubKey)
+                .SpendFrom(UtxoWith1Coin.TxId, UtxoWith1Coin.Index, UtxoWith1Coin.Amount, UtxoWith1Coin.ScriptPubKey)
                 .SpendTo(ToAddress, 500000L, new P2PkhLockBuilder(ToAddress));
 
             Assert.Throws<TransactionFeeException>(() => tx.Serialize(true));
@@ -211,12 +243,11 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         [Fact]
         public void Verify_Dust_Output()
         {   
-            var tx = new Transaction();
-                tx.SpendFromUtxo(UtxoWith1Coin, new P2PkhUnlockBuilder(PrivateKeyFromWif.CreatePublicKey()));
-                tx.SpendTo(ToAddress, 546, new P2PkhLockBuilder(ToAddress));
-                tx.SendChangeTo(ChangeAddress, new P2PkhLockBuilder(ChangeAddress));
-            
-            tx.SignInput(0, PrivateKeyFromWif);
+            var tx = new Transaction()
+                .SpendFromUtxo(UtxoWith1Coin, new P2PkhUnlockBuilder(PrivateKeyFromWif.CreatePublicKey()))
+                .SpendTo(ToAddress, 546, new P2PkhLockBuilder(ToAddress))
+                .SendChangeTo(ChangeAddress, new P2PkhLockBuilder(ChangeAddress))
+                .Sign(0, PrivateKeyFromWif);
 
             Assert.True(tx.Verify());
             Assert.NotNull(tx.Serialize());
@@ -225,12 +256,11 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         [Fact]
         public void Verify_Dust_As_OpReturn()
         {
-            var tx = new Transaction();
-            tx.SpendFromUtxo(UtxoWith1Coin, new P2PkhUnlockBuilder(PrivateKeyFromWif.CreatePublicKey()));
-            tx.AddData("not dust!".Utf8ToBytes());
-            tx.SendChangeTo(ChangeAddress, new P2PkhLockBuilder(ChangeAddress));
-
-            tx.SignInput(0, PrivateKeyFromWif);
+            var tx = new Transaction()
+                .SpendFromUtxo(UtxoWith1Coin, new P2PkhUnlockBuilder(PrivateKeyFromWif.CreatePublicKey()))
+                .AddData("not dust!".Utf8ToBytes())
+                .SendChangeTo(ChangeAddress, new P2PkhLockBuilder(ChangeAddress))
+                .Sign(PrivateKeyFromWif);
 
             Assert.True(tx.Verify());
             Assert.NotNull(tx.Serialize());
@@ -247,30 +277,29 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
         [Fact]
         public void Recalculate_Change_Amount()
         {
-            var transaction = new Transaction();
-            transaction.SpendFromUtxo(UtxoWith100000Satoshis);
-            transaction.SpendTo(ToAddress, 50000L, new P2PkhLockBuilder(ToAddress));
-            transaction.SendChangeTo(ChangeAddress, new P2PkhLockBuilder(ChangeAddress));
-            transaction.WithFee(Amount.Zero);
-
-            transaction.SignInput(0, PrivateKeyFromWif);
+            var tx = new Transaction()
+                .SpendFromUtxo(UtxoWith100000Satoshis)
+                .SpendTo(ToAddress, 50000L, new P2PkhLockBuilder(ToAddress))
+                .SendChangeTo(ChangeAddress, new P2PkhLockBuilder(ChangeAddress))
+                .WithFee(Amount.Zero)
+                .Sign(PrivateKeyFromWif);
 
             var changeLocker = new P2PkhLockBuilder(ChangeAddress);
-            Assert.Equal(new Amount(50000), transaction.GetChangeOutput(changeLocker).Amount);
+            Assert.Equal(new Amount(50000), tx.GetChangeOutput(changeLocker).Amount);
 
-            transaction = transaction.SpendTo(ToAddress, 20000L);
-            transaction.SignInput(0, PrivateKeyFromWif);
+            tx = tx.SpendTo(ToAddress, 20000L)
+                .Sign(PrivateKeyFromWif);
 
-            Assert.Equal(3, transaction.Outputs.Length);
-            Assert.Equal(new Amount(30000), transaction.Outputs[2].Amount);
-            Assert.Equal(changeLocker.ToScript().ToString(), transaction.Outputs[2].Script.ToString());
+            Assert.Equal(3, tx.Outputs.Length);
+            Assert.Equal(new Amount(30000), tx.Outputs[2].Amount);
+            Assert.Equal(changeLocker.ToScript().ToString(), tx.Outputs[2].Script.ToString());
         }
 
         [Fact]
         public void Adds_No_Fee_If_No_Available_Change()
         {
             var transaction = new Transaction();
-            transaction.SpendFrom(UtxoWith100000Satoshis.TxHash,
+            transaction.SpendFrom(UtxoWith100000Satoshis.TxId,
                 UtxoWith100000Satoshis.Index,
                 UtxoWith100000Satoshis.Amount,
                 new P2PkhUnlockBuilder(PrivateKeyFromWif.CreatePublicKey()));

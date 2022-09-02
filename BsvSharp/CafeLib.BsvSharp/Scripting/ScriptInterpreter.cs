@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -38,13 +37,14 @@ namespace CafeLib.BsvSharp.Scripting
         /// <summary>
         /// Modeled on Bitcoin-SV interpreter.cpp 0.1.1 lines 1866-1945
         /// </summary>
-        /// <param name="scriptSig"></param>
-        /// <param name="scriptPub"></param>
-        /// <param name="flags"></param>
-        /// <param name="checker"></param>
-        /// <param name="error"></param>
-        /// <returns></returns>
-        public static bool VerifyScript(Script scriptSig, Script scriptPub, ScriptFlags flags, ISignatureChecker checker, out ScriptError error)
+        /// <param name="scriptSig">script signature</param>
+        /// <param name="scriptPubKey">script public key</param>
+        /// <param name="flags">script flags</param>
+        /// <param name="checker">signature checker</param>
+        /// <param name="error">error output parameter</param>
+        /// <returns>true if verfied; false if not verfied</returns>
+        /// <remarks>P2SH scripts are not verfied</remarks>
+        public static bool VerifyScript(Script scriptSig, Script scriptPubKey, ScriptFlags flags, ISignatureChecker checker, out ScriptError error)
         {
             SetError(out error, ScriptError.UNKNOWN_ERROR);
 
@@ -62,7 +62,7 @@ namespace CafeLib.BsvSharp.Scripting
             return evaluator switch
             {
                 _ when !evaluator.EvalScript(scriptSig, flags, checker, out error) => false,
-                _ when !evaluator.EvalScript(scriptPub, flags, checker, out error) => false,
+                _ when !evaluator.EvalScript(scriptPubKey, flags, checker, out error) => false,
                 _ when evaluator.Count == 0 => SetError(out error, ScriptError.EVAL_FALSE),
                 _ when !evaluator.Peek() => SetError(out error, ScriptError.EVAL_FALSE),
                 _ => SetSuccess(out error)

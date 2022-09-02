@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -21,18 +20,18 @@ namespace CafeLib.BsvSharp.Builders
         /// false if this operation still needs to be changed
         /// false is typically used for data placeholders
         /// </summary>
-        public bool IsFinal;
+        public bool IsFinal { get; init; }
 
         /// <summary>
         /// If IsRaw is true, ignore Op.Code and just add Op.Data bytes to script.
         /// </summary>
-        public bool IsRaw;
+        public bool IsRaw { get; init; }
 
         /// <summary>
         /// KzOp is the standard script opcode plus data bytes struct.
         /// If IsRaw is true, ignore Op.Code and just add Op.Data bytes to script.
         /// </summary>
-        public Operand Operand;
+        public Operand Operand { get; init; }
 
         /// <summary>
         /// Operand opcode.
@@ -57,7 +56,7 @@ namespace CafeLib.BsvSharp.Builders
         public long Length => IsRaw ? Operand.Data.Length : Operand.Length;
 
         public static implicit operator OperandBuilder(Operand op)
-            => new() { IsFinal = true, Operand = op};
+            => new() { IsFinal = true, Operand = op };
 
         public bool TryCopyTo(ref ByteSpan span)
         {

@@ -135,7 +135,7 @@ namespace CafeLib.BsvSharp.Network
         /// <summary>
         /// Maximum script length in bytes. 
         /// </summary>
-        public int ScriptMaxSize => 149;
+        public int ScriptMaxSize => 148;
         /// <summary>
         /// Threshold for nLockTime: below this value it is interpreted as block number,
         /// otherwise as UNIX timestamp. Threshold is Tue Nov 5 00:53:20 1985 UTC
@@ -209,8 +209,8 @@ namespace CafeLib.BsvSharp.Network
                 new Transaction
                 (
                     version: 1,
-                    vin: new TxInCollection(new[] { new TxIn(UInt256.Zero, -1, Amount.Zero, Script.None, 0 ) }),
-                    vout: new TxOutCollection(new[] { new TxOut(UInt256.Zero, -1, Amount.Zero, Script.None) }),
+                    vin: new TransactionInputList(new[] { new TransactionInput(UInt256.Zero, -1, Amount.Zero, 0) }),
+                    vout: new TransactionOutputList(new[] { new TransactionOutput(UInt256.Zero, -1, Amount.Zero, Script.None) }),
                     lockTime: 0
                 )
             };

@@ -35,8 +35,9 @@ namespace CafeLib.BsvSharp.UnitTests.Encrypt
 
             var privkey = PrivateKey.FromWif(wifKeySource);
             var decodedPrivKey = privkey.ToHex().ToUpper();
-            //var outPrivKey = privkey.ToString();
+            var outPrivKey = privkey.ToString();
             Assert.Equal(privateKeyHex, decodedPrivKey);
+            Assert.Equal(wifKeySource, outPrivKey);
         }
 
         //[Fact]

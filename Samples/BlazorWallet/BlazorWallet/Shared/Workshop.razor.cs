@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using BlazorWallet.Interop;
 using CafeLib.BsvSharp.Api.WhatsOnChain;
 using CafeLib.BsvSharp.Extensions;
@@ -20,8 +21,8 @@ namespace BlazorWallet.Shared
         private Mnemonic _mnemonic;
         private string _words = "";
 
-        private ExtPrivateKey _extPrivateKey;
-        private string _extPrivateKeyText = "";
+        private HdPrivateKey _hdPrivateKey;
+        private string _hdPrivateKeyText = "";
 
         private string _keyPath = "m/44'/0'/0'";
         private int _pathDepth;
@@ -47,8 +48,8 @@ namespace BlazorWallet.Shared
 
         private async Task NewHdPrivateKey()
         {
-            _extPrivateKey = ExtPrivateKey.FromWords(_words);
-            _extPrivateKeyText = _extPrivateKey.ToString();
+            _hdPrivateKey = HdPrivateKey.FromWords(_words);
+            _hdPrivateKeyText = _hdPrivateKey.ToString();
             await DerivationPath(_pathDepth.ToString());
         }
 
@@ -65,7 +66,7 @@ namespace BlazorWallet.Shared
         {
             _keyPath = $"m/44'/0'/{pathDepth}'";
             _pathDepth = pathDepth;
-            _privateKey = _extPrivateKey.Derive(_keyPath).PrivateKey;
+            _privateKey = _hdPrivateKey.Derive(_keyPath).PrivateKey;
             _privateKeyText = _privateKey.ToString();
         }
 

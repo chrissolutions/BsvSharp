@@ -1,4 +1,8 @@
-﻿using System;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using System;
 using System.Runtime.CompilerServices;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.Core.Buffers;
@@ -15,31 +19,12 @@ namespace CafeLib.BsvSharp.Extensions
         /// <returns></returns>
         public static ByteSpan AsSpan(this int i) => BitConverter.GetBytes(i);
 
-        // <summary>
-        // Returns access to an integer as a span of bytes.
-        // Reflects the endian of the underlying implementation.
-        // </summary>
-        // <param name = "i" ></param >
-        // < returns ></returns >
-        //public static ByteSpan AsSpan(this ref Int32 i)
-        //{
-        //    unsafe
-        //    {
-        //        fixed (Int32* p = &i)
-        //        {
-        //            byte* pb = (byte*)p;
-        //            var bytes = new Span<byte>(pb, 4);
-        //            return bytes;
-        //        }
-        //    }
-        //}
-
         /// <summary>
         /// Returns access to an integer as a span of bytes.
         /// Reflects the endian of the underlying implementation.
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="bigEndian"></param>
+        /// <param name="i">integer</param>
+        /// <param name="bigEndian">true if big endian flag; otherwise little ending</param>
         /// <returns></returns>
         public static ReadOnlyByteSpan AsReadOnlySpan(this int i, bool bigEndian = false)
         {
@@ -53,31 +38,12 @@ namespace CafeLib.BsvSharp.Extensions
             return bytes;
         }
 
-        ///// <summary>
-        ///// Returns access to an integer as a span of bytes.
-        ///// Reflects the endian of the underlying implementation.
-        ///// </summary>
-        ///// <param name="i"></param>
-        ///// <param name="bigEndian"></param>
-        ///// <returns></returns>
-        //public static ReadOnlyByteSpan AsReadOnlySpan(this ref Int32 i, bool bigEndian = false)
-        //{
-        //    byte[] bytes = i.AsSpan();
-
-        //    if (BitConverter.IsLittleEndian == bigEndian)
-        //    {
-        //        Array.Reverse(bytes);
-        //    }
-
-        //    return bytes;
-        //}
-
         /// <summary>
         /// Returns access to an integer as a span of bytes.
         /// Reflects the endian of the underlying implementation.
         /// </summary>
-        /// <param name="i"></param>
-        /// <returns></returns>
+        /// <param name="i">reference to integer</param>
+        /// <returns>ByteSpan</returns>
         public static ByteSpan AsSpan(this ref uint i)
         {
             unsafe
@@ -95,16 +61,16 @@ namespace CafeLib.BsvSharp.Extensions
         /// Returns access to an integer as a span of bytes.
         /// Reflects the endian of the underlying implementation.
         /// </summary>
-        /// <param name="i"></param>
-        /// <returns></returns>
+        /// <param name="i">reference to integer</param>
+        /// <returns>ReadOnlyByteSpan</returns>
         public static ReadOnlyByteSpan AsReadOnlySpan(this ref uint i) => i.AsSpan();
 
         /// <summary>
         /// Returns access to an integer as a span of bytes.
         /// Reflects the endian of the underlying implementation.
         /// </summary>
-        /// <param name="i"></param>
-        /// <returns></returns>
+        /// <param name="i">reference to long integer</param>
+        /// <returns>ByteSpan</returns>
         public static ByteSpan AsSpan(this ref long i)
         {
             unsafe
@@ -122,16 +88,16 @@ namespace CafeLib.BsvSharp.Extensions
         /// Returns access to an integer as a span of bytes.
         /// Reflects the endian of the underlying implementation.
         /// </summary>
-        /// <param name="i"></param>
-        /// <returns></returns>
+        /// <param name="i">reference to long integer</param>
+        /// <returns>readonly byte span</returns>
         public static ReadOnlyByteSpan AsReadOnlySpan(this ref long i) => i.AsSpan();
 
         /// <summary>
         /// Returns access to an integer as a span of bytes.
         /// Reflects the endian of the underlying implementation.
         /// </summary>
-        /// <param name="i"></param>
-        /// <returns></returns>
+        /// <param name="i">reference to integer</param>
+        /// <returns>span of bytes</returns>
         public static Span<byte> AsSpan(this ref ulong i)
         {
             unsafe
@@ -149,30 +115,30 @@ namespace CafeLib.BsvSharp.Extensions
         /// Returns access to an integer as a span of bytes.
         /// Reflects the endian of the underlying implementation.
         /// </summary>
-        /// <param name="i"></param>
-        /// <returns></returns>
+        /// <param name="i">reference to long integer</param>
+        /// <returns>readonly byte span</returns>
         public static ReadOnlyByteSpan AsReadOnlySpan(this ref ulong i) => i.AsSpan();
 
         /// <summary>
-        /// 
+        /// Convert bytes to UInt256 
         /// </summary>
-        /// <param name="bytes"></param>
-        /// <returns></returns>
+        /// <param name="bytes">byte array</param>
+        /// <returns>UInt256</returns>
         public static UInt256 AsUInt256(this byte[] bytes) => (UInt256)(ByteSpan)bytes;
 
         /// <summary>
-        /// 
+        /// Convert integer to array of bytes
         /// </summary>
-        /// <param name="v"></param>
-        /// <returns></returns>
-        public static byte[] AsVarIntBytes(this int v) => ((VarInt)v).ToArray();
+        /// <param name="i">integer value</param>
+        /// <returns>byte array</returns>
+        public static byte[] AsVarIntBytes(this int i) => ((VarInt)i).ToArray();
 
         /// <summary>
-        /// 
+        /// Convert long integer to array of bytes
         /// </summary>
-        /// <param name="v"></param>
-        /// <returns></returns>
-        public static byte[] AsVarIntBytes(this long v) => ((VarInt)v).ToArray();
+        /// <param name="l">long value</param>
+        /// <returns>byte array</returns>
+        public static byte[] AsVarIntBytes(this long l) => ((VarInt)l).ToArray();
 
         /// <summary>
         /// Copy to UInt160 from byte array.

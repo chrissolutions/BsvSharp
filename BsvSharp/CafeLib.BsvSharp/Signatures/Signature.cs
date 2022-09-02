@@ -1,5 +1,8 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
+﻿#region Copyright
+// Distributed under the Open BSV software license, see the accompanying file LICENSE.
+#endregion
+
+using System;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
@@ -7,7 +10,6 @@ using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Signatures
 {
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public struct Signature : IEquatable<Signature>
     {
         private byte[] _data;
@@ -30,10 +32,10 @@ namespace CafeLib.BsvSharp.Signatures
         /// </summary>
         /// <param name="signature">signature as byte array</param>
         /// <param name="hashType"></param>
-        public Signature(byte[] signature, SignatureHashType hashType = null)
+        public Signature(byte[] signature, SignatureHashType hashType = default)
         {
             _data = signature;
-            _hashType = hashType?.RawSigHashType ?? (uint)SignatureHashEnum.Unsupported;
+            _hashType = hashType.RawSigHashType;
         }
 
         /// <summary>
@@ -186,6 +188,16 @@ namespace CafeLib.BsvSharp.Signatures
         public override string ToString()
         {
             return Encoders.Base64.Encode(_data);
+        }
+
+        public static bool operator ==(Signature left, Signature right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Signature left, Signature right)
+        {
+            return !(left == right);
         }
     }
 }

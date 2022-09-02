@@ -1,5 +1,4 @@
 ﻿#region Copyright
-// Copyright (c) 2020 TonesNotes
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
@@ -12,14 +11,9 @@ using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
 using CafeLib.Cryptography.BouncyCastle.Math;
-// ReSharper disable NonReadonlyMemberInGetHashCode
-// ReSharper disable InconsistentNaming
 
 namespace CafeLib.BsvSharp.Keys
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class PrivateKey : IEquatable<PrivateKey>
     {
         private const int KeySize = UInt256.Length;
@@ -32,7 +26,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <summary>
         /// Internal elliptical curve key.
         /// </summary>
-        internal ECKey ECKey { get; set; }
+        internal ECKey ECKey { get; private set; }
 
         ///// <summary>
         ///// HardenedBit.
@@ -119,21 +113,16 @@ namespace CafeLib.BsvSharp.Keys
         {
             get
             {
-                if (_publicKey == null)
-                {
-                    _publicKey = this.CreatePublicKey();
-                }
+                if (_publicKey == null) _publicKey = this.CreatePublicKey();
                 return _publicKey;
             }
         }
 
-
         public byte[] ToArray() => _keyData;
 
+        public static PrivateKey FromRandom() => new(true);
         public static PrivateKey FromHex(string hex, bool compressed = true) => new(UInt256.FromHex(hex, true), compressed);
-        public static PrivateKey FromBase58(string base58) => new Base58PrivateKey(base58).GetKey();
-        public static PrivateKey FromWif(string wif) => new Base58PrivateKey(wif).GetKey();
-        public static PrivateKey FromRandom() => new();
+        public static PrivateKey FromWif(string wif) => WifPrivateKey.FromString(wif).ToPrivateKey();
 
         /// <summary>
         /// Derive a new private key.
@@ -197,12 +186,12 @@ namespace CafeLib.BsvSharp.Keys
             return sig != null && publicKey.Verify(hash, sig);
         }
 
-        public string ToHex() => _keyData.ToString();
-        public Base58PrivateKey ToBase58(NetworkType? networkType = null) => new(this, networkType);
-        public override string ToString() => ToBase58().ToString();
+        public string ToHex() => _keyData.ToHex(true);
+        public override string ToString() => ToWif().ToString();
+        public WifPrivateKey ToWif(NetworkType? networkType = null) => WifPrivateKey.FromPrivateKey(this, networkType);
 
-        public override int GetHashCode() => _keyData.GetHashCode();
-        public bool Equals(PrivateKey o) => !(o is null) && IsCompressed.Equals(o.IsCompressed) && _keyData.Equals(o._keyData);
+        public override int GetHashCode() => ToString().GetHashCode();
+        public bool Equals(PrivateKey o) => o is not null && IsCompressed.Equals(o.IsCompressed) && _keyData.Equals(o._keyData);
         public override bool Equals(object obj) => obj is PrivateKey key && this == key;
 
         public static bool operator ==(PrivateKey x, PrivateKey y) => x?.Equals(y) ?? y is null;
@@ -220,7 +209,7 @@ namespace CafeLib.BsvSharp.Keys
             }
             else
             {
-                _keyData = new UInt256(true);
+                _keyData = new UInt256();
                 data.CopyTo(_keyData.Span);
                 IsCompressed = compressed;
                 IsValid = true;
