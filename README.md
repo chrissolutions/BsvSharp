@@ -6,13 +6,13 @@ BsvSharp is a fork of [KzBSV](https://github.com/kzbsv/KzBsv) version 0.2.0, ano
 
 BsvSharp resolves this problem by using the BouncyCastle library to provide the cryptographic security algorithms used by BSV.  The version of BouncyCastle was ported from [NBitcoin version 2.0.0](https://github.com/MetacoSA/NBitcoin/tree/v2.0.0.0).  NBitcoin is a .NET version of the BitcoinJ library.  It is quite a mature library but contains the technical debt and constraints associated with the BTC Core protocol.  Fortunately, the BouncyCastle portion is isolated and separated from the technical debt of BTC Core.
 
-Other parts of BsvSharp was derived from the <a href="https://github.com/twostack/dartsv">dartsv</a> library.  The dartsv library by <a href="https://www.twostack.org">TwoStack.org</a>, is an implementation of the BSV library written in the Dart programming language.  
+Some parts of BsvSharp was derived from the <a href="https://github.com/twostack/dartsv">dartsv</a> library.  The dartsv library by <a href="https://www.twostack.org">TwoStack.org</a>, is an implementation of the BSV library written in the Dart programming language.  Other parts was derived from [MoneyButton BSV JavaScript library](https://github.com/moneybutton/bsvmoneybutton/bsv) originally developed by Ryan X. Charles.
 
 BsvSharp leverages these implementations to produce a C# library that works across all environments and runs on the Web, Desktop and Mobile platforms.
 
 BsvSharp uses the [CafeLib](https://github.com/chrissolutions/CafeLib) library.  CafeLib is a collection of C# libraries used for application development and is now located in its own [GitHub Repository](https://github.com/chrissolutions/BsvSharp).
 
-CafeLib is deployed as set of nuget packages found on [nuget.org](https://www.nuget.org/packages?q=CafeLib).  The current version of the CafeLib libraries is 1.7.0. The current version of CafeLib.Blazor is 1.8.0.
+CafeLib is deployed as set of nuget packages found on [nuget.org](https://www.nuget.org/packages?q=CafeLib).  The current version of the CafeLib libraries is 2.0.0.
 
 ### BsvSharp.Api
 

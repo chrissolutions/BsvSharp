@@ -182,12 +182,12 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
             "c55257c360c07c72029aebc1b53c05ed0362ada38ead3e3e9efa3708e53495531f09a6987599d18264c1e1c92f2cf141630c7a3c4ab7c81b2f001698e7463b04"
         )]
-        //[InlineData(
-        //    "メートルガバヴァぱばぐゞちぢ十人十色",
-        //    "00000000000000000000000000000000",
-        //    "あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あおぞら",
-        //    "a262d6fb6122ecf45be09c50492b31f92e9beb7d9a845987a02cefda57a15f9c467a17872029a9e92299b5cbdf306e3a0ee620245cbd508959b6cb7ca637bd55"
-        //)]
+        [InlineData(
+            "メートルガバヴァぱばぐゞちぢ十人十色",
+            "00000000000000000000000000000000",
+            "あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あおぞら",
+            "a262d6fb6122ecf45be09c50492b31f92e9beb7d9a845987a02cefda57a15f9c467a17872029a9e92299b5cbdf306e3a0ee620245cbd508959b6cb7ca637bd55"
+        )]
         public void Mnemonic_Test(string password, string entropy, string words, string seed)
         {
             var _ = entropy;
