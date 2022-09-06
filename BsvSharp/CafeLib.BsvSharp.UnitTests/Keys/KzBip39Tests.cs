@@ -196,17 +196,21 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             var seed512 = UInt512.FromHex(seed, true);
             var mnemonic = new Mnemonic(words, language);
             var ntropy = mnemonic.Entropy;
-            var seedMnemonic = mnemonic.ToSeed(password);
+            var seedMnemonic = mnemonic.ToSeed(mnemonic.Words, password);
             Assert.Equal(seed512, seedMnemonic);
             Assert.True(Encoders.Hex.Decode(entropy).SequenceEqual(ntropy));
         }
 
-        //[Fact]
-        //public void Mnemonic_Test22()
-        //{
-        //    const string mnemonic = "Public and Private keys in bitcoin are easy to create";
-        //    var seed = HdPrivateKey.Bip39Seed(mnemonic);
-        //    var privateKey = HdPrivateKey.MasterBip39(seed.ToString());
-        //}
+        [Fact]
+        public void Mnemonic_Seed_Test()
+        {
+            const string phrase = "Public and Private keys in bitcoin are easy to create";
+            var seedBip39 = HdPrivateKey.Bip39Seed(phrase);
+
+            var mnemonic = new Mnemonic();
+            var seedMnemonic = mnemonic.ToSeed(phrase);
+
+            Assert.Equal(seedBip39, seedMnemonic);
+        }
     }
 }
