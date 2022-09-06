@@ -6,8 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.Unicode;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys.Base58;
+using CafeLib.BsvSharp.Passphrase;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
@@ -81,13 +83,16 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="password">password and passwordPrefix are combined to generate salt bytes.</param>
         /// <param name="passwordPrefix">password and passwordPrefix are combined to generate salt bytes. Default is "mnemonic".</param>
         /// <returns>Computes 512 bit Bip39 seed.</returns>
-        public static UInt512 Bip39Seed(string passphrase, string password = null, string passwordPrefix = "mnemonic")
+        public static UInt512 Bip39Seed(string passphrase, string password = "", string passwordPrefix = "mnemonic")
         {
+            var mnemonic = passphrase.Utf8NormalizedToBytes();
+            //var salt = password.Utf8NormalizedToBytes();
+
             var salt = $"{passwordPrefix}{password}".Utf8NormalizedToBytes();
-            var bytes = passphrase.Utf8NormalizedToBytes();
+            //var bytes = passphrase.Utf8NormalizedToBytes();
 
             var mac = new HMac(new Sha512Digest());
-            mac.Init(new KeyParameter(bytes));
+            mac.Init(new KeyParameter(mnemonic));
             var key = Pbkdf2.ComputeDerivedKey(mac, salt, 2048, 64);
             return new UInt512(key);
         }
