@@ -77,20 +77,16 @@ namespace CafeLib.BsvSharp.Keys
 
         /// <summary>
         /// Computes 512 bit Bip39 seed.
-        /// passphrase, password, and passwordPrefix are converted to bytes using UTF8 KD normal form encoding.
+        /// phrase, password, and passwordPrefix are converted to bytes using UTF8 KD normal form encoding.
         /// </summary>
-        /// <param name="passphrase">arbitrary passphrase (typically mnemonic words with checksum but not necessarily)</param>
+        /// <param name="phrase">arbitrary phrase (typically mnemonic words with checksum but not necessarily)</param>
         /// <param name="password">password and passwordPrefix are combined to generate salt bytes.</param>
         /// <param name="passwordPrefix">password and passwordPrefix are combined to generate salt bytes. Default is "mnemonic".</param>
         /// <returns>Computes 512 bit Bip39 seed.</returns>
-        public static UInt512 Bip39Seed(string passphrase, string password = "", string passwordPrefix = "mnemonic")
+        public static UInt512 Bip39Seed(string phrase, string password = "", string passwordPrefix = "mnemonic")
         {
-            var mnemonic = passphrase.Utf8NormalizedToBytes();
-            //var salt = password.Utf8NormalizedToBytes();
-
+            var mnemonic = phrase.Utf8NormalizedToBytes();
             var salt = $"{passwordPrefix}{password}".Utf8NormalizedToBytes();
-            //var bytes = passphrase.Utf8NormalizedToBytes();
-
             var mac = new HMac(new Sha512Digest());
             mac.Init(new KeyParameter(mnemonic));
             var key = Pbkdf2.ComputeDerivedKey(mac, salt, 2048, 64);
@@ -101,37 +97,37 @@ namespace CafeLib.BsvSharp.Keys
         /// Returns a new extended private key per Bip39.
         /// passphrase, password, and passwordPrefix are converted to bytes using UTF8 KD normal form encoding.
         /// </summary>
-        /// <param name="passphrase">arbitrary passphrase (typically mnemonic words with checksum but not necessarily)</param>
+        /// <param name="phrase">arbitrary phrase (typically mnemonic words with checksum but not necessarily)</param>
         /// <param name="password">password and passwordPrefix are combined to generate salt bytes.</param>
         /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
         /// <param name="passwordPrefix">password and passwordPrefix are combined to generate salt bytes. Default is "mnemonic".</param>
         /// <returns>Returns new key unless required key paths aren't valid for specified key in which case null is returned.</returns>
-        public static HdPrivateKey FromWords(string passphrase, string password = null, IEnumerable<KeyPath> required = null, string passwordPrefix = "mnemonic")
-            => MasterBip39(passphrase, password, required, passwordPrefix);
+        public static HdPrivateKey FromWords(string phrase, string password = null, IEnumerable<KeyPath> required = null, string passwordPrefix = "mnemonic")
+            => MasterBip39(phrase, password, required, passwordPrefix);
 
         /// <summary>
         /// Returns a new extended private key per Bip39.
         /// passphrase, password, and passwordPrefix are converted to bytes using UTF8 KD normal form encoding.
         /// </summary>
-        /// <param name="passphrase">arbitrary passphrase (typically mnemonic words with checksum but not necessarily)</param>
+        /// <param name="phrase">arbitrary phrase (typically mnemonic words with checksum but not necessarily)</param>
         /// <param name="password">password and passwordPrefix are combined to generate salt bytes.</param>
         /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
         /// <param name="passwordPrefix">password and passwordPrefix are combined to generate salt bytes. Default is "mnemonic".</param>
         /// <returns>Returns new key unless required key paths aren't valid for specified key in which case null is returned.</returns>
-        public static HdPrivateKey MasterBip39(string passphrase, string password = null, IEnumerable<KeyPath> required = null, string passwordPrefix = "mnemonic")
-            => new HdPrivateKey().SetMasterBip39(passphrase, password, required, passwordPrefix);
+        public static HdPrivateKey MasterBip39(string phrase, string password = null, IEnumerable<KeyPath> required = null, string passwordPrefix = "mnemonic")
+            => new HdPrivateKey().SetMasterBip39(phrase, password, required, passwordPrefix);
 
         /// <summary>
         /// Sets this extended private key per Bip39.
         /// passphrase, password, and passwordPrefix are converted to bytes using UTF8 KD normal form encoding.
         /// </summary>
-        /// <param name="passphrase">arbitrary passphrase (typically mnemonic words with checksum but not necessarily)</param>
+        /// <param name="phrase">arbitrary phrase (typically mnemonic words with checksum but not necessarily)</param>
         /// <param name="password">password and passwordPrefix are combined to generate salt bytes.</param>
         /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
         /// <param name="passwordPrefix">password and passwordPrefix are combined to generate salt bytes. Default is "mnemonic".</param>
         /// <returns>Returns this key unless required key paths aren't valid for generated key.</returns>
-        public HdPrivateKey SetMasterBip39(string passphrase, string password = null, IEnumerable<KeyPath> required = null, string passwordPrefix = "mnemonic")
-            => SetMasterBip32(Bip39Seed(passphrase, password, passwordPrefix), required);
+        public HdPrivateKey SetMasterBip39(string phrase, string password = null, IEnumerable<KeyPath> required = null, string passwordPrefix = "mnemonic")
+            => SetMasterBip32(Bip39Seed(phrase, password, passwordPrefix), required);
 
         /// <summary>
         /// Returns a new extended private key to be a master (depth 0) with the given private key and chaincode and verifies required key paths.
