@@ -4,6 +4,7 @@
 #endregion
 
 using System.Linq;
+using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Keys.Base58;
@@ -180,28 +181,32 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             "TREZOR",
             "00000000000000000000000000000000",
             "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
-            "c55257c360c07c72029aebc1b53c05ed0362ada38ead3e3e9efa3708e53495531f09a6987599d18264c1e1c92f2cf141630c7a3c4ab7c81b2f001698e7463b04"
+            "c55257c360c07c72029aebc1b53c05ed0362ada38ead3e3e9efa3708e53495531f09a6987599d18264c1e1c92f2cf141630c7a3c4ab7c81b2f001698e7463b04",
+            Languages.English
         )]
         [InlineData(
             "メートルガバヴァぱばぐゞちぢ十人十色",
             "00000000000000000000000000000000",
             "あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あおぞら",
-            "a262d6fb6122ecf45be09c50492b31f92e9beb7d9a845987a02cefda57a15f9c467a17872029a9e92299b5cbdf306e3a0ee620245cbd508959b6cb7ca637bd55"
+            "a262d6fb6122ecf45be09c50492b31f92e9beb7d9a845987a02cefda57a15f9c467a17872029a9e92299b5cbdf306e3a0ee620245cbd508959b6cb7ca637bd55",
+            Languages.Japanese
         )]
-        public void Mnemonic_Test(string password, string entropy, string words, string seed)
+        public void Mnemonic_Test(string password, string entropy, string words, string seed, Languages language)
         {
-            var _ = entropy;
             var seed512 = UInt512.FromHex(seed, true);
-            var seedBip39 = HdPrivateKey.Bip39Seed(words, password);
-            Assert.Equal(seed512, seedBip39);
+            var mnemonic = new Mnemonic(words, language);
+            var ntropy = mnemonic.Entropy;
+            var seedMnemonic = mnemonic.ToSeed(password);
+            Assert.Equal(seed512, seedMnemonic);
+            Assert.True(Encoders.Hex.Decode(entropy).SequenceEqual(ntropy));
         }
 
-        [Fact]
-        public void Mnemonic_Test22()
-        {
-            const string mnemonic = "Public and Private keys in bitcoin are easy to create";
-            var seed = HdPrivateKey.Bip39Seed(mnemonic);
-            var privateKey = HdPrivateKey.MasterBip39(seed.ToString());
-        }
+        //[Fact]
+        //public void Mnemonic_Test22()
+        //{
+        //    const string mnemonic = "Public and Private keys in bitcoin are easy to create";
+        //    var seed = HdPrivateKey.Bip39Seed(mnemonic);
+        //    var privateKey = HdPrivateKey.MasterBip39(seed.ToString());
+        //}
     }
 }

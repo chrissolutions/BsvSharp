@@ -6,6 +6,6 @@ namespace CafeLib.BsvSharp.Extensions
 {
     public static class MnemonicExtensions
     {
-        public static UInt512 ToSeed(this Mnemonic _, string mnemonic, string password = "") => HdPrivateKey.Bip39Seed(mnemonic, password);
+        public static UInt512 ToSeed(this Mnemonic mnemonic, string password = "") => HdPrivateKey.Bip39Seed(mnemonic.Words, password);
     }
 }

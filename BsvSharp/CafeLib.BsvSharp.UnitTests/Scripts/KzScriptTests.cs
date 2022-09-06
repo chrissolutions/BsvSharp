@@ -14,7 +14,6 @@ using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Services;
 using CafeLib.BsvSharp.Transactions;
 using CafeLib.BsvSharp.Units;
-using CafeLib.Core.Encodings;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 using Newtonsoft.Json.Linq;
@@ -38,8 +37,6 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             //var id = address.GetID();
             Assert.True(true);
         }
-
-        private static readonly HexEncoder HexEncoder = Encoders.Hex;
 
         /// <summary>
         /// Test Vector
