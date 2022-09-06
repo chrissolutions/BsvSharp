@@ -67,9 +67,8 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
         /// <param name="hmacKey">Default is current global Kz.MasterBip32Key which may default to "Bitcoin seed".</param>
         /// <returns>Returns this key unless required key paths aren't valid for generated key.</returns>
-        public HdPrivateKey SetMasterBip32(byte[] hmacData, IEnumerable<KeyPath> required = null, string hmacKey = null)
+        public HdPrivateKey SetMasterBip32(byte[] hmacData, IEnumerable<KeyPath> required = null, string hmacKey = MasterBip32Key)
         {
-            hmacKey ??= MasterBip32Key;
             var vOut = Hashes.HmacSha512(hmacKey.Utf8NormalizedToBytes(), hmacData);
             return SetMaster(vOut, required);
         }
@@ -158,7 +157,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
         /// <param name="hmacKey">Default is current global Kz.MasterBip32Key which may default to "Bitcoin seed".</param>
         /// <returns>Returns new key unless required key paths aren't valid for specified key in which case null is returned.</returns>
-        public static HdPrivateKey MasterBip32(byte[] hmacData, IEnumerable<KeyPath> required = null, string hmacKey = null)
+        public static HdPrivateKey MasterBip32(byte[] hmacData, IEnumerable<KeyPath> required = null, string hmacKey = MasterBip32Key)
             => new HdPrivateKey().SetMasterBip32(hmacData, required, hmacKey);
 
         /// <summary>
