@@ -154,7 +154,7 @@ namespace CafeLib.BsvSharp.Mnemonics
         /// </summary>
         /// <param name="words">Space separated words that encode Entropy and checksum.</param>
         /// <param name="language">Optional language key to use in WordLists.</param>
-        public static Mnemonic FromWords(string words, Languages language = Languages.Unknown) => new Mnemonic(words, language);
+        public static Mnemonic FromWords(string words, Languages language = Languages.Unknown) => new(words, language);
         public static Mnemonic FromWords(string words, string[] wordList, Languages language = Languages.Unknown) => new(words, wordList, language);
 
         /// <summary>
