@@ -8,12 +8,12 @@ using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Keys.Base58;
-using CafeLib.BsvSharp.Passphrase;
+using CafeLib.BsvSharp.Mnemonics;
 using CafeLib.Core.Numerics;
 using Xunit;
 // ReSharper disable StringLiteralTypo
 
-namespace CafeLib.BsvSharp.UnitTests.Keys 
+namespace CafeLib.BsvSharp.UnitTests.Keys
 {
     public class KzBip39Tests 
     {
@@ -208,6 +208,8 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             var seedBip39 = HdPrivateKey.Bip39Seed(phrase);
             var seedMnemonic = Mnemonic.ToSeed(phrase);
             Assert.Equal(seedBip39, seedMnemonic);
+            var hdPrivateKey = HdPrivateKey.Master(seedBip39);
+            var privateKey = hdPrivateKey.PrivateKey;
         }
     }
 }

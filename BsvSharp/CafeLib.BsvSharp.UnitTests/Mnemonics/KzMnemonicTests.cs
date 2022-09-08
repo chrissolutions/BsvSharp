@@ -5,7 +5,7 @@
 
 using System.Linq;
 using CafeLib.BsvSharp.Keys;
-using CafeLib.BsvSharp.Passphrase;
+using CafeLib.BsvSharp.Mnemonics;
 using Xunit;
 
 namespace CafeLib.BsvSharp.UnitTests.Passphrase

@@ -15,30 +15,30 @@ using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
 
-namespace CafeLib.BsvSharp.Passphrase
+namespace CafeLib.BsvSharp.Mnemonics
 {
-	/// <summary>
-	/// BIP39 based support for converting binary data of specific lengths into sequences of words to facilitate written record keeping and verbal transmission.
-	/// </summary>
-	public class Mnemonic
-	{
-		/// <summary>
-		/// Space separated word list. Each word encodes 11 bits. Words are all in Language and are contained in WordList.
-		/// In addition to encoding Entropy, Words also encodes a checksum to catch transcription errors.
-		/// </summary>
-		public string Words { get; }
-		/// <summary>
-		/// What human language is being used by Words and WordList.
-		/// </summary>
-		public Languages Language { get; }
-		/// <summary>
-		/// A list of 2048 words. The index of each word, taken as an 11 bit value, is used to encode Entropy and checksum binary data.
-		/// </summary>
-		public string[] WordList { get; }
-		/// <summary>
-		/// The binary data for which Words is a transcription safe encoding, or null on checksum error.
-		/// </summary>
-		public byte[] Entropy { get; }
+    /// <summary>
+    /// BIP39 based support for converting binary data of specific lengths into sequences of words to facilitate written record keeping and verbal transmission.
+    /// </summary>
+    public class Mnemonic
+    {
+        /// <summary>
+        /// Space separated word list. Each word encodes 11 bits. Words are all in Language and are contained in WordList.
+        /// In addition to encoding Entropy, Words also encodes a checksum to catch transcription errors.
+        /// </summary>
+        public string Words { get; }
+        /// <summary>
+        /// What human language is being used by Words and WordList.
+        /// </summary>
+        public Languages Language { get; }
+        /// <summary>
+        /// A list of 2048 words. The index of each word, taken as an 11 bit value, is used to encode Entropy and checksum binary data.
+        /// </summary>
+        public string[] WordList { get; }
+        /// <summary>
+        /// The binary data for which Words is a transcription safe encoding, or null on checksum error.
+        /// </summary>
+        public byte[] Entropy { get; }
 
         /// <summary>
         /// Create a new KzMnemonic from a desired entropy length in bits.
@@ -147,35 +147,35 @@ namespace CafeLib.BsvSharp.Passphrase
         /// <param name="length">Optional length in bits, default is 128. Should be a multiple of 32.</param>
         /// <param name="language">Optional language to use, default is English.</param>
         public static Mnemonic FromLength(int length = 128, Languages language = Languages.English) => new Mnemonic(length, language);
-		public static Mnemonic FromLength(int length, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(length, wordList, language);
+        public static Mnemonic FromLength(int length, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(length, wordList, language);
 
-		/// <summary>
-		/// Create a new KzMnemonic from a sequence of words.
-		/// </summary>
-		/// <param name="words">Space separated words that encode Entropy and checksum.</param>
-		/// <param name="language">Optional language key to use in WordLists.</param>
-		public static Mnemonic FromWords(string words, Languages language = Languages.Unknown) => new Mnemonic(words, language);
-		public static Mnemonic FromWords(string words, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(words, wordList, language);
+        /// <summary>
+        /// Create a new KzMnemonic from a sequence of words.
+        /// </summary>
+        /// <param name="words">Space separated words that encode Entropy and checksum.</param>
+        /// <param name="language">Optional language key to use in WordLists.</param>
+        public static Mnemonic FromWords(string words, Languages language = Languages.Unknown) => new Mnemonic(words, language);
+        public static Mnemonic FromWords(string words, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(words, wordList, language);
 
-		/// <summary>
-		/// Create a new KzMnemonic from given Entropy.
-		/// </summary>
-		/// <param name="entropy">Binary data to encode.</param>
-		/// <param name="language">Optional language key to select WordList from WordLists. Defaults to English.</param>
-		public static Mnemonic FromEntropy(byte[] entropy, Languages language = Languages.English) => new Mnemonic(entropy, language);
-		public static Mnemonic FromEntropy(byte[] entropy, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(entropy, wordList, language);
+        /// <summary>
+        /// Create a new KzMnemonic from given Entropy.
+        /// </summary>
+        /// <param name="entropy">Binary data to encode.</param>
+        /// <param name="language">Optional language key to select WordList from WordLists. Defaults to English.</param>
+        public static Mnemonic FromEntropy(byte[] entropy, Languages language = Languages.English) => new Mnemonic(entropy, language);
+        public static Mnemonic FromEntropy(byte[] entropy, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(entropy, wordList, language);
 
-		/// <summary>
-		/// Create a new KzMnemonic from given entropy encoded as base 6 string of digits. e.g. Die rolls.
-		/// </summary>
-		/// <param name="base6">Entropy encoded as base 6 string. Use either digits 1-6 or 0-5.</param>
-		/// <param name="length">Target Entropy length in bits.</param>
-		/// <param name="language">Optional language key to select WordList from WordLists. Defaults to English.</param>
-		public static Mnemonic FromBase6(string base6, int length = 128, Languages language = Languages.English) => new Mnemonic(Base6ToEntropy(base6, length), language);
-		public static Mnemonic FromBase6(string base6, int length, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(Base6ToEntropy(base6, length), wordList, language);
+        /// <summary>
+        /// Create a new KzMnemonic from given entropy encoded as base 6 string of digits. e.g. Die rolls.
+        /// </summary>
+        /// <param name="base6">Entropy encoded as base 6 string. Use either digits 1-6 or 0-5.</param>
+        /// <param name="length">Target Entropy length in bits.</param>
+        /// <param name="language">Optional language key to select WordList from WordLists. Defaults to English.</param>
+        public static Mnemonic FromBase6(string base6, int length = 128, Languages language = Languages.English) => new Mnemonic(Base6ToEntropy(base6, length), language);
+        public static Mnemonic FromBase6(string base6, int length, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(Base6ToEntropy(base6, length), wordList, language);
 
-		public static Mnemonic FromBase10(string base10, int length = 128, Languages language = Languages.English) => new Mnemonic(Base10ToEntropy(base10, length), language);
-		public static Mnemonic FromBase10(string base10, int length, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(Base10ToEntropy(base10, length), wordList, language);
+        public static Mnemonic FromBase10(string base10, int length = 128, Languages language = Languages.English) => new Mnemonic(Base10ToEntropy(base10, length), language);
+        public static Mnemonic FromBase10(string base10, int length, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(Base10ToEntropy(base10, length), wordList, language);
 
         public string ToHex() => Encoders.Hex.Encode(Entropy);
         public string ToDigitsBase10() => new BigInteger(Entropy.Concat(new byte[1]).ToArray()).ToString();
@@ -184,119 +184,122 @@ namespace CafeLib.BsvSharp.Passphrase
         public UInt512 ToSeed(string password = "") => ToSeed(Words, password);
         public static UInt512 ToSeed(string phrase, string password = "") => HdPrivateKey.Bip39Seed(phrase, password);
 
-		/// <summary>
-		/// Returns words converted into a binary string of "0" and "1" based on wordList.
-		/// If wordList is specified, then it is used.
-		/// Otherwise the wordList is selected based on the words provided.
-		/// If a wordList can't be determined, null is returned.
-		/// If a word is not found in wordList, null is returned.
-		/// </summary>
-		/// <param name="words">A sequence of space separated words from wordList, or one of the standard WordLists</param>
-		/// <param name="wordList">Optional wordList to be used.</param>
-		/// <returns>Returns words converted into a binary string of "0" and "1" based on wordList.</returns>
-		public static string WordsToBinaryString(string words, string[] wordList = null)
-		{
-			words = words.Normalize(NormalizationForm.FormKD);
-			wordList ??= GetWordList(words).wordList;
+        /// <summary>
+        /// Returns words converted into a binary string of "0" and "1" based on wordList.
+        /// If wordList is specified, then it is used.
+        /// Otherwise the wordList is selected based on the words provided.
+        /// If a wordList can't be determined, null is returned.
+        /// If a word is not found in wordList, null is returned.
+        /// </summary>
+        /// <param name="words">A sequence of space separated words from wordList, or one of the standard WordLists</param>
+        /// <param name="wordList">Optional wordList to be used.</param>
+        /// <returns>Returns words converted into a binary string of "0" and "1" based on wordList.</returns>
+        public static string WordsToBinaryString(string words, string[] wordList = null)
+        {
+            words = words.Normalize(NormalizationForm.FormKD);
+            wordList ??= GetWordList(words).wordList;
 
-			if (wordList == null) return null;
+            if (wordList == null) return null;
 
-			var bin = "";
-			foreach (var w in words.Split(' ', StringSplitOptions.RemoveEmptyEntries)) {
-				var i = Array.IndexOf(wordList, w);
-				if (i < 0) return null;
-				bin += Convert.ToString(i, 2).PadLeft(11, '0');
-			}
+            var bin = "";
+            foreach (var w in words.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var i = Array.IndexOf(wordList, w);
+                if (i < 0) return null;
+                bin += Convert.ToString(i, 2).PadLeft(11, '0');
+            }
 
-			return bin;
-		}
+            return bin;
+        }
 
-		public static string BinaryStringToWords(string bin, string[] wordList)
-		{
-			var words = new StringBuilder();
-			for (var j = 0; j < bin.Length; j += 11) {
-				var i = Convert.ToInt16(bin.Substring(j, 11), 2);
-				if (j > 0) words.Append(" ");
-				words.Append(wordList[i]);
-			}
-			return words.ToString();
-		}
+        public static string BinaryStringToWords(string bin, string[] wordList)
+        {
+            var words = new StringBuilder();
+            for (var j = 0; j < bin.Length; j += 11)
+            {
+                var i = Convert.ToInt16(bin.Substring(j, 11), 2);
+                if (j > 0) words.Append(" ");
+                words.Append(wordList[i]);
+            }
+            return words.ToString();
+        }
 
-		/// <summary>
-		/// Returns true if words encode binary data with a valid checksum.
-		/// If wordList is specified, then it is used.
-		/// Otherwise the wordList is selected based on the words provided.
-		/// If a wordList can't be determined, false is returned.
-		/// </summary>
-		/// <param name="words">A sequence of space separated words from wordList, or one of the standard WordLists</param>
-		/// <param name="wordList">Optional wordList to be used.</param>
-		/// <returns>Returns true if words encode binary data with a valid checksum.</returns>
-		public static bool IsValid(string words, string[] wordList = null)
-		{
-			var bin = WordsToBinaryString(words, wordList);
+        /// <summary>
+        /// Returns true if words encode binary data with a valid checksum.
+        /// If wordList is specified, then it is used.
+        /// Otherwise the wordList is selected based on the words provided.
+        /// If a wordList can't be determined, false is returned.
+        /// </summary>
+        /// <param name="words">A sequence of space separated words from wordList, or one of the standard WordLists</param>
+        /// <param name="wordList">Optional wordList to be used.</param>
+        /// <returns>Returns true if words encode binary data with a valid checksum.</returns>
+        public static bool IsValid(string words, string[] wordList = null)
+        {
+            var bin = WordsToBinaryString(words, wordList);
 
-			if (bin == null) return false;
+            if (bin == null) return false;
 
-			var (data, appendedChecksum) = BinaryStringToDataAndChecksum(bin);
+            var (data, appendedChecksum) = BinaryStringToDataAndChecksum(bin);
 
-			var dataChecksum = GetChecksum(data);
+            var dataChecksum = GetChecksum(data);
 
-			return appendedChecksum == dataChecksum;
-		}
+            return appendedChecksum == dataChecksum;
+        }
 
-		public override string ToString()
-		{
-			return Words;
-		}
+        public override string ToString()
+        {
+            return Words;
+        }
 
-		/// <summary>
-		/// Converts a string of base 6 digits to a BitInteger.
-		/// The string can use either digits 1-6, or 0-5.
-		/// This is implemented by treating 6 and 0 as the same value 0.
-		/// </summary>
-		/// <param name="base6"></param>
-		/// <returns></returns>
-		public static BigInteger Base6ToBigInteger(string base6) 
-		{
-			if (string.IsNullOrWhiteSpace(base6)) return BigInteger.Zero;
+        /// <summary>
+        /// Converts a string of base 6 digits to a BitInteger.
+        /// The string can use either digits 1-6, or 0-5.
+        /// This is implemented by treating 6 and 0 as the same value 0.
+        /// </summary>
+        /// <param name="base6"></param>
+        /// <returns></returns>
+        public static BigInteger Base6ToBigInteger(string base6)
+        {
+            if (string.IsNullOrWhiteSpace(base6)) return BigInteger.Zero;
 
-			var n = new BigInteger(0);
-			foreach (var c in base6.AsEnumerable())
-			{
-				var d = c - '0';
-				if (d == 6) d = 0;
-				if (d < 0 || d >= 6)
-					throw new ArgumentException();
-				n = n * 6 + d;
-			}
+            var n = new BigInteger(0);
+            foreach (var c in base6.AsEnumerable())
+            {
+                var d = c - '0';
+                if (d == 6) d = 0;
+                if (d < 0 || d >= 6)
+                    throw new ArgumentException();
+                n = n * 6 + d;
+            }
 
-			return n;
-		}
+            return n;
+        }
 
-		public static BigInteger Base10ToBigInteger(string base10)
-		{
-			var bn = BigInteger.Parse(base10);
-			return bn;
-		}
+        public static BigInteger Base10ToBigInteger(string base10)
+        {
+            var bn = BigInteger.Parse(base10);
+            return bn;
+        }
 
-		public static string ToDigitsBase10(byte[] bytes)
-		{
-			var bn = new BigInteger(bytes.Concat(new byte[1]).ToArray());
-			return bn.ToString();
-		}
+        public static string ToDigitsBase10(byte[] bytes)
+        {
+            var bn = new BigInteger(bytes.Concat(new byte[1]).ToArray());
+            return bn.ToString();
+        }
 
-		public static string ToDigitsBase6(byte[] bytes)
-		{
-			var bn = new BigInteger(bytes.Concat(new byte[1]).ToArray());
-			var sb = new List<char>();
-			while (bn > 0) {
-				var r = (int)(bn % 6);
-				bn /= 6;
-				sb.Add((char)('0' + r));
-			}
-			sb.Reverse();
-			return new string(sb.ToArray());
-		}
+        public static string ToDigitsBase6(byte[] bytes)
+        {
+            var bn = new BigInteger(bytes.Concat(new byte[1]).ToArray());
+            var sb = new List<char>();
+            while (bn > 0)
+            {
+                var r = (int)(bn % 6);
+                bn /= 6;
+                sb.Add((char)('0' + r));
+            }
+            sb.Reverse();
+            return new string(sb.ToArray());
+        }
 
         #region Helpers
 
@@ -399,40 +402,40 @@ namespace CafeLib.BsvSharp.Passphrase
             return (data, checksum);
         }
 
-		/// <summary>
-		/// Returns the entropy as a byte[] from a string of base 6 digits.
-		/// Verifies that there are at least length / Log2(6) rounded up digits in string.
-		/// This is 50 digits for 128 bits, 100 digits for 256 bits.
-		/// The string can use either digits 1-6, or 0-5.
-		/// This is implemented by treating 6 and 0 as the same value 0.
-		/// </summary>
-		/// <param name="base6">The string can use either digits 1-6, or 0-5.</param>
-		/// <param name="length">Optional entropy length in bits. Must be a multiple of 8.</param>
-		/// <returns>Returns the entropy as a byte[] from a string of base 6 digits.</returns>
-		private static byte[] Base6ToEntropy(string base6, int length = 128)
-		{
-			var needDigits = (int)Math.Ceiling(length / Math.Log(6, 2));
-			if (base6.Length < needDigits)
-				throw new ArgumentException($"For {length} bits of entropy, at least {needDigits} digits of base 6 are needed.");
-			return BigIntegerToEntropy(Base6ToBigInteger(base6), length);
-		}
+        /// <summary>
+        /// Returns the entropy as a byte[] from a string of base 6 digits.
+        /// Verifies that there are at least length / Log2(6) rounded up digits in string.
+        /// This is 50 digits for 128 bits, 100 digits for 256 bits.
+        /// The string can use either digits 1-6, or 0-5.
+        /// This is implemented by treating 6 and 0 as the same value 0.
+        /// </summary>
+        /// <param name="base6">The string can use either digits 1-6, or 0-5.</param>
+        /// <param name="length">Optional entropy length in bits. Must be a multiple of 8.</param>
+        /// <returns>Returns the entropy as a byte[] from a string of base 6 digits.</returns>
+        private static byte[] Base6ToEntropy(string base6, int length = 128)
+        {
+            var needDigits = (int)Math.Ceiling(length / Math.Log(6, 2));
+            if (base6.Length < needDigits)
+                throw new ArgumentException($"For {length} bits of entropy, at least {needDigits} digits of base 6 are needed.");
+            return BigIntegerToEntropy(Base6ToBigInteger(base6), length);
+        }
 
-		/// <summary>
-		/// Returns the entropy as a byte[] from a string of base 6 digits.
-		/// Verifies that there are at least length / Log2(6) rounded up digits in string.
-		/// This is 50 digits for 128 bits, 100 digits for 256 bits.
-		/// The string must use digits 0-9.
-		/// </summary>
-		/// <param name="base10">The string must use digits 0-9.</param>
-		/// <param name="length">Optional entropy length in bits. Must be a multiple of 8.</param>
-		/// <returns>Returns the entropy as a byte[] from a string of base 10 digits.</returns>
-		private static byte[] Base10ToEntropy(string base10, int length = 128)
-		{
-			var needDigits = (int)Math.Ceiling(length / Math.Log(10, 2));
-			if (base10.Length < needDigits)
-				throw new ArgumentException($"For {length} bits of entropy, at least {needDigits} digits of base 10 are needed.");
-			return BigIntegerToEntropy(Base10ToBigInteger(base10), length);
-		}
+        /// <summary>
+        /// Returns the entropy as a byte[] from a string of base 6 digits.
+        /// Verifies that there are at least length / Log2(6) rounded up digits in string.
+        /// This is 50 digits for 128 bits, 100 digits for 256 bits.
+        /// The string must use digits 0-9.
+        /// </summary>
+        /// <param name="base10">The string must use digits 0-9.</param>
+        /// <param name="length">Optional entropy length in bits. Must be a multiple of 8.</param>
+        /// <returns>Returns the entropy as a byte[] from a string of base 10 digits.</returns>
+        private static byte[] Base10ToEntropy(string base10, int length = 128)
+        {
+            var needDigits = (int)Math.Ceiling(length / Math.Log(10, 2));
+            if (base10.Length < needDigits)
+                throw new ArgumentException($"For {length} bits of entropy, at least {needDigits} digits of base 10 are needed.");
+            return BigIntegerToEntropy(Base10ToBigInteger(base10), length);
+        }
 
         /// <summary>
         /// Converts a binary string of "0" and "1" into a byte[].
