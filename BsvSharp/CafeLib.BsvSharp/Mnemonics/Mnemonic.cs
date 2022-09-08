@@ -47,7 +47,7 @@ namespace CafeLib.BsvSharp.Mnemonics
         /// <param name="bitLength">Entropy length in bits. Should be a multiple of 32.</param>
         /// <param name="wordList">string[] of 2048 unique words.</param>
         /// <param name="language">optional Languages key to use. Defaults to Unknown.</param>
-        public Mnemonic(int bitLength, string[] wordList, Languages language = Languages.Unknown)
+        public Mnemonic(int bitLength, string[] wordList, Languages language = Languages.English)
         {
             if (bitLength <= 0)
             {
@@ -218,7 +218,7 @@ namespace CafeLib.BsvSharp.Mnemonics
             for (var j = 0; j < bin.Length; j += 11)
             {
                 var i = Convert.ToInt16(bin.Substring(j, 11), 2);
-                if (j > 0) words.Append(" ");
+                if (j > 0) words.Append(' ');
                 words.Append(wordList[i]);
             }
             return words.ToString();
@@ -344,7 +344,10 @@ namespace CafeLib.BsvSharp.Mnemonics
             {
                 if (language == Languages.Unknown) continue;
                 var wl = WordLists.GetWords(language);
-                if (BelongsToWordList(words, wl)) return (language, wl);
+                if (BelongsToWordList(words, wl))
+                {
+                    return (language, wl);
+                }
             }
 
             return (Languages.Unknown, null);
