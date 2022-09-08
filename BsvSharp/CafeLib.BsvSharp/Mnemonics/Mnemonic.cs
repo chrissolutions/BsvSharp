@@ -146,8 +146,8 @@ namespace CafeLib.BsvSharp.Mnemonics
         /// </summary>
         /// <param name="length">Optional length in bits, default is 128. Should be a multiple of 32.</param>
         /// <param name="language">Optional language to use, default is English.</param>
-        public static Mnemonic FromLength(int length = 128, Languages language = Languages.English) => new Mnemonic(length, language);
-        public static Mnemonic FromLength(int length, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(length, wordList, language);
+        public static Mnemonic FromLength(int length = 128, Languages language = Languages.English) => new(length, language);
+        public static Mnemonic FromLength(int length, string[] wordList, Languages language = Languages.Unknown) => new(length, wordList, language);
 
         /// <summary>
         /// Create a new KzMnemonic from a sequence of words.
@@ -155,15 +155,15 @@ namespace CafeLib.BsvSharp.Mnemonics
         /// <param name="words">Space separated words that encode Entropy and checksum.</param>
         /// <param name="language">Optional language key to use in WordLists.</param>
         public static Mnemonic FromWords(string words, Languages language = Languages.Unknown) => new Mnemonic(words, language);
-        public static Mnemonic FromWords(string words, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(words, wordList, language);
+        public static Mnemonic FromWords(string words, string[] wordList, Languages language = Languages.Unknown) => new(words, wordList, language);
 
         /// <summary>
         /// Create a new KzMnemonic from given Entropy.
         /// </summary>
         /// <param name="entropy">Binary data to encode.</param>
         /// <param name="language">Optional language key to select WordList from WordLists. Defaults to English.</param>
-        public static Mnemonic FromEntropy(byte[] entropy, Languages language = Languages.English) => new Mnemonic(entropy, language);
-        public static Mnemonic FromEntropy(byte[] entropy, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(entropy, wordList, language);
+        public static Mnemonic FromEntropy(byte[] entropy, Languages language = Languages.English) => new(entropy, language);
+        public static Mnemonic FromEntropy(byte[] entropy, string[] wordList, Languages language = Languages.Unknown) => new(entropy, wordList, language);
 
         /// <summary>
         /// Create a new KzMnemonic from given entropy encoded as base 6 string of digits. e.g. Die rolls.
@@ -171,11 +171,11 @@ namespace CafeLib.BsvSharp.Mnemonics
         /// <param name="base6">Entropy encoded as base 6 string. Use either digits 1-6 or 0-5.</param>
         /// <param name="length">Target Entropy length in bits.</param>
         /// <param name="language">Optional language key to select WordList from WordLists. Defaults to English.</param>
-        public static Mnemonic FromBase6(string base6, int length = 128, Languages language = Languages.English) => new Mnemonic(Base6ToEntropy(base6, length), language);
-        public static Mnemonic FromBase6(string base6, int length, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(Base6ToEntropy(base6, length), wordList, language);
+        public static Mnemonic FromBase6(string base6, int length = 128, Languages language = Languages.English) => new(Base6ToEntropy(base6, length), language);
+        public static Mnemonic FromBase6(string base6, int length, string[] wordList, Languages language = Languages.Unknown) => new(Base6ToEntropy(base6, length), wordList, language);
 
-        public static Mnemonic FromBase10(string base10, int length = 128, Languages language = Languages.English) => new Mnemonic(Base10ToEntropy(base10, length), language);
-        public static Mnemonic FromBase10(string base10, int length, string[] wordList, Languages language = Languages.Unknown) => new Mnemonic(Base10ToEntropy(base10, length), wordList, language);
+        public static Mnemonic FromBase10(string base10, int length = 128, Languages language = Languages.English) => new(Base10ToEntropy(base10, length), language);
+        public static Mnemonic FromBase10(string base10, int length, string[] wordList, Languages language = Languages.Unknown) => new(Base10ToEntropy(base10, length), wordList, language);
 
         public string ToHex() => Encoders.Hex.Encode(Entropy);
         public string ToDigitsBase10() => new BigInteger(Entropy.Concat(new byte[1]).ToArray()).ToString();
