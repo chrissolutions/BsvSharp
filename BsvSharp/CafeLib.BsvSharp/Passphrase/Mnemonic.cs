@@ -181,8 +181,7 @@ namespace CafeLib.BsvSharp.Passphrase
         public string ToDigitsBase10() => new BigInteger(Entropy.Concat(new byte[1]).ToArray()).ToString();
         public string ToDigitsBase6() => ToDigitsBase6(Entropy);
 
-        public UInt512 ToSeed(string password = "") => ToSeed(Words, password);
-        public static UInt512 ToSeed(string phrase, string password = "") => HdPrivateKey.Bip39Seed(phrase, password);
+        public HdPrivateKey ToHdPrivateKey(string password = "") => HdPrivateKey.Master(HdPrivateKey.Bip39Seed(Words, password));
 
 		/// <summary>
 		/// Returns words converted into a binary string of "0" and "1" based on wordList.
