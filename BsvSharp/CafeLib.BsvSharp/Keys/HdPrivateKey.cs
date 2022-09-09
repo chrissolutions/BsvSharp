@@ -74,6 +74,20 @@ namespace CafeLib.BsvSharp.Keys
         }
 
         /// <summary>
+        /// Sets Bip32 private key.
+        /// Uses a single invocation of HMACSHA512 to generate 512 bits of entropy with which to set master private key and chaincode.
+        /// </summary>
+        /// <param name="hmacData">Sequence of bytes passed as hmacData to HMACSHA512 along with byte encoding of hmacKey.</param>
+        /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
+        /// <param name="hmacKey">Default is current global Kz.MasterBip32Key which may default to "Bitcoin seed".</param>
+        /// <returns>Returns this key unless required key paths aren't valid for generated key.</returns>
+        public static HdPrivateKey FromSeed(byte[] hmacData, IEnumerable<KeyPath> required = null, string hmacKey = MasterBip32Key)
+        {
+            var vOut = Hashes.HmacSha512(hmacKey.Utf8NormalizedToBytes(), hmacData);
+            return Master(vOut, required);
+        }
+
+        /// <summary>
         /// Computes 512 bit Bip39 seed.
         /// phrase, password, and passwordPrefix are converted to bytes using UTF8 KD normal form encoding.
         /// </summary>
@@ -100,7 +114,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
         /// <param name="passwordPrefix">password and passwordPrefix are combined to generate salt bytes. Default is "mnemonic".</param>
         /// <returns>Returns new key unless required key paths aren't valid for specified key in which case null is returned.</returns>
-        public static HdPrivateKey FromWords(string phrase, string password = null, IEnumerable<KeyPath> required = null, string passwordPrefix = "mnemonic")
+        public static HdPrivateKey FromMnemonicPhrase(string phrase, string password = null, IEnumerable<KeyPath> required = null, string passwordPrefix = "mnemonic")
             => MasterBip39(phrase, password, required, passwordPrefix);
 
         /// <summary>

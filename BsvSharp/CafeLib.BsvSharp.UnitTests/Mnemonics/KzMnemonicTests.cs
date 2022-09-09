@@ -8,7 +8,7 @@ using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Mnemonics;
 using Xunit;
 
-namespace CafeLib.BsvSharp.UnitTests.Passphrase
+namespace CafeLib.BsvSharp.UnitTests.Mnemonics
 {
     public class MnemonicTests
     {

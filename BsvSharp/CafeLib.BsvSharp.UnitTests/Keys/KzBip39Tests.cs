@@ -162,18 +162,18 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             "01f5bced59dec48e362f2c45b5de68b9fd6c92c6634f44d6d40aab69056506f0e35524a518034ddc1192e1dacd32c1ed3eaa3c3b131c88ed8e7e54c49a5d0998",
             "xprv9s21ZrQH143K39rnQJknpH1WEPFJrzmAqqasiDcVrNuk926oizzJDDQkdiTvNPr2FYDYzWgiMiC63YmfPAa2oPyNB23r2g7d1yiK6WpqaQS"
         )]
-        public void Bip39_Mnemonic_Test(string entropy, string words, string seed, string b58PrivateKey)
+        public void Bip39_Mnemonic_Test(string entropy, string phrase, string seed, string b58PrivateKey)
         {
             var bytes = entropy.HexToBytes();
-            var mnemonic = new Mnemonic(words, Languages.English);
+            var mnemonic = new Mnemonic(phrase, Languages.English);
             Assert.NotNull(mnemonic); // If checksum doesn't match returns null.
             Assert.True(mnemonic.Entropy.SequenceEqual(bytes));
             var seed512 = UInt512.FromHex(seed, true);
-            var seedBip39 = HdPrivateKey.Bip39Seed(words, "TREZOR");
+            var seedBip39 = HdPrivateKey.Bip39Seed(phrase, "TREZOR");
             Assert.Equal(seed512, seedBip39);
-            var privkeyFromWords = HdPrivateKey.FromWords(words, "TREZOR");
+            var privkeyFromPhrase = HdPrivateKey.FromMnemonicPhrase(phrase, "TREZOR");
             var privkeyFromB58 = new Base58HdPrivateKey(b58PrivateKey).GetKey();
-            Assert.Equal(privkeyFromB58, privkeyFromWords);
+            Assert.Equal(privkeyFromB58, privkeyFromPhrase);
         }
 
         [Theory]
@@ -210,6 +210,23 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             Assert.Equal(seedBip39, seedMnemonic);
             var hdPrivateKey = HdPrivateKey.Master(seedBip39);
             var privateKey = hdPrivateKey.PrivateKey;
+
+            var hdPrivateKey1 = HdPrivateKey.FromSeed(seedMnemonic.ToArray());
+        }
+
+        [Fact]
+        public void HdPrivateKey_From_Mnemonic_Phrase_Test()
+        {
+            const string phrase = "Public and Private keys in bitcoin are easy to create";
+
+            var t = HdPrivateKey.FromWords
+            var seedBip39 = HdPrivateKey.Bip39Seed(phrase);
+            var seedMnemonic = Mnemonic.ToSeed(phrase);
+            Assert.Equal(seedBip39, seedMnemonic);
+            var hdPrivateKey = HdPrivateKey.Master(seedBip39);
+            var privateKey = hdPrivateKey.PrivateKey;
+
+            var hdPrivateKey1 = HdPrivateKey.FromSeed(seedMnemonic.ToArray());
         }
     }
 }
