@@ -23,10 +23,10 @@ namespace CafeLib.BsvSharp.Mnemonics
     public class Mnemonic
     {
         /// <summary>
-        /// Space separated word list. Each word encodes 11 bits. Words are all in Language and are contained in WordList.
+        /// A phrase of space separated words. Each word encodes 11 bits. Words are all in Language and are contained in WordList.
         /// In addition to encoding Entropy, Words also encodes a checksum to catch transcription errors.
         /// </summary>
-        public string Words { get; }
+        public string Phrase { get; }
         /// <summary>
         /// What human language is being used by Words and WordList.
         /// </summary>
@@ -69,7 +69,7 @@ namespace CafeLib.BsvSharp.Mnemonics
 
             Language = language;
             WordList = wordList;
-            Words = ConvertEntropyToWords(Entropy, WordList);
+            Phrase = ConvertEntropyToWords(Entropy, WordList);
         }
 
         /// <summary>
@@ -86,12 +86,12 @@ namespace CafeLib.BsvSharp.Mnemonics
         /// <summary>
         /// Create a new KzMnemonic from a sequence of words.
         /// </summary>
-        /// <param name="words"></param>
+        /// <param name="phrase"></param>
         /// <param name="wordList"></param>
         /// <param name="language"></param>
-        public Mnemonic(string words, string[] wordList, Languages language = Languages.Unknown)
+        public Mnemonic(string phrase, string[] wordList, Languages language = Languages.Unknown)
         {
-            Words = words.Normalize(NormalizationForm.FormKD);
+            Phrase = phrase.Normalize(NormalizationForm.FormKD);
             if (wordList != null)
             {
                 Language = language;
@@ -103,9 +103,9 @@ namespace CafeLib.BsvSharp.Mnemonics
                 WordList = WordLists.GetWords(Language);
             }
             else
-                (Language, WordList) = GetWordList(words);
+                (Language, WordList) = GetWordList(phrase);
 
-            Entropy = GetEntropy(Words, WordList);
+            Entropy = GetEntropy(Phrase, WordList);
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace CafeLib.BsvSharp.Mnemonics
             Entropy = entropy.ToArray();
             Language = language;
             WordList = wordList;
-            Words = ConvertEntropyToWords(Entropy, WordList);
+            Phrase = ConvertEntropyToWords(Entropy, WordList);
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace CafeLib.BsvSharp.Mnemonics
         public string ToDigitsBase10() => new BigInteger(Entropy.Concat(new byte[1]).ToArray()).ToString();
         public string ToDigitsBase6() => ToDigitsBase6(Entropy);
 
-        public UInt512 ToSeed(string password = "") => ToSeed(Words, password);
+        public UInt512 ToSeed(string password = "") => ToSeed(Phrase, password);
         public static UInt512 ToSeed(string phrase, string password = "") => HdPrivateKey.Bip39Seed(phrase, password);
 
         /// <summary>
@@ -248,7 +248,7 @@ namespace CafeLib.BsvSharp.Mnemonics
 
         public override string ToString()
         {
-            return Words;
+            return Phrase;
         }
 
         /// <summary>

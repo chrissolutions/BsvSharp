@@ -82,49 +82,49 @@ namespace CafeLib.BsvSharp.UnitTests.Mnemonics
         [Fact]
         public void Constructors()
         {
-            var words = "afirmar diseño hielo fideo etapa ogro cambio fideo toalla pomelo número buscar";
-            var m1 = new Mnemonic(words);
+            var phrase = "afirmar diseño hielo fideo etapa ogro cambio fideo toalla pomelo número buscar";
+            var m1 = new Mnemonic(phrase);
             Assert.Equal(Languages.Spanish, m1.Language);
-            Assert.Equal(m1.Words, Mnemonic.FromWords(words).Words);
+            Assert.Equal(m1.Phrase, Mnemonic.FromWords(phrase).Phrase);
 
             var m2 = new Mnemonic(m1.Entropy, m1.Language);
-            Assert.Equal(m1.Words, m2.Words);
-            Assert.Equal(m2.Words, Mnemonic.FromEntropy(m1.Entropy, m1.Language).Words);
+            Assert.Equal(m1.Phrase, m2.Phrase);
+            Assert.Equal(m2.Phrase, Mnemonic.FromEntropy(m1.Entropy, m1.Language).Phrase);
 
             var m3 = new Mnemonic(new byte[] { 5, 40, 161, 175, 172, 69, 19, 67, 74, 26, 196, 233, 87, 10, 119, 18 }, Languages.Spanish);
-            Assert.Equal(m1.Words, m3.Words);
+            Assert.Equal(m1.Phrase, m3.Phrase);
 
             var m4 = new Mnemonic(bitLength:256);
-            Assert.Equal(24, m4.Words.Split(' ').Length);
-            Assert.Equal(24, Mnemonic.FromLength(256).Words.Split(' ').Length);
+            Assert.Equal(24, m4.Phrase.Split(' ').Length);
+            Assert.Equal(24, Mnemonic.FromLength(256).Phrase.Split(' ').Length);
 
         }
 
         [Fact]
         public void WordListLength()
         {
-            Assert.Equal(12, new Mnemonic().Words.Split(' ').Length);
-            Assert.Equal(15, new Mnemonic(32 * 5).Words.Split(' ').Length);
-            Assert.Equal(18, new Mnemonic(32 * 6).Words.Split(' ').Length);
-            Assert.Equal(21, new Mnemonic(32 * 7).Words.Split(' ').Length);
-            Assert.Equal(24, new Mnemonic(32 * 8).Words.Split(' ').Length);
+            Assert.Equal(12, new Mnemonic().Phrase.Split(' ').Length);
+            Assert.Equal(15, new Mnemonic(32 * 5).Phrase.Split(' ').Length);
+            Assert.Equal(18, new Mnemonic(32 * 6).Phrase.Split(' ').Length);
+            Assert.Equal(21, new Mnemonic(32 * 7).Phrase.Split(' ').Length);
+            Assert.Equal(24, new Mnemonic(32 * 8).Phrase.Split(' ').Length);
         }
 
         [Fact]
         public void ToStringIsWords()
         {
             var m1 = new Mnemonic();
-            Assert.Equal(m1.Words, m1.ToString());
+            Assert.Equal(m1.Phrase, m1.ToString());
         }
 
         [Fact]
         public void MnemonicsAreDifferent()
         {
             var m1 = new Mnemonic();
-            Assert.Equal(m1.Words, m1.ToString());
+            Assert.Equal(m1.Phrase, m1.ToString());
 
             var m2 = new Mnemonic();
-            Assert.Equal(m2.Words, m2.ToString());
+            Assert.Equal(m2.Phrase, m2.ToString());
 
             Assert.NotEqual(m1.ToHex(), m2.ToHex());
         }
@@ -132,8 +132,8 @@ namespace CafeLib.BsvSharp.UnitTests.Mnemonics
         [Fact]
         public void MnemonicToAddress()
         {
-            const string words = "dutch expire chief blue paddle flush upset health catch drill turtle slot";
-            var m = HdPrivateKey.MasterBip39(words);
+            const string phrase = "dutch expire chief blue paddle flush upset health catch drill turtle slot";
+            var m = HdPrivateKey.MasterBip39(phrase);
             var path = new KeyPath("m/44'/0'/0'");
             var hdPrivateKey = m.Derive(path);
             var privateKey = hdPrivateKey.PrivateKey;
@@ -151,15 +151,15 @@ namespace CafeLib.BsvSharp.UnitTests.Mnemonics
         {
             var rolls1 = "10000000000000000000000000000000000000000000000002";
             var m1 = Mnemonic.FromBase6(rolls1);
-            Assert.Equal("acoustic abandon abandon abandon anchor cancel pole advance naive alpha noodle slogan", m1.Words);
+            Assert.Equal("acoustic abandon abandon abandon anchor cancel pole advance naive alpha noodle slogan", m1.Phrase);
 
             var rolls2 = "20433310335200331223501035145525323501554453150402";
             var m2 = Mnemonic.FromBase6(rolls2);
-            Assert.Equal("little jar barrel spatial tenant business manual cabin pig nerve trophy purity", m2.Words);
+            Assert.Equal("little jar barrel spatial tenant business manual cabin pig nerve trophy purity", m2.Phrase);
 
             var rolls3 = "2043331033520033122350103533025405142024330443100234401130333301433333523345145525323501554453150402";
             var m3 = Mnemonic.FromBase6(rolls3, 256);
-            Assert.Equal("little jar crew spice goat sell journey behind used choose eyebrow property audit firm later blind invite fork camp shock floor reduce submit bronze", m3.Words);
+            Assert.Equal("little jar crew spice goat sell journey behind used choose eyebrow property audit firm later blind invite fork camp shock floor reduce submit bronze", m3.Phrase);
         }
     }
 }

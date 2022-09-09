@@ -205,8 +205,9 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         public void Mnemonic_Seed_Test()
         {
             const string phrase = "Public and Private keys in bitcoin are easy to create";
+            var mnemonic = new Mnemonic(phrase, Languages.English);
+            var seedMnemonic = mnemonic.ToSeed();
             var seedBip39 = HdPrivateKey.Bip39Seed(phrase);
-            var seedMnemonic = Mnemonic.ToSeed(phrase);
             Assert.Equal(seedBip39, seedMnemonic);
             var hdPrivateKey = HdPrivateKey.Master(seedBip39);
             var privateKey = hdPrivateKey.PrivateKey;
