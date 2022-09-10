@@ -22,69 +22,31 @@ namespace CafeLib.BsvSharp.Keys
     {
         private const string MasterBip32Key = "Bitcoin seed";
 
+        /// <summary>
+        /// PrivateKey
+        /// </summary>
         public PrivateKey PrivateKey { get; private set; } = PrivateKey.FromRandom();
 
         /// <summary>
-        /// Sets this extended private key to be a master (depth 0) with the given private key and chaincode and verifies required key paths.
+        /// HdPrivateKey constructor.
         /// </summary>
-        /// <param name="privkey">Master private key.</param>
-        /// <param name="chaincode">Master chaincode.</param>
-        /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
-        /// <returns>Returns this key unless required key paths aren't valid for specified key.</returns>
-        private HdPrivateKey SetMaster(UInt256 privkey, UInt256 chaincode, IEnumerable<KeyPath> required = null)
+        protected HdPrivateKey()
         {
-            PrivateKey = new PrivateKey(privkey);
-            ChainCode = chaincode;
-            Depth = 0;
-            Child = 0;
-            Fingerprint = 0;
-
-            if (PrivateKey == null || !PrivateKey.IsValid) return null;
-
-            // Verify that all the required derivation paths yield valid keys.
-            if (required == null) return this;
-            return required.Any(r => Derive(r) == null) ? null : this;
         }
 
         /// <summary>
-        /// Sets this extended private key to be a master (depth 0) with the private key and chaincode set from the single 512 bit vout parameter.
-        /// Master private key will be set to the first 256 bits.
-        /// Chaincode will be set from the last 256 bits.
+        /// Construct a hierarchal deterministic private key from key data.
         /// </summary>
-        /// <param name="vOut">Master private key will be set to the first 256 bits. Chaincode will be set from the last 256 bits.</param>
-        /// <param name="required">if not null, each key path will be verified as valid on the specified key or returns null.</param>
-        /// <returns>Returns this key unless required key paths aren't valid for specified key.</returns>
-        private HdPrivateKey SetMaster(UInt512 vOut, IEnumerable<KeyPath> required = null)
+        /// <param name="keyData">key data</param>
+        /// <returns>hierarchal deterministic private key</returns>
+        public static HdPrivateKey FromKeyData(ReadOnlyByteSpan keyData)
         {
-            return SetMaster((UInt256)vOut.Span[..32], (UInt256)vOut.Span.Slice(32, 32), required);
-        }
-
-        /// <summary>
-        /// Sets Bip32 private key.
-        /// Uses a single invocation of HMACSHA512 to generate 512 bits of entropy with which to set master private key and chaincode.
-        /// </summary>
-        /// <param name="hmacData">Sequence of bytes passed as hmacData to HMACSHA512 along with byte encoding of hmacKey.</param>
-        /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
-        /// <param name="hmacKey">Default is current global Kz.MasterBip32Key which may default to "Bitcoin seed".</param>
-        /// <returns>Returns this key unless required key paths aren't valid for generated key.</returns>
-        private HdPrivateKey SetMasterBip32(byte[] hmacData, IEnumerable<KeyPath> required = null, string hmacKey = MasterBip32Key)
-        {
-            var vOut = Hashes.HmacSha512(hmacKey.Utf8NormalizedToBytes(), hmacData);
-            return SetMaster(vOut, required);
-        }
-
-        /// <summary>
-        /// Sets Bip32 private key.
-        /// Uses a single invocation of HMACSHA512 to generate 512 bits of entropy with which to set master private key and chaincode.
-        /// </summary>
-        /// <param name="hmacData">Sequence of bytes passed as hmacData to HMACSHA512 along with byte encoding of hmacKey.</param>
-        /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
-        /// <param name="hmacKey">Default is current global Kz.MasterBip32Key which may default to "Bitcoin seed".</param>
-        /// <returns>Returns this key unless required key paths aren't valid for generated key.</returns>
-        public static HdPrivateKey FromSeed(byte[] hmacData, IEnumerable<KeyPath> required = null, string hmacKey = MasterBip32Key)
-        {
-            var seed = Hashes.HmacSha512(hmacKey.Utf8NormalizedToBytes(), hmacData);
-            return FromSeed(seed, required);
+            var privateKey = new HdPrivateKey();
+            if (keyData.Length == Bip32KeySize)
+            {
+                privateKey.Decode(keyData);
+            }
+            return privateKey;
         }
 
         /// <summary>
@@ -128,6 +90,17 @@ namespace CafeLib.BsvSharp.Keys
             => MasterBip39(phrase, password, required, passwordPrefix);
 
         /// <summary>
+        /// Returns a new Bip32 private key.
+        /// Uses a single invocation of HMACSHA512 to generate 512 bits of entropy with which to set master private key and chaincode.
+        /// </summary>
+        /// <param name="hmacData">Sequence of bytes passed as hmacData to HMACSHA512 along with byte encoding of hmacKey.</param>
+        /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
+        /// <param name="hmacKey">Default is current global Kz.MasterBip32Key which may default to "Bitcoin seed".</param>
+        /// <returns>Returns new key unless required key paths aren't valid for specified key in which case null is returned.</returns>
+        public static HdPrivateKey MasterBip32(byte[] hmacData, IEnumerable<KeyPath> required = null, string hmacKey = MasterBip32Key)
+            => new HdPrivateKey().SetMasterBip32(hmacData, required, hmacKey);
+
+        /// <summary>
         /// Returns a new extended private key per Bip39.
         /// passphrase, password, and passwordPrefix are converted to bytes using UTF8 KD normal form encoding.
         /// </summary>
@@ -138,18 +111,6 @@ namespace CafeLib.BsvSharp.Keys
         /// <returns>Returns new key unless required key paths aren't valid for specified key in which case null is returned.</returns>
         public static HdPrivateKey MasterBip39(string phrase, string password = null, IEnumerable<KeyPath> required = null, string passwordPrefix = "mnemonic")
             => new HdPrivateKey().SetMasterBip39(phrase, password, required, passwordPrefix);
-
-        /// <summary>
-        /// Sets this extended private key per Bip39.
-        /// passphrase, password, and passwordPrefix are converted to bytes using UTF8 KD normal form encoding.
-        /// </summary>
-        /// <param name="phrase">arbitrary phrase (typically mnemonic words with checksum but not necessarily)</param>
-        /// <param name="password">password and passwordPrefix are combined to generate salt bytes.</param>
-        /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
-        /// <param name="passwordPrefix">password and passwordPrefix are combined to generate salt bytes. Default is "mnemonic".</param>
-        /// <returns>Returns this key unless required key paths aren't valid for generated key.</returns>
-        private HdPrivateKey SetMasterBip39(string phrase, string password = null, IEnumerable<KeyPath> required = null, string passwordPrefix = "mnemonic")
-            => SetMasterBip32(Bip39Seed(phrase, password, passwordPrefix), required);
 
         /// <summary>
         /// Returns a new extended private key to be a master (depth 0) with the given private key and chaincode and verifies required key paths.
@@ -171,17 +132,6 @@ namespace CafeLib.BsvSharp.Keys
         /// <returns>Returns new key unless required key paths aren't valid for specified key in which case null is returned.</returns>
         public static HdPrivateKey Master(UInt512 vout, IEnumerable<KeyPath> required = null)
             => new HdPrivateKey().SetMaster(vout, required);
-
-        /// <summary>
-        /// Returns a new Bip32 private key.
-        /// Uses a single invocation of HMACSHA512 to generate 512 bits of entropy with which to set master private key and chaincode.
-        /// </summary>
-        /// <param name="hmacData">Sequence of bytes passed as hmacData to HMACSHA512 along with byte encoding of hmacKey.</param>
-        /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
-        /// <param name="hmacKey">Default is current global Kz.MasterBip32Key which may default to "Bitcoin seed".</param>
-        /// <returns>Returns new key unless required key paths aren't valid for specified key in which case null is returned.</returns>
-        public static HdPrivateKey MasterBip32(byte[] hmacData, IEnumerable<KeyPath> required = null, string hmacKey = MasterBip32Key)
-            => new HdPrivateKey().SetMasterBip32(hmacData, required, hmacKey);
 
         /// <summary>
         /// BIP32 uses "Neuter" to describe adding the extended key information to the public key
@@ -277,5 +227,70 @@ namespace CafeLib.BsvSharp.Keys
 
         public static bool operator ==(HdPrivateKey x, HdPrivateKey y) => x?.Equals(y) ?? y is null;
         public static bool operator !=(HdPrivateKey x, HdPrivateKey y) => !(x == y);
+
+        #region Helpers
+
+        /// <summary>
+        /// Sets this extended private key to be a master (depth 0) with the given private key and chaincode and verifies required key paths.
+        /// </summary>
+        /// <param name="privkey">Master private key.</param>
+        /// <param name="chaincode">Master chaincode.</param>
+        /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
+        /// <returns>Returns this key unless required key paths aren't valid for specified key.</returns>
+        private HdPrivateKey SetMaster(UInt256 privkey, UInt256 chaincode, IEnumerable<KeyPath> required = null)
+        {
+            PrivateKey = new PrivateKey(privkey);
+            ChainCode = chaincode;
+            Depth = 0;
+            Child = 0;
+            Fingerprint = 0;
+
+            if (PrivateKey == null || !PrivateKey.IsValid) return null;
+
+            // Verify that all the required derivation paths yield valid keys.
+            if (required == null) return this;
+            return required.Any(r => Derive(r) == null) ? null : this;
+        }
+
+        /// <summary>
+        /// Sets this extended private key to be a master (depth 0) with the private key and chaincode set from the single 512 bit vout parameter.
+        /// Master private key will be set to the first 256 bits.
+        /// Chaincode will be set from the last 256 bits.
+        /// </summary>
+        /// <param name="vOut">Master private key will be set to the first 256 bits. Chaincode will be set from the last 256 bits.</param>
+        /// <param name="required">if not null, each key path will be verified as valid on the specified key or returns null.</param>
+        /// <returns>Returns this key unless required key paths aren't valid for specified key.</returns>
+        private HdPrivateKey SetMaster(UInt512 vOut, IEnumerable<KeyPath> required = null)
+        {
+            return SetMaster((UInt256)vOut.Span[..32], (UInt256)vOut.Span.Slice(32, 32), required);
+        }
+
+        /// <summary>
+        /// Sets Bip32 private key.
+        /// Uses a single invocation of HMACSHA512 to generate 512 bits of entropy with which to set master private key and chaincode.
+        /// </summary>
+        /// <param name="hmacData">Sequence of bytes passed as hmacData to HMACSHA512 along with byte encoding of hmacKey.</param>
+        /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
+        /// <param name="hmacKey">Default is current global Kz.MasterBip32Key which may default to "Bitcoin seed".</param>
+        /// <returns>Returns this key unless required key paths aren't valid for generated key.</returns>
+        private HdPrivateKey SetMasterBip32(byte[] hmacData, IEnumerable<KeyPath> required = null, string hmacKey = MasterBip32Key)
+        {
+            var vOut = Hashes.HmacSha512(hmacKey.Utf8NormalizedToBytes(), hmacData);
+            return SetMaster(vOut, required);
+        }
+
+        /// <summary>
+        /// Sets this extended private key per Bip39.
+        /// passphrase, password, and passwordPrefix are converted to bytes using UTF8 KD normal form encoding.
+        /// </summary>
+        /// <param name="phrase">arbitrary phrase (typically mnemonic words with checksum but not necessarily)</param>
+        /// <param name="password">password and passwordPrefix are combined to generate salt bytes.</param>
+        /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
+        /// <param name="passwordPrefix">password and passwordPrefix are combined to generate salt bytes. Default is "mnemonic".</param>
+        /// <returns>Returns this key unless required key paths aren't valid for generated key.</returns>
+        private HdPrivateKey SetMasterBip39(string phrase, string password = null, IEnumerable<KeyPath> required = null, string passwordPrefix = "mnemonic")
+            => SetMasterBip32(Bip39Seed(phrase, password, passwordPrefix), required);
+
+        #endregion
     }
 }

@@ -12,8 +12,17 @@ namespace CafeLib.BsvSharp.Keys
 {
     public class HdPublicKey : HdKey
     {
+        protected HdPublicKey()
+        {
+        }
+
         public PublicKey PublicKey { get; private set; }
 
+        /// <summary>
+        /// Create a hierarchal deterministic public key from HdPrivateKey.
+        /// </summary>
+        /// <param name="privateKey">HD private key</param>
+        /// <returns>HdPublicKey</returns>
         public static HdPublicKey FromPrivateKey(HdPrivateKey privateKey)
         {
             return new HdPublicKey
@@ -24,6 +33,21 @@ namespace CafeLib.BsvSharp.Keys
                 ChainCode = privateKey.ChainCode,
                 PublicKey = privateKey.PrivateKey.CreatePublicKey()
             };
+        }
+
+        /// <summary>
+        /// Create a hierarchal deterministic public key from key data.
+        /// </summary>
+        /// <param name="keyData">key data</param>
+        /// <returns>hierarchal deterministic public key</returns>
+        public static HdPublicKey FromKeyData(ReadOnlyByteSpan keyData)
+        {
+            var pubKey = new HdPublicKey();
+            if (keyData.Length == Bip32KeySize)
+            {
+                pubKey.Decode(keyData);
+            }
+            return pubKey;
         }
 
         /// <summary>
