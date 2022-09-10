@@ -31,7 +31,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="chaincode">Master chaincode.</param>
         /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
         /// <returns>Returns this key unless required key paths aren't valid for specified key.</returns>
-        public HdPrivateKey SetMaster(UInt256 privkey, UInt256 chaincode, IEnumerable<KeyPath> required = null)
+        private HdPrivateKey SetMaster(UInt256 privkey, UInt256 chaincode, IEnumerable<KeyPath> required = null)
         {
             PrivateKey = new PrivateKey(privkey);
             ChainCode = chaincode;
@@ -54,7 +54,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="vOut">Master private key will be set to the first 256 bits. Chaincode will be set from the last 256 bits.</param>
         /// <param name="required">if not null, each key path will be verified as valid on the specified key or returns null.</param>
         /// <returns>Returns this key unless required key paths aren't valid for specified key.</returns>
-        public HdPrivateKey SetMaster(UInt512 vOut, IEnumerable<KeyPath> required = null)
+        private HdPrivateKey SetMaster(UInt512 vOut, IEnumerable<KeyPath> required = null)
         {
             return SetMaster((UInt256)vOut.Span[..32], (UInt256)vOut.Span.Slice(32, 32), required);
         }
@@ -67,7 +67,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
         /// <param name="hmacKey">Default is current global Kz.MasterBip32Key which may default to "Bitcoin seed".</param>
         /// <returns>Returns this key unless required key paths aren't valid for generated key.</returns>
-        public HdPrivateKey SetMasterBip32(byte[] hmacData, IEnumerable<KeyPath> required = null, string hmacKey = MasterBip32Key)
+        private HdPrivateKey SetMasterBip32(byte[] hmacData, IEnumerable<KeyPath> required = null, string hmacKey = MasterBip32Key)
         {
             var vOut = Hashes.HmacSha512(hmacKey.Utf8NormalizedToBytes(), hmacData);
             return SetMaster(vOut, required);
@@ -83,9 +83,19 @@ namespace CafeLib.BsvSharp.Keys
         /// <returns>Returns this key unless required key paths aren't valid for generated key.</returns>
         public static HdPrivateKey FromSeed(byte[] hmacData, IEnumerable<KeyPath> required = null, string hmacKey = MasterBip32Key)
         {
-            var vOut = Hashes.HmacSha512(hmacKey.Utf8NormalizedToBytes(), hmacData);
-            return Master(vOut, required);
+            var seed = Hashes.HmacSha512(hmacKey.Utf8NormalizedToBytes(), hmacData);
+            return FromSeed(seed, required);
         }
+
+        /// <summary>
+        /// Returns a new extended private key from seed to be a master (depth 0) with the private key and chaincode set from the single 512 bit vout parameter.
+        /// Master private key will be set to the first 256 bits.
+        /// Chaincode will be set from the last 256 bits.
+        /// </summary>
+        /// <param name="seed">Master private key will be set to the first 256 bits. Chaincode will be set from the last 256 bits.</param>
+        /// <param name="required">if not null, each key path will be verified as valid on the specified key or returns null.</param>
+        /// <returns>Returns new key unless required key paths aren't valid for specified key in which case null is returned.</returns>
+        public static HdPrivateKey FromSeed(UInt512 seed, IEnumerable<KeyPath> required = null) => Master(seed, required);
 
         /// <summary>
         /// Computes 512 bit Bip39 seed.
@@ -138,7 +148,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="required">if not null, each key path will be verified as valid on the generated key or returns null.</param>
         /// <param name="passwordPrefix">password and passwordPrefix are combined to generate salt bytes. Default is "mnemonic".</param>
         /// <returns>Returns this key unless required key paths aren't valid for generated key.</returns>
-        public HdPrivateKey SetMasterBip39(string phrase, string password = null, IEnumerable<KeyPath> required = null, string passwordPrefix = "mnemonic")
+        private HdPrivateKey SetMasterBip39(string phrase, string password = null, IEnumerable<KeyPath> required = null, string passwordPrefix = "mnemonic")
             => SetMasterBip32(Bip39Seed(phrase, password, passwordPrefix), required);
 
         /// <summary>
@@ -231,35 +241,38 @@ namespace CafeLib.BsvSharp.Keys
 
         public override void Encode(ByteSpan code)
         {
-            code[0] = Depth;
-            var s = Fingerprint.AsSpan();
-            s.CopyTo(code.Slice(1, 4));
-            code[5] = (byte)((Child >> 24) & 0xFF);
-            code[6] = (byte)((Child >> 16) & 0xFF);
-            code[7] = (byte)((Child >> 8) & 0xFF);
-            code[8] = (byte)(Child & 0xFF);
-            ChainCode.Span.CopyTo(code.Slice(9, UInt256.Length));
-            code[41] = 0;
+            var i = 0;
+            code[i++] = Depth;
+            var fingerprint = Fingerprint.AsSpan();
+            fingerprint.CopyTo(code[i..(i+=sizeof(int))]);
+            code[i++] = (byte)((Child >> 24) & 0xFF);
+            code[i++] = (byte)((Child >> 16) & 0xFF);
+            code[i++] = (byte)((Child >> 8) & 0xFF);
+            code[i++] = (byte)(Child & 0xFF);
+            ChainCode.Span.CopyTo(code[i..(i+=UInt256.Length)]);
+            code[i++] = 0;
             var key = PrivateKey.ToArray();
             Debug.Assert(key.Length == UInt256.Length);
-            key.CopyTo(code.Slice(42, UInt256.Length));
+            key.CopyTo(code[i..(i + UInt256.Length)]);
         }
 
         public override void Decode(ReadOnlyByteSpan code)
         {
-            Depth = code[0];
-            Fingerprint = BitConverter.ToInt32(code[1..5]);
-            Child = (uint)code[5] << 24 | (uint)code[6] << 16 | (uint)code[7] << 8 | code[8];
-            ChainCode = new UInt256(code.Slice(9, UInt256.Length));
-            PrivateKey.SetData(code.Slice(42, UInt256.Length));
+            var i = 0;
+            Depth = code[i++];
+            Fingerprint = BitConverter.ToInt32(code[i..(i+=sizeof(int))]);
+            Child = (uint)code[i++] << 24 | (uint)code[i++] << 16 | (uint)code[i++] << 8 | code[i++];
+            ChainCode = new UInt256(code[i..(i += UInt256.Length)]);
+            ++i;  // Skip position 41;
+            PrivateKey.SetData(code[i..(i + UInt256.Length)]);
         }
 
-        internal Base58HdPrivateKey ToBase58() => new(this);
+        private Base58HdPrivateKey ToBase58() => new(this);
         public override string ToString() => ToBase58().ToString();
 
         public override int GetHashCode() => base.GetHashCode() ^ ToString().GetHashCode();
 
-        public bool Equals(HdPrivateKey o) => o is not null && base.Equals(o) && PrivateKey.Equals(o.PrivateKey);
+        private bool Equals(HdPrivateKey o) => o is not null && base.Equals(o) && PrivateKey.Equals(o.PrivateKey);
         public override bool Equals(object obj) => obj is HdPrivateKey key && this == key;
 
         public static bool operator ==(HdPrivateKey x, HdPrivateKey y) => x?.Equals(y) ?? y is null;

@@ -22,7 +22,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         {
             const string phrase = "Public and Private keys in bitcoin are easy to create";
             var seedBip39 = HdPrivateKey.Bip39Seed(phrase);
-            var hdPrivateKey = HdPrivateKey.Master(seedBip39);
+            var hdPrivateKey = HdPrivateKey.FromSeed(seedBip39);
             Assert.NotNull(hdPrivateKey);
         }
 
@@ -207,9 +207,9 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             var ntropy = mnemonic.Entropy;
             Assert.True(Encoders.Hex.Decode(entropy).SequenceEqual(ntropy));
 
-            var hdPrivateKeyFromMnemomic = mnemonic.ToHdPrivateKey(password);
-            var hdPrivateKey = HdPrivateKey.Master(seed512);
-            Assert.Equal(hdPrivateKey, hdPrivateKeyFromMnemomic);
+            var hdPrivateKeyFromMnemonic = mnemonic.ToHdPrivateKey(password);
+            var hdPrivateKey = HdPrivateKey.FromSeed(seed512);
+            Assert.Equal(hdPrivateKey, hdPrivateKeyFromMnemonic);
         }
     }
 }

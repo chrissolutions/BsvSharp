@@ -152,10 +152,10 @@ namespace CafeLib.BsvSharp.Mnemonics
         /// <summary>
         /// Create a new KzMnemonic from a sequence of words.
         /// </summary>
-        /// <param name="words">Space separated words that encode Entropy and checksum.</param>
+        /// <param name="phrase">Space separated words that encode Entropy and checksum.</param>
         /// <param name="language">Optional language key to use in WordLists.</param>
-        public static Mnemonic FromWords(string words, Languages language = Languages.Unknown) => new(words, language);
-        public static Mnemonic FromWords(string words, string[] wordList, Languages language = Languages.Unknown) => new(words, wordList, language);
+        public static Mnemonic FromPhrase(string phrase, Languages language = Languages.Unknown) => new(phrase, language);
+        public static Mnemonic FromPhrase(string phrase, string[] wordList, Languages language = Languages.Unknown) => new(phrase, wordList, language);
 
         /// <summary>
         /// Create a new KzMnemonic from given Entropy.
@@ -180,7 +180,7 @@ namespace CafeLib.BsvSharp.Mnemonics
         public string ToHex() => Encoders.Hex.Encode(Entropy);
         public string ToDigitsBase10() => new BigInteger(Entropy.Concat(new byte[1]).ToArray()).ToString();
         public string ToDigitsBase6() => ToDigitsBase6(Entropy);
-        public HdPrivateKey ToHdPrivateKey(string password = "") => HdPrivateKey.Master(HdPrivateKey.Bip39Seed(Phrase, password));
+        public HdPrivateKey ToHdPrivateKey(string password = "") => HdPrivateKey.FromSeed(HdPrivateKey.Bip39Seed(Phrase, password));
 
         /// <summary>
         /// Returns words converted into a binary string of "0" and "1" based on wordList.

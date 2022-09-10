@@ -85,7 +85,7 @@ namespace CafeLib.BsvSharp.UnitTests.Mnemonics
             var phrase = "afirmar diseño hielo fideo etapa ogro cambio fideo toalla pomelo número buscar";
             var m1 = new Mnemonic(phrase);
             Assert.Equal(Languages.Spanish, m1.Language);
-            Assert.Equal(m1.Phrase, Mnemonic.FromWords(phrase).Phrase);
+            Assert.Equal(m1.Phrase, Mnemonic.FromPhrase(phrase).Phrase);
 
             var m2 = new Mnemonic(m1.Entropy, m1.Language);
             Assert.Equal(m1.Phrase, m2.Phrase);
