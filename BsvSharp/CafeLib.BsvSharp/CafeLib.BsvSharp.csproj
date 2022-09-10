@@ -26,14 +26,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Passphrase\Cultures\ChineseSimplified.words" />
-    <EmbeddedResource Include="Passphrase\Cultures\ChineseTraditional.words" />
-    <EmbeddedResource Include="Passphrase\Cultures\English.words" />
-    <EmbeddedResource Include="Passphrase\Cultures\French.words" />
-    <EmbeddedResource Include="Passphrase\Cultures\Italian.words" />
-    <EmbeddedResource Include="Passphrase\Cultures\Japanese.words" />
-    <EmbeddedResource Include="Passphrase\Cultures\PortugueseBrazil.words" />
-    <EmbeddedResource Include="Passphrase\Cultures\Spanish.words" />
+    <EmbeddedResource Include="Mnemonics\Cultures\ChineseSimplified.words" />
+    <EmbeddedResource Include="Mnemonics\Cultures\ChineseTraditional.words" />
+    <EmbeddedResource Include="Mnemonics\Cultures\English.words" />
+    <EmbeddedResource Include="Mnemonics\Cultures\French.words" />
+    <EmbeddedResource Include="Mnemonics\Cultures\Italian.words" />
+    <EmbeddedResource Include="Mnemonics\Cultures\Japanese.words" />
+    <EmbeddedResource Include="Mnemonics\Cultures\PortugueseBrazil.words" />
+    <EmbeddedResource Include="Mnemonics\Cultures\Spanish.words" />
   </ItemGroup>
 
   <ItemGroup>
