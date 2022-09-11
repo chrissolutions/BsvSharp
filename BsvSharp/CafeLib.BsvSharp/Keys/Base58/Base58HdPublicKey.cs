@@ -19,7 +19,7 @@ namespace CafeLib.BsvSharp.Keys.Base58
         public bool FromString(string base58, NetworkType? networkType)
             => FromString(base58, RootService.GetNetwork(networkType).HdPublicKey.Length);
 
-        public HdPublicKey GetKey() => HdPublicKey.FromKeyData(KeyData);
+        public HdPublicKey GetKey() => HdPublicKey.FromKey(KeyData);
 
         public static HdPublicKey GetKey(string base58) => new Base58HdPublicKey(base58).GetKey();
 

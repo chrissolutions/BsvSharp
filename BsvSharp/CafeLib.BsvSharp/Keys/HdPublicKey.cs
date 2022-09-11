@@ -36,11 +36,11 @@ namespace CafeLib.BsvSharp.Keys
         }
 
         /// <summary>
-        /// Create a hierarchal deterministic public key from key data.
+        /// Create a hierarchal deterministic public key from key.
         /// </summary>
         /// <param name="keyData">key data</param>
         /// <returns>hierarchal deterministic public key</returns>
-        public static HdPublicKey FromKeyData(ReadOnlyByteSpan keyData)
+        public static HdPublicKey FromKey(ReadOnlyByteSpan keyData)
         {
             var pubKey = new HdPublicKey();
             if (keyData.Length == Bip32KeySize)

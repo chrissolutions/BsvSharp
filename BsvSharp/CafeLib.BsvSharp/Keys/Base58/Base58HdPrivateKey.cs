@@ -47,7 +47,7 @@ namespace CafeLib.BsvSharp.Keys.Base58
         /// Get the HdPrivateKey from Base58HdPrivateKey key data.
         /// </summary>
         /// <returns>HdPrivateKey</returns>
-        public HdPrivateKey GetKey() => HdPrivateKey.FromKeyData(KeyData);
+        public HdPrivateKey GetKey() => HdPrivateKey.FromKey(KeyData);
 
         /// <summary>
         /// Set the Base58HdPrivateKey key data.
