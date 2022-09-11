@@ -4,7 +4,7 @@ using BlazorWallet.Interop;
 using CafeLib.BsvSharp.Api.WhatsOnChain;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
-using CafeLib.BsvSharp.Passphrase;
+using CafeLib.BsvSharp.Mnemonics;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -19,7 +19,7 @@ namespace BlazorWallet.Shared
         private readonly WhatsOnChain _whatsOnChain = new();
 
         private Mnemonic _mnemonic;
-        private string _words = "";
+        private string _phrase = "";
 
         private HdPrivateKey _hdPrivateKey;
         private string _hdPrivateKeyText = "";
@@ -41,14 +41,14 @@ namespace BlazorWallet.Shared
         private async Task GenerateMnemonic()
         {
             _mnemonic = new Mnemonic();
-            _words = _mnemonic.Words;
+            _phrase = _mnemonic.Phrase;
 
             await NewHdPrivateKey();
         }
 
         private async Task NewHdPrivateKey()
         {
-            _hdPrivateKey = HdPrivateKey.FromWords(_words);
+            _hdPrivateKey = _mnemonic.ToHdPrivateKey();
             _hdPrivateKeyText = _hdPrivateKey.ToString();
             await DerivationPath(_pathDepth.ToString());
         }
