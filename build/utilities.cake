@@ -178,7 +178,6 @@ public class Builder
                 Configuration = vars.config,
                 ApiKey = vars.nugetKey,
                 Server = vars.nugetServer,
-                Debug = vars.nugetDebug,
                 SkipDuplicate = vars.nugetSkipDup
             }))
             {
@@ -260,9 +259,6 @@ public static class DotNet
 
         if (!string.IsNullOrEmpty(settings.Server))
             sb.Append($"-s {settings.Server} ");
-
-        if (settings.Debug)
-            sb.Append($"-d ");
 
         if (settings.SkipDuplicate)
             sb.Append($"--skip-duplicate ");

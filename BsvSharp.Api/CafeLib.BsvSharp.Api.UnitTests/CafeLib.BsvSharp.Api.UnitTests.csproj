@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Version Condition=" '$(Version)' == '' ">2.0.0</Version>
+    <Version Condition=" '$(Version)' == '' ">2.0.1</Version>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -16,8 +16,8 @@
 
   <ItemGroup>
     <PackageReference Include="CafeLib.BsvSharp" Version="$(Version)" />
-    <PackageReference Include="CafeLib.Core" Version="$(Version)" />
-    <PackageReference Include="CafeLib.Web.Request" Version="$(Version)" />
+    <PackageReference Include="CafeLib.Core" Version="2.0.0" />
+    <PackageReference Include="CafeLib.Web.Request" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
     <PackageReference Include="Moq" Version="4.16.1" />
