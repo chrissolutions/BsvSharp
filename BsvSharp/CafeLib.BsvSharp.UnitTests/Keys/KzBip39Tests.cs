@@ -4,18 +4,28 @@
 #endregion
 
 using System.Linq;
+using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Keys.Base58;
-using CafeLib.BsvSharp.Passphrase;
+using CafeLib.BsvSharp.Mnemonics;
 using CafeLib.Core.Numerics;
 using Xunit;
 // ReSharper disable StringLiteralTypo
 
-namespace CafeLib.BsvSharp.UnitTests.Keys 
+namespace CafeLib.BsvSharp.UnitTests.Keys
 {
     public class KzBip39Tests 
     {
+        [Fact]
+        public void Bip39_Seed_Test()
+        {
+            const string phrase = "Public and Private keys in bitcoin are easy to create";
+            var seedBip39 = HdPrivateKey.Bip39Seed(phrase);
+            var hdPrivateKey = HdPrivateKey.FromSeed(seedBip39);
+            Assert.NotNull(hdPrivateKey);
+        }
+
         [Theory]
         [InlineData(
             "00000000000000000000000000000000",
@@ -161,18 +171,18 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             "01f5bced59dec48e362f2c45b5de68b9fd6c92c6634f44d6d40aab69056506f0e35524a518034ddc1192e1dacd32c1ed3eaa3c3b131c88ed8e7e54c49a5d0998",
             "xprv9s21ZrQH143K39rnQJknpH1WEPFJrzmAqqasiDcVrNuk926oizzJDDQkdiTvNPr2FYDYzWgiMiC63YmfPAa2oPyNB23r2g7d1yiK6WpqaQS"
         )]
-        public void Bip39_Mnemonic_Test(string entropy, string words, string seed, string b58PrivateKey)
+        public void Bip39_Mnemonic_HdPrivateKey_Test(string entropy, string phrase, string seed, string b58PrivateKey)
         {
             var bytes = entropy.HexToBytes();
-            var mnemonic = new Mnemonic(words, Languages.English);
+            var mnemonic = new Mnemonic(phrase, Languages.English);
             Assert.NotNull(mnemonic); // If checksum doesn't match returns null.
             Assert.True(mnemonic.Entropy.SequenceEqual(bytes));
             var seed512 = UInt512.FromHex(seed, true);
-            var seedBip39 = HdPrivateKey.Bip39Seed(words, "TREZOR");
+            var seedBip39 = HdPrivateKey.Bip39Seed(phrase, "TREZOR");
             Assert.Equal(seed512, seedBip39);
-            var privkeyFromWords = HdPrivateKey.FromWords(words, "TREZOR");
+            var privkeyFromPhrase = HdPrivateKey.FromMnemonicPhrase(phrase, "TREZOR");
             var privkeyFromB58 = new Base58HdPrivateKey(b58PrivateKey).GetKey();
-            Assert.Equal(privkeyFromB58, privkeyFromWords);
+            Assert.Equal(privkeyFromB58, privkeyFromPhrase);
         }
 
         [Theory]
@@ -180,20 +190,26 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             "TREZOR",
             "00000000000000000000000000000000",
             "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
-            "c55257c360c07c72029aebc1b53c05ed0362ada38ead3e3e9efa3708e53495531f09a6987599d18264c1e1c92f2cf141630c7a3c4ab7c81b2f001698e7463b04"
+            "c55257c360c07c72029aebc1b53c05ed0362ada38ead3e3e9efa3708e53495531f09a6987599d18264c1e1c92f2cf141630c7a3c4ab7c81b2f001698e7463b04",
+            Languages.English
         )]
-        //[InlineData(
-        //    "メートルガバヴァぱばぐゞちぢ十人十色",
-        //    "00000000000000000000000000000000",
-        //    "あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あおぞら",
-        //    "a262d6fb6122ecf45be09c50492b31f92e9beb7d9a845987a02cefda57a15f9c467a17872029a9e92299b5cbdf306e3a0ee620245cbd508959b6cb7ca637bd55"
-        //)]
-        public void Mnemonic_Test(string password, string entropy, string words, string seed)
+        [InlineData(
+            "メートルガバヴァぱばぐゞちぢ十人十色",
+            "00000000000000000000000000000000",
+            "あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あいこくしん　あおぞら",
+            "a262d6fb6122ecf45be09c50492b31f92e9beb7d9a845987a02cefda57a15f9c467a17872029a9e92299b5cbdf306e3a0ee620245cbd508959b6cb7ca637bd55",
+            Languages.Japanese
+        )]
+        public void Bip39_Mnemonic_Language_Test(string password, string entropy, string words, string seed, Languages language)
         {
-            var _ = entropy;
             var seed512 = UInt512.FromHex(seed, true);
-            var seedBip39 = HdPrivateKey.Bip39Seed(words, password);
-            Assert.Equal(seed512, seedBip39);
+            var mnemonic = new Mnemonic(words, language);
+            var ntropy = mnemonic.Entropy;
+            Assert.True(Encoders.Hex.Decode(entropy).SequenceEqual(ntropy));
+
+            var hdPrivateKeyFromMnemonic = mnemonic.ToHdPrivateKey(password);
+            var hdPrivateKey = HdPrivateKey.FromSeed(seed512);
+            Assert.Equal(hdPrivateKey, hdPrivateKeyFromMnemonic);
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using CafeLib.Core.Extensions;
 
-namespace CafeLib.BsvSharp.Passphrase
+namespace CafeLib.BsvSharp.Mnemonics
 {
     public static class WordLists
     {

@@ -23,6 +23,18 @@ namespace CafeLib.BsvSharp.Keys.Base58
         protected ReadOnlyByteSpan VersionData => _versionData;
         public NetworkType NetworkType { get; protected set; }
 
+        protected bool FromString(string base58, int nVersionBytes)
+        {
+            var (data, length, result) =
+                Encoders.Base58Check.TryDecode(base58, out var bytes) && bytes.Length >= nVersionBytes
+                    ? (bytes, nVersionBytes, true)
+                    : (Array.Empty<byte>(), 0, false);
+
+            _versionData = data;
+            _versionLength = length;
+            return result;
+        }
+
         protected void SetData(byte[] versionData, int versionLength = 1)
         {
             _versionData = versionData;
@@ -36,18 +48,6 @@ namespace CafeLib.BsvSharp.Keys.Base58
             version.CopyTo(Version);
             data.CopyTo(KeyData);
             KeyData.Data[^1] = flag ? (byte)1 : data[^1];
-        }
-
-        protected bool SetString(string b58, int nVersionBytes)
-        {
-            var (data, length, result) =
-                Encoders.Base58Check.TryDecode(b58, out var bytes) && bytes.Length >= nVersionBytes
-                    ? (bytes, nVersionBytes, true)
-                    : (Array.Empty<byte>(), 0, false);
-
-            _versionData = data;
-            _versionLength = length;
-            return result;
         }
 
         public override string ToString() => Encoders.Base58Check.Encode(_versionData);
