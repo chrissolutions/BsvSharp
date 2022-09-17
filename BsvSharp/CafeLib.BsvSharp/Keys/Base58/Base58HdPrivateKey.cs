@@ -2,7 +2,6 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
-using System;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Services;
@@ -60,7 +59,7 @@ namespace CafeLib.BsvSharp.Keys.Base58
             var prefix = RootService.GetNetwork(networkType).HdSecretKey;
             var data = new byte[prefix.Length + HdKey.Bip32KeySize];
             prefix.CopyTo(data, 0);
-            privateKey.Encode(data.AsSpan()[prefix.Length..]);
+            privateKey.Encode(data.Slice(prefix.Length));
             SetData(data, prefix.Length);
         }
     }
