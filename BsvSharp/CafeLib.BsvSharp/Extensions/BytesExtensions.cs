@@ -46,12 +46,7 @@ namespace CafeLib.BsvSharp.Extensions
 
         public static UInt256 Hash256(this byte[] data)
         {
-            return ((ReadOnlyByteSpan)data).Sha256();
-        }
-
-        public static UInt512 Hash512(this byte[] data)
-        {
-            return ((ReadOnlyByteSpan)data).Sha512();
+            return Hashes.Hash256(data);
         }
     }
 }

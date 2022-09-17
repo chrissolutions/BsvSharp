@@ -172,7 +172,7 @@ namespace CafeLib.BsvSharp.Keys
         /// </summary>
         /// <param name="publicKey"></param>
         /// <returns></returns>
-        public bool VerifyPubKey(PublicKey publicKey)
+        public bool VerifyPublicKey(PublicKey publicKey)
         {
             if (publicKey.IsCompressed != IsCompressed)
                 return false;
