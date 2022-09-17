@@ -28,9 +28,12 @@ obj/
 _ReSharper*/
 [Tt]est[Rr]esult*
 .vs/
+.vscode/
 .idea/
 #Nuget packages folder
 packages/
 Repo/
+apikey.json
 buildapi.cmd
-/BsvSharp.Api/CafeLib.BsvSharp.Api.UnitTests/apikey.json
+buildnuget.cmd
+/.config/dotnet-tools.json
