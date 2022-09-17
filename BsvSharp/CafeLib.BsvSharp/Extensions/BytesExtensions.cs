@@ -17,9 +17,6 @@ namespace CafeLib.BsvSharp.Extensions
     {
         public static int AggregateHashCode(this IEnumerable<byte> bytes) => bytes?.Aggregate(17, (current, b) => current * 31 + b) ?? 0;
 
-        public static ByteSpan Slice(this byte[] a, int start) => a.AsSpan().Slice(start);
-        public static ByteSpan Slice(this byte[] a, int start, int length) => a.AsSpan().Slice(start, length);
-
         public static string ToHex(this byte[] a) => Encoders.Hex.Encode(a);
         public static string ToHexReverse(this byte[] a) => Encoders.HexReverse.Encode(a);
 
