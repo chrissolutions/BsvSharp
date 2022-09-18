@@ -18,7 +18,7 @@ using CafeLib.Cryptography.Cryptsharp;
 
 namespace CafeLib.BsvSharp.Keys
 {
-    public class HdPrivateKey : HdKey
+    public sealed class HdPrivateKey : HdKey
     {
         private const string MasterBip32Key = "Bitcoin seed";
 
@@ -30,15 +30,15 @@ namespace CafeLib.BsvSharp.Keys
         /// <summary>
         /// HdPrivateKey constructor.
         /// </summary>
-        protected HdPrivateKey()
+        private HdPrivateKey()
         {
         }
 
         /// <summary>
-        /// Construct a hierarchal deterministic private key from key.
+        /// Construct a hierarchical deterministic private key from key.
         /// </summary>
         /// <param name="keyData">key data</param>
-        /// <returns>hierarchal deterministic private key</returns>
+        /// <returns>hierarchical deterministic private key</returns>
         public static HdPrivateKey FromKey(ReadOnlyByteSpan keyData)
         {
             var privateKey = new HdPrivateKey();
@@ -141,12 +141,6 @@ namespace CafeLib.BsvSharp.Keys
         public HdPublicKey GetHdPublicKey() => HdPublicKey.FromPrivateKey(this);
 
         /// <summary>
-        /// Get public key from ExtPrivateKey.
-        /// </summary>
-        /// <returns></returns>
-        public PublicKey GetPublicKey() => PrivateKey.CreatePublicKey();
-
-        /// <summary>
         /// Computes the private key specified by a key path.
         /// At each derivation, there's a small chance the index specified will fail.
         /// If any generation fails, null is returned.
@@ -179,10 +173,11 @@ namespace CafeLib.BsvSharp.Keys
         protected override HdKey DeriveBase(int index, bool hardened)
         {
             Trace.Assert(index >= 0);
-            var cek = new HdPrivateKey {
+            var cek = new HdPrivateKey 
+            {
                 Depth = (byte)(Depth + 1),
                 Child = (uint)index | (hardened ? HardenedBit : 0),
-                Fingerprint = BitConverter.ToInt32(PrivateKey.CreatePublicKey().GetId().Span.Slice(0, 4))
+                Fingerprint = BitConverter.ToInt32(PrivateKey.CreatePublicKey().GetId().Span[0..4])
             };
 
             (cek.PrivateKey, cek.ChainCode) = PrivateKey.Derive(cek.Child, ChainCode);
