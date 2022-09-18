@@ -160,8 +160,8 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
                     Assert.Equal(hdPriv, hdPriv2);
 
                     hdPub.Encode(data);
-                    //var pub2 = HdPublicKey.FromKey(data);
-                    //Assert.Equal(pub, pub2);
+                    var hdPub2 = HdPublicKey.FromKey(data);
+                    Assert.Equal(hdPub, hdPub2);
 
                     // Test private key
                     var b58Key = new Base58HdPrivateKey(hdPriv);

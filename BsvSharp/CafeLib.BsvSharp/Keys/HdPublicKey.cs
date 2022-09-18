@@ -7,6 +7,7 @@ using System.Diagnostics;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys.Base58;
 using CafeLib.Core.Buffers;
+using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Keys
 {
@@ -85,7 +86,7 @@ namespace CafeLib.BsvSharp.Keys
             {
                 Depth = (byte)(Depth + 1),
                 Child = (uint)index | (hardened ? HardenedBit : 0),
-                Fingerprint = BitConverter.ToInt32(PublicKey.GetId().Span.Slice(0, 4))
+                Fingerprint = BitConverter.ToInt32(PublicKey.GetId().Span[..4])
             };
 
             (cek.PublicKey, cek.ChainCode) = PublicKey.Derive(cek.Child, ChainCode);
@@ -94,26 +95,28 @@ namespace CafeLib.BsvSharp.Keys
 
         public override void Encode(ByteSpan code)
         {
-            code[0] = Depth;
-            Fingerprint.AsSpan().CopyTo(code.Slice(1, 4));
-            code[5] = (byte)((Child >> 24) & 0xFF);
-            code[6] = (byte)((Child >> 16) & 0xFF);
-            code[7] = (byte)((Child >> 8) & 0xFF);
-            code[8] = (byte)(Child & 0xFF);
-            ChainCode.Span.CopyTo(code.Slice(9, 32));
+            var i = 0;
+            code[i++] = Depth;
+            Fingerprint.AsSpan().CopyTo(code[i..(i += sizeof(int))]);
+            code[i++] = (byte)((Child >> 24) & 0xFF);
+            code[i++] = (byte)((Child >> 16) & 0xFF);
+            code[i++] = (byte)((Child >> 8) & 0xFF);
+            code[i++] = (byte)(Child & 0xFF);
+            ChainCode.Span.CopyTo(code[i..(i += UInt256.Length)]);
             var key = PublicKey.Data;
             Debug.Assert(key.Length == 33);
-            key.CopyTo(code.Slice(41, 33));
+            key.CopyTo(code[i..(i += key.Length)]);
         }
 
         public override void Decode(ReadOnlyByteSpan code)
         {
-            Depth = code[0];
-            Fingerprint = BitConverter.ToInt32(code.Slice(1, 4));
-            Child = (uint)code[5] << 24 | (uint)code[6] << 16 | (uint)code[7] << 8 | code[8];
-            code.Slice(9, 32).CopyTo(ChainCode.Span);
+            var i = 0;
+            Depth = code[i++];
+            Fingerprint = BitConverter.ToInt32(code[i..(i += sizeof(int))]);
+            Child = (uint)code[i++] << 24 | (uint)code[i++] << 16 | (uint)code[i++] << 8 | code[i++];
+            ChainCode = new UInt256(code[i..(i += UInt256.Length)]);
             PublicKey = new PublicKey();
-            PublicKey.Set(code.Slice(41, 33));
+            PublicKey.SetData(code[i..]);
         }
 
         public byte[] ToArray()

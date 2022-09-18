@@ -188,8 +188,7 @@ namespace CafeLib.BsvSharp.Keys
         {
             var i = 0;
             code[i++] = Depth;
-            var fingerprint = Fingerprint.AsSpan();
-            fingerprint.CopyTo(code[i..(i+=sizeof(int))]);
+            Fingerprint.AsSpan().CopyTo(code[i..(i+=sizeof(int))]);
             code[i++] = (byte)((Child >> 24) & 0xFF);
             code[i++] = (byte)((Child >> 16) & 0xFF);
             code[i++] = (byte)((Child >> 8) & 0xFF);
