@@ -127,23 +127,23 @@ namespace CafeLib.BsvSharp.Keys
         /// <summary>
         /// Derive a new private key.
         /// </summary>
-        /// <param name="chainCode">chain code</param>
-        /// <param name="child">child info</param>
+        /// <param name="chainCode"></param>
+        /// <param name="nChild"></param>
         /// <returns></returns>
-        internal (PrivateKey keyChild, UInt256 ccChild) Derive(uint child, UInt256 chainCode)
+        internal (PrivateKey keyChild, UInt256 ccChild) Derive(uint nChild, UInt256 chainCode)
         {
             byte[] l;
             var ll = new byte[32];
             var lr = new byte[32];
 
-            if (child >> 31 == 0)
+            if (nChild >> 31 == 0)
             {
                 var pubKey = this.CreatePublicKey().ToArray();
-                l = Hashes.Bip32Hash(chainCode, child, pubKey[0], pubKey[1..]);
+                l = Hashes.Bip32Hash(chainCode, nChild, pubKey[0], pubKey[1..]);
             }
             else
             {
-                l = Hashes.Bip32Hash(chainCode, child, 0, ToArray());
+                l = Hashes.Bip32Hash(chainCode, nChild, 0, ToArray());
             }
 
             Buffer.BlockCopy(l, 0, ll, 0, 32);
