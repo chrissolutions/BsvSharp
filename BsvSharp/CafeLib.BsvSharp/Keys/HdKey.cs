@@ -88,6 +88,17 @@ namespace CafeLib.BsvSharp.Keys
             return k;
         }
 
+        /// <summary>
+        /// Returns byte array of the HD key data.
+        /// </summary>
+        /// <returns>byte array</returns>
+        public byte[] ToArray()
+        {
+            var bytes = new byte[Bip32KeySize];
+            Encode(bytes);
+            return bytes;
+        }
+
         public override int GetHashCode() => Depth.GetHashCode() ^ Fingerprint.GetHashCode() ^ Child.GetHashCode() ^ ChainCode.GetHashCode();
 
         public bool Equals(HdKey o) => o is not null && Depth == o.Depth && Fingerprint == o.Fingerprint && Child == o.Child && ChainCode == o.ChainCode;

@@ -93,37 +93,38 @@ namespace CafeLib.BsvSharp.Keys
             return cek;
         }
 
-        public override void Encode(ByteSpan code)
+        /// <summary>
+        /// Encode the hierarchical deterministic public key.
+        /// </summary>
+        /// <param name="data">byte span ref struct to copy key data</param>
+        public override void Encode(ByteSpan data)
         {
             var i = 0;
-            code[i++] = Depth;
-            Fingerprint.AsSpan().CopyTo(code[i..(i += sizeof(int))]);
-            code[i++] = (byte)((Child >> 24) & 0xFF);
-            code[i++] = (byte)((Child >> 16) & 0xFF);
-            code[i++] = (byte)((Child >> 8) & 0xFF);
-            code[i++] = (byte)(Child & 0xFF);
-            ChainCode.Span.CopyTo(code[i..(i += UInt256.Length)]);
+            data[i++] = Depth;
+            Fingerprint.AsSpan().CopyTo(data[i..(i += sizeof(int))]);
+            data[i++] = (byte)((Child >> 24) & 0xFF);
+            data[i++] = (byte)((Child >> 16) & 0xFF);
+            data[i++] = (byte)((Child >> 8) & 0xFF);
+            data[i++] = (byte)(Child & 0xFF);
+            ChainCode.Span.CopyTo(data[i..(i += UInt256.Length)]);
             var key = PublicKey.Data;
             Debug.Assert(key.Length == 33);
-            key.CopyTo(code[i..(i += key.Length)]);
+            key.CopyTo(data[i..(i += key.Length)]);
         }
 
-        public override void Decode(ReadOnlyByteSpan code)
+        /// <summary>
+        /// Decode the key data into the private key.
+        /// </summary>
+        /// <param name="data">byte span ref struct that retrieves key data</param>
+        public override void Decode(ReadOnlyByteSpan data)
         {
             var i = 0;
-            Depth = code[i++];
-            Fingerprint = BitConverter.ToInt32(code[i..(i += sizeof(int))]);
-            Child = (uint)code[i++] << 24 | (uint)code[i++] << 16 | (uint)code[i++] << 8 | code[i++];
-            ChainCode = new UInt256(code[i..(i += UInt256.Length)]);
+            Depth = data[i++];
+            Fingerprint = BitConverter.ToInt32(data[i..(i += sizeof(int))]);
+            Child = (uint)data[i++] << 24 | (uint)data[i++] << 16 | (uint)data[i++] << 8 | data[i++];
+            ChainCode = new UInt256(data[i..(i += UInt256.Length)]);
             PublicKey = new PublicKey();
-            PublicKey.SetData(code[i..]);
-        }
-
-        public byte[] ToArray()
-        {
-            var bytes = new byte[Bip32KeySize];
-            Encode(bytes);
-            return bytes;
+            PublicKey.SetData(data[i..]);
         }
 
         internal Base58HdPublicKey ToBase58() => new(this);
