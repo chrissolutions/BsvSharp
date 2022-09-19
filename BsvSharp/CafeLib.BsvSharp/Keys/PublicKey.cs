@@ -25,7 +25,7 @@ namespace CafeLib.BsvSharp.Keys
     /// byte[33]: Key is compressed.
     /// byte[65]: Key is uncompressed.
     /// </summary>
-    public class PublicKey
+    public sealed class PublicKey : IEquatable<PublicKey>
     {
         /// <summary>
         /// A KzPubKey is fundamentally an array of bytes in one of these states:

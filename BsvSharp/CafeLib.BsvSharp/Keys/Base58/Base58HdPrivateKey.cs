@@ -9,7 +9,7 @@ using CafeLib.BsvSharp.Services;
 
 namespace CafeLib.BsvSharp.Keys.Base58
 {
-    internal class Base58HdPrivateKey : Base58Data
+    internal sealed class Base58HdPrivateKey : Base58Data
     {
         public Base58HdPrivateKey()
         {
