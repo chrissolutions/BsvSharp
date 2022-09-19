@@ -14,7 +14,7 @@ using CafeLib.Cryptography.BouncyCastle.Math;
 
 namespace CafeLib.BsvSharp.Keys
 {
-    public class PrivateKey : IEquatable<PrivateKey>
+    public sealed class PrivateKey : IEquatable<PrivateKey>
     {
         private const int KeySize = UInt256.Length;
 

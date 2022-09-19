@@ -11,9 +11,9 @@ using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Keys
 {
-    public class HdPublicKey : HdKey
+    public sealed class HdPublicKey : HdKey
     {
-        protected HdPublicKey()
+        private HdPublicKey()
         {
         }
 
