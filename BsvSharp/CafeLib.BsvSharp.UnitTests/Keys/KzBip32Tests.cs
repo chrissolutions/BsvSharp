@@ -141,36 +141,46 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
 
                 foreach (var d in tv.Derivations)
                 {
+                    // Test key path.
                     var path = new KeyPath(d.Path);
-                    var priv = m.Derive(path);
-                    var pub = priv.GetHdPublicKey();
+                    var hdPriv = m.Derive(path);
+                    var hdPriv2 = m.Derive(d.Path);
+                    Assert.Equal(hdPriv, hdPriv2);
 
-                    var strPriv = priv.ToString();
-                    var strPub = pub.ToString();
+                    // Test hierarchical deterministic keys.
+                    var hdPub = hdPriv.GetHdPublicKey();
+                    var strPriv = hdPriv.ToString();
+                    var strPub = hdPub.ToString();
                     Assert.Equal(d.HdPrivateKey, strPriv);
                     Assert.Equal(d.HdPublicKey, strPub);
 
                     var data = new byte[HdKey.Bip32KeySize];
-                    priv.Encode(data);
-                    pub.Encode(data);
+                    hdPriv.Encode(data);
+                    hdPriv2 = HdPrivateKey.FromKey(data);
+                    Assert.Equal(hdPriv, hdPriv2);
+
+                    hdPub.Encode(data);
+                    var hdPub2 = HdPublicKey.FromKey(data);
+                    Assert.Equal(hdPub, hdPub2);
 
                     // Test private key
-                    var b58Key = new Base58HdPrivateKey(priv);
+                    var b58Key = new Base58HdPrivateKey(hdPriv);
                     Assert.Equal(d.HdPrivateKey, b58Key.ToString());
                     Assert.True(new Base58HdPrivateKey(d.HdPrivateKey) == b58Key);
 
                     var b58KeyDecodeCheck = new Base58HdPrivateKey(d.HdPrivateKey);
                     var checkKey = b58KeyDecodeCheck.GetKey();
-                    // ensure a base58 decoded pubkey also matches
-                    Assert.Equal(checkKey, priv);
 
-                    if (priv.Hardened == false && path.Parent != null)
-                    {
-                        // Compare with public derivation
-                        var pubkeyNew2 = m.Derive(path.Parent).GetHdPublicKey().Derive((int)path.Last());
-                        Assert.True(pubkeyNew2 != null);
-                        Assert.Equal(pub, pubkeyNew2);
-                    }
+                    // ensure a base58 decoded pubkey also matches
+                    Assert.Equal(checkKey, hdPriv);
+
+                    // Skip if private key is not hardened or if the path's parent is null.
+                    if (hdPriv.Hardened != false || path.Parent == null) continue;
+                    
+                    // Compare with public derivation
+                    var pubkeyNew2 = m.Derive(path.Parent).GetHdPublicKey().Derive((int)path.Last());
+                    Assert.True(pubkeyNew2 != null);
+                    Assert.Equal(hdPub, pubkeyNew2);
                 }
             }
         }

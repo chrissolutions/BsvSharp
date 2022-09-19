@@ -25,14 +25,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\BsvSharp\LICENSE" >
+    <None Include="..\..\BsvSharp\LICENSE">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CafeLib.BsvSharp" Version="$(Version)" />
+    <PackageReference Include="CafeLib.BsvSharp" Version="2.0.2" />
     <PackageReference Include="CafeLib.Web.Request" Version="2.0.0" />
   </ItemGroup>
 

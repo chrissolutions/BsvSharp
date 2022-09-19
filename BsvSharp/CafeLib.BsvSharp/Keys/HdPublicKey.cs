@@ -7,6 +7,7 @@ using System.Diagnostics;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys.Base58;
 using CafeLib.Core.Buffers;
+using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Keys
 {
@@ -85,42 +86,45 @@ namespace CafeLib.BsvSharp.Keys
             {
                 Depth = (byte)(Depth + 1),
                 Child = (uint)index | (hardened ? HardenedBit : 0),
-                Fingerprint = BitConverter.ToInt32(PublicKey.GetId().Span.Slice(0, 4))
+                Fingerprint = BitConverter.ToInt32(PublicKey.GetId().Span[..4])
             };
 
             (cek.PublicKey, cek.ChainCode) = PublicKey.Derive(cek.Child, ChainCode);
             return cek;
         }
 
-        public override void Encode(ByteSpan code)
+        /// <summary>
+        /// Encode the hierarchical deterministic public key.
+        /// </summary>
+        /// <param name="data">byte span ref struct to copy key data</param>
+        public override void Encode(ByteSpan data)
         {
-            code[0] = Depth;
-            Fingerprint.AsSpan().CopyTo(code.Slice(1, 4));
-            code[5] = (byte)((Child >> 24) & 0xFF);
-            code[6] = (byte)((Child >> 16) & 0xFF);
-            code[7] = (byte)((Child >> 8) & 0xFF);
-            code[8] = (byte)(Child & 0xFF);
-            ChainCode.Span.CopyTo(code.Slice(9, 32));
+            var i = 0;
+            data[i++] = Depth;
+            Fingerprint.AsSpan().CopyTo(data[i..(i += sizeof(int))]);
+            data[i++] = (byte)((Child >> 24) & 0xFF);
+            data[i++] = (byte)((Child >> 16) & 0xFF);
+            data[i++] = (byte)((Child >> 8) & 0xFF);
+            data[i++] = (byte)(Child & 0xFF);
+            ChainCode.Span.CopyTo(data[i..(i += UInt256.Length)]);
             var key = PublicKey.Data;
             Debug.Assert(key.Length == 33);
-            key.CopyTo(code.Slice(41, 33));
+            key.CopyTo(data[i..(i += key.Length)]);
         }
 
-        public override void Decode(ReadOnlyByteSpan code)
+        /// <summary>
+        /// Decode the key data into the private key.
+        /// </summary>
+        /// <param name="data">byte span ref struct that retrieves key data</param>
+        public override void Decode(ReadOnlyByteSpan data)
         {
-            Depth = code[0];
-            Fingerprint = BitConverter.ToInt32(code.Slice(1, 4));
-            Child = (uint)code[5] << 24 | (uint)code[6] << 16 | (uint)code[7] << 8 | code[8];
-            code.Slice(9, 32).CopyTo(ChainCode.Span);
+            var i = 0;
+            Depth = data[i++];
+            Fingerprint = BitConverter.ToInt32(data[i..(i += sizeof(int))]);
+            Child = (uint)data[i++] << 24 | (uint)data[i++] << 16 | (uint)data[i++] << 8 | data[i++];
+            ChainCode = new UInt256(data[i..(i += UInt256.Length)]);
             PublicKey = new PublicKey();
-            PublicKey.Set(code.Slice(41, 33));
-        }
-
-        public byte[] ToArray()
-        {
-            var bytes = new byte[Bip32KeySize];
-            Encode(bytes);
-            return bytes;
+            PublicKey.SetData(data[i..]);
         }
 
         internal Base58HdPublicKey ToBase58() => new(this);
