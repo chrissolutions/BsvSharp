@@ -3,7 +3,11 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
+using CafeLib.BsvSharp.Extensions;
 using CafeLib.Core.Buffers;
+using CafeLib.Core.Encodings;
+using CafeLib.Cryptography;
+using System;
 using Xunit;
 
 namespace CafeLib.BsvSharp.UnitTests.Extensions {

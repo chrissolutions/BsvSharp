@@ -139,7 +139,7 @@ namespace CafeLib.BsvSharp.Keys
 
         public byte[] ToArray() => Data;
 
-        public void Set(ReadOnlyByteSpan data)
+        public void SetData(ReadOnlyByteSpan data)
         {
             var len = data.Length == 0 ? 0 : PredictLength(data[0]);
             if (len > 0 && len == data.Length)

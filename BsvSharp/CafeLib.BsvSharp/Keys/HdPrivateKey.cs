@@ -18,7 +18,7 @@ using CafeLib.Cryptography.Cryptsharp;
 
 namespace CafeLib.BsvSharp.Keys
 {
-    public class HdPrivateKey : HdKey
+    public sealed class HdPrivateKey : HdKey
     {
         private const string MasterBip32Key = "Bitcoin seed";
 
@@ -30,15 +30,15 @@ namespace CafeLib.BsvSharp.Keys
         /// <summary>
         /// HdPrivateKey constructor.
         /// </summary>
-        protected HdPrivateKey()
+        private HdPrivateKey()
         {
         }
 
         /// <summary>
-        /// Construct a hierarchal deterministic private key from key.
+        /// Construct a hierarchical deterministic private key from key.
         /// </summary>
         /// <param name="keyData">key data</param>
-        /// <returns>hierarchal deterministic private key</returns>
+        /// <returns>hierarchical deterministic private key</returns>
         public static HdPrivateKey FromKey(ReadOnlyByteSpan keyData)
         {
             var privateKey = new HdPrivateKey();
@@ -58,6 +58,14 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="required">if not null, each key path will be verified as valid on the specified key or returns null.</param>
         /// <returns>Returns new key unless required key paths aren't valid for specified key in which case null is returned.</returns>
         public static HdPrivateKey FromSeed(UInt512 seed, IEnumerable<KeyPath> required = null) => Master(seed, required);
+
+        /// <summary>
+        /// Returns a master seed from master seed data.
+        /// </summary>
+        /// <param name="data">master seed data</param>
+        /// <param name="hmacKey">hmac key</param>
+        /// <returns>master seed</returns>
+        public static UInt512 ToMasterSeed(byte[] data, string hmacKey = MasterBip32Key) => Hashes.HmacSha512(hmacKey.Utf8NormalizedToBytes(), data);
 
         /// <summary>
         /// Computes 512 bit Bip39 seed.
@@ -141,12 +149,6 @@ namespace CafeLib.BsvSharp.Keys
         public HdPublicKey GetHdPublicKey() => HdPublicKey.FromPrivateKey(this);
 
         /// <summary>
-        /// Get public key from ExtPrivateKey.
-        /// </summary>
-        /// <returns></returns>
-        public PublicKey GetPublicKey() => PrivateKey.CreatePublicKey();
-
-        /// <summary>
         /// Computes the private key specified by a key path.
         /// At each derivation, there's a small chance the index specified will fail.
         /// If any generation fails, null is returned.
@@ -179,42 +181,50 @@ namespace CafeLib.BsvSharp.Keys
         protected override HdKey DeriveBase(int index, bool hardened)
         {
             Trace.Assert(index >= 0);
-            var cek = new HdPrivateKey {
+            var cek = new HdPrivateKey 
+            {
                 Depth = (byte)(Depth + 1),
                 Child = (uint)index | (hardened ? HardenedBit : 0),
-                Fingerprint = BitConverter.ToInt32(PrivateKey.CreatePublicKey().GetId().Span.Slice(0, 4))
+                Fingerprint = BitConverter.ToInt32(PrivateKey.CreatePublicKey().GetId().Span[0..4])
             };
 
             (cek.PrivateKey, cek.ChainCode) = PrivateKey.Derive(cek.Child, ChainCode);
             return cek;
         }
 
-        public override void Encode(ByteSpan code)
+        /// <summary>
+        /// Encode the hierarchical deterministic private key.
+        /// </summary>
+        /// <param name="data">byte span ref struct to copy key data</param>
+        public override void Encode(ByteSpan data)
         {
             var i = 0;
-            code[i++] = Depth;
-            var fingerprint = Fingerprint.AsSpan();
-            fingerprint.CopyTo(code[i..(i+=sizeof(int))]);
-            code[i++] = (byte)((Child >> 24) & 0xFF);
-            code[i++] = (byte)((Child >> 16) & 0xFF);
-            code[i++] = (byte)((Child >> 8) & 0xFF);
-            code[i++] = (byte)(Child & 0xFF);
-            ChainCode.Span.CopyTo(code[i..(i+=UInt256.Length)]);
-            code[i++] = 0;
+            data[i++] = Depth;
+            Fingerprint.AsSpan().CopyTo(data[i..(i+=sizeof(int))]);
+            data[i++] = (byte)((Child >> 24) & 0xFF);
+            data[i++] = (byte)((Child >> 16) & 0xFF);
+            data[i++] = (byte)((Child >> 8) & 0xFF);
+            data[i++] = (byte)(Child & 0xFF);
+            ChainCode.Span.CopyTo(data[i..(i+=UInt256.Length)]);
+            data[i++] = 0;
             var key = PrivateKey.ToArray();
             Debug.Assert(key.Length == UInt256.Length);
-            key.CopyTo(code[i..(i + UInt256.Length)]);
+            key.CopyTo(data[i..(i + UInt256.Length)]);
         }
 
-        public override void Decode(ReadOnlyByteSpan code)
+        /// <summary>
+        /// Decode the key data into the private key.
+        /// </summary>
+        /// <param name="data">byte span ref struct that retrieves key data</param>
+        public override void Decode(ReadOnlyByteSpan data)
         {
             var i = 0;
-            Depth = code[i++];
-            Fingerprint = BitConverter.ToInt32(code[i..(i+=sizeof(int))]);
-            Child = (uint)code[i++] << 24 | (uint)code[i++] << 16 | (uint)code[i++] << 8 | code[i++];
-            ChainCode = new UInt256(code[i..(i += UInt256.Length)]);
+            Depth = data[i++];
+            Fingerprint = BitConverter.ToInt32(data[i..(i+=sizeof(int))]);
+            Child = (uint)data[i++] << 24 | (uint)data[i++] << 16 | (uint)data[i++] << 8 | data[i++];
+            ChainCode = new UInt256(data[i..(i += UInt256.Length)]);
             ++i;  // Skip position 41;
-            PrivateKey.SetData(code[i..(i + UInt256.Length)]);
+            PrivateKey.SetData(data[i..(i + UInt256.Length)]);
         }
 
         private Base58HdPrivateKey ToBase58() => new(this);

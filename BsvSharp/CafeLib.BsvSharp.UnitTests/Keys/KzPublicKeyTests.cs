@@ -21,7 +21,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
             var pubkey = privkey.CreatePublicKey();
             Assert.Equal(privateHex, privkey.ToHex());
             Assert.Equal(publicHex, pubkey.ToHex());
-            Assert.True(privkey.VerifyPubKey(pubkey));
+            Assert.True(privkey.VerifyPublicKey(pubkey));
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
 
             Assert.Equal(privateHex, privkey.ToHex());
             Assert.Equal(publicHex, pubkey.ToHex());
-            Assert.True(privkey.VerifyPubKey(pubkey));
+            Assert.True(privkey.VerifyPublicKey(pubkey));
             Assert.Equal(publicKeyAddress, address.ToString());
         }
 
