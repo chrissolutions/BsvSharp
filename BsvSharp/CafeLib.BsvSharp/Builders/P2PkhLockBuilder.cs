@@ -11,7 +11,7 @@ namespace CafeLib.BsvSharp.Builders
     public class P2PkhLockBuilder : LockingScriptBuilder
     {
         public P2PkhLockBuilder(Address address)
-            : this(address.PubKeyHash)
+            : this(address.PublicKeyHash)
         {
         }
 

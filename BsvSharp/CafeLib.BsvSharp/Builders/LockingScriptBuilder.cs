@@ -13,7 +13,7 @@ namespace CafeLib.BsvSharp.Builders
         public UInt160 PubKeyHash { get; }
 
         public LockingScriptBuilder(Address address, TemplateId templateId = TemplateId.Unknown)
-            : this(address.PubKeyHash, templateId)
+            : this(address.PublicKeyHash, templateId)
         {
         }
 

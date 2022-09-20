@@ -60,7 +60,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <summary>
         /// Public Key Hash.
         /// </summary>
-        public UInt160 PubKeyHash => this;
+        public UInt160 PublicKeyHash => this;
 
         public AddressType AddressType
         {
