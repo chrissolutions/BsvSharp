@@ -68,7 +68,7 @@ namespace CafeLib.BsvSharp.Keys
             {
                 return Version switch
                 {
-                    0 or 111 => AddressType.PubkeyHash,
+                    0 or 111 => AddressType.PublicKeyHash,
                     5 or 196 => AddressType.ScriptHash,
                     _ => throw new FormatException($"{nameof(Version)} is not a valid address type."),
                 };
