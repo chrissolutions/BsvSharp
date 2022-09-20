@@ -66,9 +66,11 @@ namespace CafeLib.BsvSharp.Units
             return true;
         }
 
-        public override string ToString() => ToString(true, false);
+        public decimal ToBitcoin() => ToBitcoinUnit(BitcoinUnit.Bitcoin);
 
-        public decimal ToBitcoin() => (decimal)Satoshis / (long)(BitcoinUnit.Bitcoin);
+        public decimal ToBitcoinUnit(BitcoinUnit unit) => (decimal)Satoshis / (long)unit;
+
+        public override string ToString() => ToString(true, false);
 
         private string ToString(bool group, bool units, BitcoinUnit unit = BitcoinUnit.MilliBitcoin)
         {
