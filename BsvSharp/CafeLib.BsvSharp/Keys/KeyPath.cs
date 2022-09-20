@@ -14,7 +14,7 @@ namespace CafeLib.BsvSharp.Keys
     /// <summary>
     /// Represent a BIP32 style key path.
     /// </summary>
-    public class KeyPath : IEnumerable<uint>
+    public sealed class KeyPath : IEnumerable<uint>
     {
         /// <summary>
         /// True if the path starts with m.
@@ -208,7 +208,7 @@ namespace CafeLib.BsvSharp.Keys
 
         public override int GetHashCode() => ToString().GetHashCode();
 
-        public bool Equals(KeyPath o) => !(o is null) && ToString().Equals(o.ToString());
+        public bool Equals(KeyPath o) => o is not null && ToString().Equals(o.ToString());
 
         public override bool Equals(object obj) => obj is KeyPath path && this == path;
 

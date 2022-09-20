@@ -32,16 +32,9 @@ namespace CafeLib.BsvSharp.Keys
     /// * next 20 bytes - the hash value computed by taking the `ripemd160(sha256(PUBLIC_KEY))`
     /// * last 4 bytes  - a checksum value taken from the first four bytes of sha256(sha256(previous_21_bytes))
     /// </summary>
-    public class Address : IEquatable<Address>
+    public struct Address : IEquatable<Address>
     {
-        private UInt160 _address;
-
-        /// <summary>
-        /// Address default constructor.
-        /// </summary>
-        private Address()
-        {
-        }
+        private UInt160 _address = UInt160.Zero;
 
         /// <summary>
         /// Constructs an Bitcoin address
@@ -55,12 +48,12 @@ namespace CafeLib.BsvSharp.Keys
         /// <summary>
         /// Version property.
         /// </summary>
-        public int Version { get; private set; }
+        public int Version { get; private set; } = 0;
 
         /// <summary>
         /// Public Key Hash.
         /// </summary>
-        public UInt160 PubKeyHash => this;
+        public UInt160 PublicKeyHash => this;
 
         public AddressType AddressType
         {
@@ -153,12 +146,12 @@ namespace CafeLib.BsvSharp.Keys
         
         public override int GetHashCode() => ToString().GetHashCode();
 
-        public bool Equals(Address o) => o is not null && Version == o.Version && _address == o._address;
+        public bool Equals(Address o) => Version == o.Version && _address == o._address;
         public override bool Equals(object obj) => Equals((Address)obj);
 
         public static implicit operator UInt160(Address rhs) => rhs._address;
 
-        public static bool operator ==(Address x, Address y) => x?.Equals(y) ?? y is null;
+        public static bool operator ==(Address x, Address y) => x.Equals(y);
         public static bool operator !=(Address x, Address y) => !(x == y);
 
         #region Helpers
