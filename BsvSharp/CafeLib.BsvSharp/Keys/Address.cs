@@ -34,7 +34,7 @@ namespace CafeLib.BsvSharp.Keys
     /// </summary>
     public sealed class Address : IEquatable<Address>
     {
-        private UInt160 _address = UInt160.Zero;
+        private UInt160 _address;
 
         /// <summary>
         /// Address default constructor.
@@ -55,7 +55,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <summary>
         /// Version property.
         /// </summary>
-        public int Version { get; private set; } = 0;
+        public int Version { get; private set; }
 
         /// <summary>
         /// Public Key Hash.
@@ -100,7 +100,7 @@ namespace CafeLib.BsvSharp.Keys
         /// </summary>
         /// <param name="base58Address"></param>
         /// <returns></returns>
-        public static Address FromBase58(string base58Address) 
+        public static Address FromBase58(string base58Address)
         {
             if (base58Address.Length is 25 or 34)
             {
@@ -150,15 +150,15 @@ namespace CafeLib.BsvSharp.Keys
         /// </summary>
         /// <returns>encoded public key hash</returns>
         public string ToHex() => Encoders.Hex.Encode(new[] { (byte)Version }.Concat(_address.ToArray()));
-        
+
         public override int GetHashCode() => ToString().GetHashCode();
 
-        public bool Equals(Address o) => Version == o.Version && _address == o._address;
+        public bool Equals(Address o) => o is not null && Version == o.Version && _address == o._address;
         public override bool Equals(object obj) => Equals((Address)obj);
 
         public static implicit operator UInt160(Address rhs) => rhs._address;
 
-        public static bool operator ==(Address x, Address y) => x.Equals(y);
+        public static bool operator ==(Address x, Address y) => x?.Equals(y) ?? y is null;
         public static bool operator !=(Address x, Address y) => !(x == y);
 
         #region Helpers
