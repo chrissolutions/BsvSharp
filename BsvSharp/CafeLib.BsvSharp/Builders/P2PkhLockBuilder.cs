@@ -8,7 +8,7 @@ using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Builders
 {
-    public class P2PkhLockBuilder : LockingScriptBuilder
+    public sealed class P2PkhLockBuilder : LockingScriptBuilder
     {
         public P2PkhLockBuilder(Address address)
             : this(address.PublicKeyHash)
@@ -16,7 +16,7 @@ namespace CafeLib.BsvSharp.Builders
         }
 
         public P2PkhLockBuilder(PublicKey publicKey)
-            : this(publicKey.ToPubKeyHash())
+            : this(publicKey.ToPublicKeyHash())
         {
         }
 

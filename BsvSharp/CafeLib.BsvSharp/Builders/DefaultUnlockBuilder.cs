@@ -7,7 +7,7 @@ using CafeLib.BsvSharp.Scripting;
 
 namespace CafeLib.BsvSharp.Builders
 {
-    public class DefaultUnlockBuilder : SignedUnlockBuilder
+    public sealed class DefaultUnlockBuilder : SignedUnlockBuilder
     {
         internal DefaultUnlockBuilder()
             : base(Script.None)

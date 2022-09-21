@@ -14,7 +14,7 @@ namespace CafeLib.BsvSharp.Keys
     /// <summary>
     /// Represent a BIP32 style key path.
     /// </summary>
-    public class KeyPath : IEnumerable<uint>
+    public sealed class KeyPath : IEnumerable<uint>
     {
         /// <summary>
         /// True if the path starts with m.
