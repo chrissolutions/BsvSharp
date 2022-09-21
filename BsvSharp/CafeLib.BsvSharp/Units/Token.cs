@@ -34,7 +34,7 @@ namespace CafeLib.BsvSharp.Units
             SetFiatValue(fiatValue);
         }
 
-        public Token(Amount amount, CurrencyTicker fiatTicker, decimal fiatValue)
+        public Token(Amount amount, ExchangeUnit fiatTicker, decimal fiatValue)
         {
             ResetValue();
             SetAmount(amount);
@@ -74,7 +74,7 @@ namespace CafeLib.BsvSharp.Units
             set => _rate = value;
         }
 
-        public CurrencyTicker FiatTicker { get; set; }
+        public ExchangeUnit FiatTicker { get; set; }
 
         public decimal? FiatValue
         {
@@ -85,7 +85,7 @@ namespace CafeLib.BsvSharp.Units
         public void ResetValue()
         {
             // Update to pull default from global preferences.
-            (ValueSetOrder, _amount, FiatTicker, _fiatValue, _rate) = (TokenValues.None, BsvSharp.Units.Amount.Zero, CurrencyTicker.USD, decimal.Zero, null);
+            (ValueSetOrder, _amount, FiatTicker, _fiatValue, _rate) = (TokenValues.None, BsvSharp.Units.Amount.Zero, ExchangeUnit.USD, decimal.Zero, null);
         }
 
         /// <summary>
@@ -106,9 +106,9 @@ namespace CafeLib.BsvSharp.Units
                 case TokenValues.FS:
                     // Satoshis (Value) and Fiat (ToValue,ToTicker) are set, check and compute ExchangeRate
                     _rate = new ExchangeRate {
-                        OfTicker = CurrencyTicker.BSV,
-                        ToTicker = FiatTicker,
-                        When = DateTime.UtcNow,
+                        Domestic = ExchangeUnit.BSV,
+                        Foreign = FiatTicker,
+                        Timestamp = DateTime.UtcNow,
                         Rate = _fiatValue / _amount.ToBitcoin()
                     };
                     break;
@@ -116,13 +116,13 @@ namespace CafeLib.BsvSharp.Units
                 case TokenValues.SR:
                 case TokenValues.RS:
                     // Satoshis and ExchangeRate are set, check and compute Fiat (ToValue,ToTicker)
-                    (_fiatValue, FiatTicker) = (_rate.ConvertOfValue(_amount), _rate.ToTicker);
+                    (_fiatValue, FiatTicker) = (_rate.ToForeignUnits(_amount), _rate.Foreign);
                     break;
 
                 case TokenValues.FR:
                 case TokenValues.RF:
                     // Fiat (ToValue,ToTicker) and ExchangeRate are set, check and compute Satoshis (Value)
-                    _amount = new Amount(Math.Round(_rate.ConvertToValue(_fiatValue), 8, MidpointRounding.AwayFromZero), BitcoinUnit.Bitcoin);
+                    _amount = new Amount(Math.Round(_rate.ToDomesticUnits(_fiatValue), 8, MidpointRounding.AwayFromZero), BitcoinUnit.Bitcoin);
                     break;
 
                 case TokenValues.ZS:
@@ -224,7 +224,7 @@ namespace CafeLib.BsvSharp.Units
             UpdateConstrainedValues();
         }
 
-        public void SetFiatTicker(CurrencyTicker fiatTicker) 
+        public void SetFiatTicker(ExchangeUnit fiatTicker) 
         {
             FiatTicker = fiatTicker;
         }
@@ -318,7 +318,7 @@ namespace CafeLib.BsvSharp.Units
         /// <param name="rate"></param>
         public void SetRate(ExchangeRate rate)
         {
-            rate.CheckOfTickerIsBSV();
+            //rate.CheckOfTickerIsBSV();
             _rate = rate.Rate != decimal.Zero ? rate : null;
 
             if (_rate != null) 

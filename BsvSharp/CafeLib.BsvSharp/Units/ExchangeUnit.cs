@@ -4,7 +4,7 @@
 
 namespace CafeLib.BsvSharp.Units 
 {
-    public enum CurrencyTicker 
+    public enum ExchangeUnit
     {
         // "Crypto" currency symbols
         BSV = 1,

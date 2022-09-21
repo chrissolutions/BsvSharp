@@ -3,38 +3,42 @@
 #endregion
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace CafeLib.BsvSharp.Units 
 {
     /// <summary>
     /// Represent the exchange rate of one currency to another at a specific moment in time.
     /// </summary>
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public sealed class BsvExchangeRate : ExchangeRate
+    public sealed record BsvExchangeRate : ExchangeRate
     {
         private BsvExchangeRate()
         {
         }
 
-        public BsvExchangeRate(CurrencyTicker toTicker, decimal rate, DateTime? timestamp = null)
-            : base(CurrencyTicker.BSV, toTicker, rate, timestamp)
+        public BsvExchangeRate(ExchangeUnit exchangeUnit, decimal rate, DateTime? timestamp = null)
+            : base(ExchangeUnit.BSV, exchangeUnit, rate, timestamp)
 
-        {
-        }
-
-        public BsvExchangeRate(CurrencyTicker ofTicker, CurrencyTicker toTicker, decimal rate, DateTime? timestamp = null) : base(ofTicker, toTicker, rate, timestamp)
         {
         }
 
         /// <summary>
-        /// Multiplying <paramref name="ofValue"/> in OfTicker units by Rate returns value in ToTicker units.
+        /// Convert BSV amount to the exchange units.
         /// </summary>
-        /// <param name="ofAmount">Multiplied by Rate to return value in ToTicker units.</param>
-        /// <returns>Returns <paramref name="ofValue"/> in ToTicker units.</returns>
-        public decimal ConvertOfAmount(Amount ofAmount)
+        /// <param name="amount">BSV amount</param>
+        /// <returns>Return the exchange units.</returns>
+        public decimal ToExchangeUnits(Amount amount)
         {
-            return ConvertOfValue(ofAmount.Satoshis);
+            return ToForeignUnits(amount.Satoshis);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public Amount ToAmount(decimal value)
+        {
+            return new Amount(ToDomesticUnits(value), BitcoinUnit.Satoshi);
         }
     }
 }
