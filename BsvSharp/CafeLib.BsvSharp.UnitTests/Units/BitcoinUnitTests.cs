@@ -42,5 +42,12 @@ namespace CafeLib.BsvSharp.UnitTests.Units
             var value = amount.ToBitcoin();
             Assert.Equal(bitcoinAmount, value);
         }
+
+        [Fact]
+        public void ExchangeRate_Test()
+        {
+            var exchangeRate = new ExchangeRate(CurrencyTicker.BSV, CurrencyTicker.USD, 50);
+            Assert.Equal(50, exchangeRate.ConvertOfValue(1));
+        }
     }
 }

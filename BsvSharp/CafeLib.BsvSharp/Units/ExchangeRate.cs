@@ -7,13 +7,27 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CafeLib.BsvSharp.Units 
 {
-
     /// <summary>
     /// Represent the exchange rate of one currency to another at a specific moment in time.
     /// </summary>
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     public class ExchangeRate
     {
+        protected ExchangeRate()
+        {
+        }
+
+        public ExchangeRate(
+            CurrencyTicker ofTicker, 
+            CurrencyTicker toTicker, 
+            decimal rate, 
+            DateTime? timestamp = null)
+        {
+            OfTicker = ofTicker;
+            ToTicker = toTicker;
+            Rate = rate;
+            TimeStamp = timestamp ?? DateTime.UtcNow;
+        }
+
         /// <summary>
         /// Multiplying a value in OfTicker units by Rate yields value in ToTicker units.
         /// </summary>
@@ -22,10 +36,12 @@ namespace CafeLib.BsvSharp.Units
         /// Multiplying a value in OfTicker units by Rate yields value in ToTicker units.
         /// </summary>
         public CurrencyTicker ToTicker { get; set; }
+
         /// <summary>
         /// When this exchange rate was observed.
         /// </summary>
-        public DateTime When { get; set; }
+        public DateTime TimeStamp { get; set; }
+        
         /// <summary>
         /// Rate is dimensionally ToTicker units divided by OfTicker units.
         /// Multiplying a value in OfTicker units by Rate yields value in ToTicker units.
@@ -35,7 +51,7 @@ namespace CafeLib.BsvSharp.Units
         /// <summary>
         /// Was in KzWdbExchangeRate class but started drawing an error...
         /// </summary>
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         /// <summary>
         /// Dividing <paramref name="toValue"/> in ToTicker units by Rate returns value in OfTicker units.
@@ -56,10 +72,11 @@ namespace CafeLib.BsvSharp.Units
         ///// </summary>
         ///// <param name="ofValue">Multiplied by Rate to return value in ToTicker units.</param>
         ///// <returns>Returns <paramref name="ofValue"/> in ToTicker units.</returns>
-        //public decimal ConvertOfValue(KzAmount ofAmount) {
-        //    CheckOfTickerIsBSV();
-        //    return Rate * ofAmount.Satoshis / (decimal)KzBitcoinUnit.BSV;
-        //}
+        public decimal ConvertOfValue(Amount ofAmount)
+        {
+            CheckOfTickerIsBSV();
+            return Rate * ofAmount.Satoshis / (decimal)KzBitcoinUnit.BSV;
+        }
 
         /// <summary>
         /// Throws <see cref="InvalidOperationException"/> if OfTicker is not BSV.
