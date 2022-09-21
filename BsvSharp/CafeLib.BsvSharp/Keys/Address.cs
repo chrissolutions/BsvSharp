@@ -32,7 +32,7 @@ namespace CafeLib.BsvSharp.Keys
     /// * next 20 bytes - the hash value computed by taking the `ripemd160(sha256(PUBLIC_KEY))`
     /// * last 4 bytes  - a checksum value taken from the first four bytes of sha256(sha256(previous_21_bytes))
     /// </summary>
-    public class Address : IEquatable<Address>
+    public sealed class Address : IEquatable<Address>
     {
         private UInt160 _address = UInt160.Zero;
 
