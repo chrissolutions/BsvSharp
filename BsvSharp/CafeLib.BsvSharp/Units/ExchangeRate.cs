@@ -66,25 +66,5 @@ namespace CafeLib.BsvSharp.Units
         /// <param name="ofValue">Multiplied by Rate to return value in ToTicker units.</param>
         /// <returns>Returns <paramref name="ofValue"/> in ToTicker units.</returns>
         public decimal ConvertOfValue(decimal ofValue) => ofValue * Rate;
-
-        ///// <summary>
-        ///// Multiplying <paramref name="ofValue"/> in OfTicker units by Rate returns value in ToTicker units.
-        ///// </summary>
-        ///// <param name="ofValue">Multiplied by Rate to return value in ToTicker units.</param>
-        ///// <returns>Returns <paramref name="ofValue"/> in ToTicker units.</returns>
-        public decimal ConvertOfValue(Amount ofAmount)
-        {
-            CheckOfTickerIsBSV();
-            return Rate * ofAmount.Satoshis / (decimal)KzBitcoinUnit.BSV;
-        }
-
-        /// <summary>
-        /// Throws <see cref="InvalidOperationException"/> if OfTicker is not BSV.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">If OfTicker is not BSV.</exception>
-        public void CheckOfTickerIsBSV() {
-            if (OfTicker != CurrencyTicker.BSV)
-                throw new InvalidOperationException("OfTicker is not BSV");
-        }
     }
 }
