@@ -12,14 +12,14 @@ namespace CafeLib.BsvSharp.Units
     /// </summary>
     public class Token
     {
-        private decimal _tokenValue;
+        private decimal _tokenQuantity;
         private BsvExchangeRate _exchangeRate;
 
         public Token()
         {
             ValueSetOrder = TokenValues.None;
             Amount = Amount.Zero;
-            _tokenValue = decimal.Zero;
+            _tokenQuantity = decimal.Zero;
             _exchangeRate = BsvExchangeRate.Default;
         }
 
@@ -29,19 +29,19 @@ namespace CafeLib.BsvSharp.Units
             SetAmount(amount);
         }
 
-        public Token(BsvExchangeRate exchangeRate, decimal tokenValue)
+        public Token(BsvExchangeRate exchangeRate, decimal tokenQuantity)
             : this(Amount.Zero)
         {
             SetExchangeRate(exchangeRate);
-            SetTokenValue(tokenValue);
+            SetTokenQuantity(tokenQuantity);
         }
 
-        public Token(Amount amount, BsvExchangeRate exchangeRate, decimal tokenValue)
+        public Token(Amount amount, BsvExchangeRate exchangeRate, decimal tokenQuantity)
             : this()
         {
             SetAmount(amount);
             SetExchangeRate(exchangeRate);
-            SetTokenValue(tokenValue);
+            SetTokenQuantity(tokenQuantity);
         }
 
 
@@ -74,16 +74,14 @@ namespace CafeLib.BsvSharp.Units
 
         public ExchangeUnit ExchangeUnit => _exchangeRate.Foreign;
 
-        public decimal? TokenValue
+        public decimal? TokenQuantity
         {
-            get => HasValue ? _tokenValue : null; 
-            set => _tokenValue = value ?? decimal.Zero;
+            get => HasValue ? _tokenQuantity : null; 
+            set => _tokenQuantity = value ?? decimal.Zero;
         }
 
         /// <summary>
-        /// Set a specific bitcoin amount.
-        /// The amount must be in the range <see cref="Amount.MinValue"/> to <see cref="BsvSharp.Units.Amount.MaxValue"/>.
-        /// If the amount is zero, it constrains the Fiat value to be zero as well, but leaves Rate as it was.
+        /// Clear token amount.
         /// </summary>
         public void ClearAmount()
         {
@@ -124,10 +122,8 @@ namespace CafeLib.BsvSharp.Units
 
         /// <summary>
         /// Set a specific bitcoin amount.
-        /// The amount must be in the range <see cref="Amount.MinValue"/> to <see cref="BsvSharp.Units.Amount.MaxValue"/>.
-        /// If the amount is zero, it constrains the Fiat value to be zero as well, but leaves Rate as it was.
         /// </summary>
-        /// <param name="amount"></param>
+        /// <param name="amount">bitcoin amount</param>
         public void SetAmount(Amount amount)
         {
             Amount = amount;
@@ -164,14 +160,12 @@ namespace CafeLib.BsvSharp.Units
         }
 
         /// <summary>
-        /// Set a specific fiat or foreign currency value, or clears a previously set value.
-        /// If the fiat value is zero, it constrains the bitcoin amount to be zero as well, but leaves Rate as it was.
-        /// If the fiat value is null, clears fiat constraints on value.
+        /// Clears a previously set token quantity.
         /// </summary>
-        public void ClearTokenValue()
+        public void ClearTokenQuantity()
         {
             // Retain the ToTicker as the best default even when clearing value.
-            _tokenValue = decimal.Zero;
+            _tokenQuantity = decimal.Zero;
 
             // Update _SetOrder to reflect the loss of Fiat/Foreign value.
             switch (ValueSetOrder)
@@ -207,17 +201,15 @@ namespace CafeLib.BsvSharp.Units
         }
 
         /// <summary>
-        /// Set a specific fiat or foreign currency value, or clears a previously set value.
-        /// If the fiat value is zero, it constrains the bitcoin amount to be zero as well, but leaves Rate as it was.
-        /// If the fiat value is null, clears fiat constraints on value.
+        /// Set token quantity.
         /// </summary>
-        /// <param name="tokenValue"></param>
-        public void SetTokenValue(decimal tokenValue)
+        /// <param name="tokenQuantity"></param>
+        public void SetTokenQuantity(decimal tokenQuantity)
         {
-            _tokenValue = tokenValue;
+            _tokenQuantity = tokenQuantity;
 
             // Update _SetOrder to reflect a new Fiat/Foreign value.
-            var isZero = _tokenValue == decimal.Zero;
+            var isZero = _tokenQuantity == decimal.Zero;
 
             ValueSetOrder = ValueSetOrder switch
             {
@@ -231,10 +223,8 @@ namespace CafeLib.BsvSharp.Units
         }
 
         /// <summary>
-        /// Set a specific exchange rate, or clears a previously set value.
-        /// A zero exchange rate is treated as a null value, clearing exchange rate constraints.
+        /// Clear exchange rate.
         /// </summary>
-        /// <param name="exchangeRate"></param>
         public void ClearExchangeRate()
         {
             _exchangeRate = null;
@@ -260,7 +250,7 @@ namespace CafeLib.BsvSharp.Units
 
                 case TokenValues.RF:
                 case TokenValues.FR:
-                    ValueSetOrder = _tokenValue == decimal.Zero ? TokenValues.ZF : TokenValues.F;
+                    ValueSetOrder = _tokenQuantity == decimal.Zero ? TokenValues.ZF : TokenValues.F;
                     break;
 
                 default:
@@ -271,7 +261,7 @@ namespace CafeLib.BsvSharp.Units
         }
 
         /// <summary>
-        /// Set a specific exchange rate, or clears a previously set value.
+        /// Set a specific exchange rate.
         /// A zero exchange rate is treated as a null value, clearing exchange rate constraints.
         /// </summary>
         /// <param name="exchangeRate"></param>
@@ -316,27 +306,27 @@ namespace CafeLib.BsvSharp.Units
                 case TokenValues.SF:
                 case TokenValues.FS:
                     // Satoshis (Value) and Fiat (ToValue,ToTicker) are set, check and compute ExchangeRate
-                    _exchangeRate = new BsvExchangeRate(ExchangeUnit, _tokenValue / Amount.ToBitcoin());
+                    _exchangeRate = new BsvExchangeRate(ExchangeUnit, _tokenQuantity / Amount.ToBitcoin());
                     break;
 
                 case TokenValues.SR:
                 case TokenValues.RS:
                     // Satoshis and ExchangeRate are set, check and compute Fiat (ToValue,ToTicker)
-                    _tokenValue = _exchangeRate.ToForeignUnits(Amount);
+                    _tokenQuantity = _exchangeRate.ToForeignUnits(Amount);
                     break;
 
                 case TokenValues.FR:
                 case TokenValues.RF:
                     // Fiat (ToValue,ToTicker) and ExchangeRate are set, check and compute Satoshis (Value)
-                    Amount = _exchangeRate.ToAmount(Math.Round(_tokenValue, 8, MidpointRounding.AwayFromZero)); 
+                    Amount = new Amount(_exchangeRate.ToForeignUnits(Math.Round(_tokenQuantity, 8, MidpointRounding.AwayFromZero)), BitcoinUnit.Bitcoin); 
                     break;
 
                 case TokenValues.ZS:
-                    _tokenValue = decimal.Zero;
+                    _tokenQuantity = decimal.Zero;
                     break;
 
                 case TokenValues.ZF:
-                    Amount = Units.Amount.Zero;
+                    Amount = Amount.Zero;
                     break;
 
                 default:

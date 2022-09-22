@@ -38,18 +38,20 @@ namespace CafeLib.BsvSharp.UnitTests.Units
         }
 
         [Theory]
-        [InlineData(ExchangeUnit.USD, 50, 1)]
-        [InlineData(ExchangeUnit.BTC, .0025, 1)]
-        public void Bsv_Amount_From_Foreign_Exchange_Test(ExchangeUnit foreign, decimal rate, decimal ratio)
+        [InlineData(ExchangeUnit.USD, 50, 50, 1)]
+        [InlineData(ExchangeUnit.BTC, .0025, 1, 400)]
+        [InlineData(ExchangeUnit.BTC, .0025, 1.25, 500)]
+        public void Bsv_Amount_From_Foreign_Exchange_Test(ExchangeUnit foreign, decimal rate, decimal foreignQuantity, decimal bitcoin)
         {
             var exchangeRate = new BsvExchangeRate(foreign, rate);
-            var amount = exchangeRate.ToAmount(rate);
-            Assert.Equal(ratio, amount.ToBitcoin());
+            var amount = exchangeRate.ToAmount(foreignQuantity);
+            Assert.Equal(bitcoin, amount.ToBitcoin());
         }
 
         [Theory]
         [InlineData(ExchangeUnit.USD, 50, 100, 5000)]
         [InlineData(ExchangeUnit.BTC, .0025, 100, .25)]
+        [InlineData(ExchangeUnit.BTC, .0025, 500, 1.25)]
         public void Bsv_Amount_To_ExchangeUnits(ExchangeUnit exchangeUnit, decimal rate, decimal bitcoin, decimal exchangeTotal)
         {
             var exchangeRate = new BsvExchangeRate(exchangeUnit, rate);
