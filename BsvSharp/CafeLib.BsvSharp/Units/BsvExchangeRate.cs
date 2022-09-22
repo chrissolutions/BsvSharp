@@ -12,7 +12,7 @@ namespace CafeLib.BsvSharp.Units
     /// </summary>
     public sealed record BsvExchangeRate : ExchangeRate
     {
-        public new static readonly ExchangeRate Default = new BsvExchangeRate();
+        public new static readonly BsvExchangeRate Default = new();
 
         private BsvExchangeRate()
             : base(ExchangeUnit.BSV, ExchangeUnit.BSV, 1)

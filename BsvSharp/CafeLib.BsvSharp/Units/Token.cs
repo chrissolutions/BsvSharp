@@ -14,14 +14,14 @@ namespace CafeLib.BsvSharp.Units
     {
         private Amount _amount;
         private decimal _fiatValue;
-        private ExchangeRate _exchangeRate;
+        private BsvExchangeRate _exchangeRate;
 
         public Token()
         {
             ValueSetOrder = TokenValues.None;
             _amount = Units.Amount.Zero;
             _fiatValue = decimal.Zero;
-            _exchangeRate = ExchangeRate.Default;
+            _exchangeRate = BsvExchangeRate.Default;
         }
 
         public Token(Amount amount)
@@ -30,17 +30,18 @@ namespace CafeLib.BsvSharp.Units
             SetAmount(amount);
         }
 
-        public Token(ExchangeRate rate, decimal fiatValue)
+        public Token(BsvExchangeRate rate, decimal fiatValue)
             : this()
         {
             SetRate(rate);
             SetFiatValue(fiatValue);
         }
 
-        public Token(Amount amount, ExchangeUnit fiatTicker, decimal fiatValue)
+        public Token(Amount amount, BsvExchangeRate rate, decimal fiatValue)
             : this()
         {
             SetAmount(amount);
+            SetRate(rate);
             SetFiatValue(fiatValue);
         }
 
@@ -70,7 +71,7 @@ namespace CafeLib.BsvSharp.Units
 
         public long? Satoshis => HasAmount ? _amount.Satoshis : null;
 
-        public ExchangeRate Rate
+        public BsvExchangeRate Rate
         {
             get => HasRate ? _exchangeRate : null; 
             set => _exchangeRate = value;
@@ -101,12 +102,7 @@ namespace CafeLib.BsvSharp.Units
                 case TokenValues.SF:
                 case TokenValues.FS:
                     // Satoshis (Value) and Fiat (ToValue,ToTicker) are set, check and compute ExchangeRate
-                    _exchangeRate = new ExchangeRate {
-                        Domestic = ExchangeUnit.BSV,
-                        Foreign = ExchangeUnit,
-                        Timestamp = DateTime.UtcNow,
-                        Rate = _fiatValue / _amount.ToBitcoin()
-                    };
+                    _exchangeRate = new BsvExchangeRate(ExchangeUnit, _fiatValue / _amount.ToBitcoin());
                     break;
 
                 case TokenValues.SR:
@@ -306,7 +302,7 @@ namespace CafeLib.BsvSharp.Units
         /// A zero exchange rate is treated as a null value, clearing exchange rate constraints.
         /// </summary>
         /// <param name="rate"></param>
-        public void SetRate(ExchangeRate rate)
+        public void SetRate(BsvExchangeRate rate)
         {
             //rate.CheckOfTickerIsBSV();
             _exchangeRate = rate.Rate != decimal.Zero ? rate : null;
