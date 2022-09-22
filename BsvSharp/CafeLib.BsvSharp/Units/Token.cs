@@ -3,6 +3,7 @@
 #endregion
 
 using System;
+using CafeLib.BsvSharp.Exceptions;
 
 namespace CafeLib.BsvSharp.Units
 {
@@ -14,11 +15,12 @@ namespace CafeLib.BsvSharp.Units
     {
         private decimal _tokenQuantity;
         private BsvExchangeRate _exchangeRate;
+        private Amount _amount;
 
         public Token()
         {
             ValueSetOrder = TokenValues.None;
-            Amount = Amount.Zero;
+            _amount = Amount.Zero;
             _tokenQuantity = decimal.Zero;
             _exchangeRate = BsvExchangeRate.Default;
         }
@@ -62,9 +64,9 @@ namespace CafeLib.BsvSharp.Units
 
         public TokenValues ValueSetOrder { get; set; }
 
-        public Amount Amount { get; private set; }
+        public Amount Amount => GetAmount();
 
-        public long? Satoshis => HasAmount ? Amount.Satoshis : null;
+        public long Satoshis => GetAmount().Satoshis;
 
         public BsvExchangeRate Rate
         {
@@ -85,7 +87,7 @@ namespace CafeLib.BsvSharp.Units
         /// </summary>
         public void ClearAmount()
         {
-            Amount = Amount.Zero;
+            _amount = Amount.Zero;
 
             // Update _SetOrder to reflect the loss of Amount Satoshis.
             switch (ValueSetOrder)
@@ -126,8 +128,8 @@ namespace CafeLib.BsvSharp.Units
         /// <param name="amount">bitcoin amount</param>
         public void SetAmount(Amount amount)
         {
-            Amount = amount;
-            var isZero = Amount == Amount.Zero;
+            _amount = amount;
+            var isZero = _amount == Amount.Zero;
 
             switch (ValueSetOrder)
             {
@@ -290,6 +292,17 @@ namespace CafeLib.BsvSharp.Units
         #region Helpers
 
         /// <summary>
+        /// Verify and return the bitcoin amount.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="TokenException">token exception of token does not have an amount.</exception>
+        private Amount GetAmount()
+        {
+            if (!HasAmount) throw new TokenException("Token does not have an amount.  Missing HasAmount check.");
+            return _amount;
+        }
+
+        /// <summary>
         /// Some sequences of set values are sufficient to fully constrain the least recently set value.
         /// </summary>
         private void UpdateConstrainedValues()
@@ -318,7 +331,7 @@ namespace CafeLib.BsvSharp.Units
                 case TokenValues.FR:
                 case TokenValues.RF:
                     // Fiat (ToValue,ToTicker) and ExchangeRate are set, check and compute Satoshis (Value)
-                    Amount = new Amount(_exchangeRate.ToForeignUnits(Math.Round(_tokenQuantity, 8, MidpointRounding.AwayFromZero)), BitcoinUnit.Bitcoin); 
+                    _amount = new Amount(_exchangeRate.ToForeignUnits(Math.Round(_tokenQuantity, 8, MidpointRounding.AwayFromZero)), BitcoinUnit.Bitcoin); 
                     break;
 
                 case TokenValues.ZS:
@@ -326,7 +339,7 @@ namespace CafeLib.BsvSharp.Units
                     break;
 
                 case TokenValues.ZF:
-                    Amount = Amount.Zero;
+                    _amount = Amount.Zero;
                     break;
 
                 default:
