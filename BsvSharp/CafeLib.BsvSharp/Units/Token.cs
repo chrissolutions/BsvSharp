@@ -33,7 +33,7 @@ namespace CafeLib.BsvSharp.Units
             : this(Amount.Zero)
         {
             SetExchangeRate(exchangeRate);
-            SetTokenQuantity(tokenQuantity);
+            SetQuantity(tokenQuantity);
         }
 
         public Token(Amount amount, BsvExchangeRate exchangeRate, decimal tokenQuantity)
@@ -41,7 +41,7 @@ namespace CafeLib.BsvSharp.Units
         {
             SetAmount(amount);
             SetExchangeRate(exchangeRate);
-            SetTokenQuantity(tokenQuantity);
+            SetQuantity(tokenQuantity);
         }
 
 
@@ -50,14 +50,14 @@ namespace CafeLib.BsvSharp.Units
         public bool HasAll => ValueSetOrder > TokenValues.R;
         public bool HasAmount => ValueSetOrder is > TokenValues.R or TokenValues.S;
         public bool HasRate => ValueSetOrder is > TokenValues.R or TokenValues.R;
-        public bool HasValue => ValueSetOrder is > TokenValues.R or TokenValues.F;
+        public bool HasQuantity => ValueSetOrder is > TokenValues.R or TokenValues.F;
 
         public bool HasComputedAmount => ValueSetOrder is TokenValues.FR or TokenValues.RF or TokenValues.ZF;
-        public bool HasComputedValue => ValueSetOrder is TokenValues.RS or TokenValues.SR or TokenValues.ZS;
+        public bool HasComputedQuantity => ValueSetOrder is TokenValues.RS or TokenValues.SR or TokenValues.ZS;
         public bool HasComputedRate => ValueSetOrder is TokenValues.FS or TokenValues.SF;
 
         public bool HasSetAmount => ValueSetOrder is TokenValues.S or TokenValues.SR or TokenValues.SF or TokenValues.RS or TokenValues.FS or TokenValues.ZS;
-        public bool HasSetValue => ValueSetOrder is TokenValues.F or TokenValues.FR or TokenValues.FS or TokenValues.RF or TokenValues.SF or TokenValues.ZF;
+        public bool HasSetQuantity => ValueSetOrder is TokenValues.F or TokenValues.FR or TokenValues.FS or TokenValues.RF or TokenValues.SF or TokenValues.ZF;
         public bool HasSetRate => ValueSetOrder is TokenValues.R or TokenValues.RS or TokenValues.RF or TokenValues.SR or TokenValues.FR;
 
         public TokenValues ValueSetOrder { get; set; }
@@ -76,7 +76,7 @@ namespace CafeLib.BsvSharp.Units
 
         public decimal? TokenQuantity
         {
-            get => HasValue ? _tokenQuantity : null; 
+            get => HasQuantity ? _tokenQuantity : null; 
             set => _tokenQuantity = value ?? decimal.Zero;
         }
 
@@ -162,7 +162,7 @@ namespace CafeLib.BsvSharp.Units
         /// <summary>
         /// Clears a previously set token quantity.
         /// </summary>
-        public void ClearTokenQuantity()
+        public void ClearQuantity()
         {
             // Retain the ToTicker as the best default even when clearing value.
             _tokenQuantity = decimal.Zero;
@@ -204,7 +204,7 @@ namespace CafeLib.BsvSharp.Units
         /// Set token quantity.
         /// </summary>
         /// <param name="tokenQuantity"></param>
-        public void SetTokenQuantity(decimal tokenQuantity)
+        public void SetQuantity(decimal tokenQuantity)
         {
             _tokenQuantity = tokenQuantity;
 

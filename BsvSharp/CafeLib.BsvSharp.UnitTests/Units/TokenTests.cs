@@ -15,7 +15,7 @@ namespace CafeLib.BsvSharp.UnitTests.Units
             var exchangeRate = new BsvExchangeRate(foreign, rate);
 
             token.SetExchangeRate(exchangeRate);
-            token.SetTokenQuantity(tokenQuantity);
+            token.SetQuantity(tokenQuantity);
 
             Assert.Equal(bitcoin, token.Amount.ToBitcoin()) ;
         }
@@ -28,6 +28,30 @@ namespace CafeLib.BsvSharp.UnitTests.Units
             Assert.Equal(100, token.Amount.ToBitcoin());
             token.ClearAmount();
             Assert.False(token.HasAmount);
+        }
+
+        [Fact]
+        public void Token_Clear_ExchangeRate_Test()
+        {
+            var token = new Token();
+            Assert.False(token.HasRate);
+            var exchangeRate = new BsvExchangeRate(ExchangeUnit.USD, 50);
+            token.SetExchangeRate(exchangeRate);
+            Assert.True(token.HasRate);
+            token.ClearExchangeRate();
+            Assert.False(token.HasRate);
+        }
+
+        [Fact]
+        public void Token_Clear_TokenQuantity_Test()
+        {
+            var token = new Token();
+            Assert.False(token.HasQuantity);
+            var exchangeRate = new BsvExchangeRate(ExchangeUnit.USD, 50);
+            token.SetQuantity(500);
+            Assert.True(token.HasQuantity);
+            token.ClearQuantity();
+            Assert.False(token.HasQuantity);
         }
     }
 }
