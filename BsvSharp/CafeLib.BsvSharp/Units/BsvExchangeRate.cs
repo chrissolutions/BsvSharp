@@ -38,7 +38,7 @@ namespace CafeLib.BsvSharp.Units
         /// <returns></returns>
         public Amount ToAmount(decimal value)
         {
-            return new Amount(ToDomesticUnits(value), BitcoinUnit.Satoshi);
+            return new Amount(ToDomesticUnits(value), BitcoinUnit.Bitcoin);
         }
     }
 }
