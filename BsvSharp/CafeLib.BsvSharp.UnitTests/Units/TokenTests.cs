@@ -47,19 +47,17 @@ namespace CafeLib.BsvSharp.UnitTests.Units
         //}
 
         [Theory]
-        [InlineData(ExchangeUnit.USD, 50, 1)]
-        public void Token_Test(ExchangeUnit foreign, decimal rate, decimal ratio)
+        [InlineData(ExchangeUnit.USD, 50, 500, 10)]
+        [InlineData(ExchangeUnit.BTC, 400, 500, 1.25)]
+        public void Token_Test(ExchangeUnit foreign, decimal rate, decimal tokenValue, decimal bitcoin)
         {
             var token = new Token();
             var exchangeRate = new BsvExchangeRate(foreign, rate);
 
             token.SetExchangeRate(exchangeRate);
-            token.SetExchangeValue(500);
+            token.SetTokenValue(tokenValue);
 
-            var defaultRate = BsvExchangeRate.Default;
-            Assert.Equal(ExchangeUnit.BSV, defaultRate.Domestic);
-            Assert.Equal(ExchangeUnit.BSV, defaultRate.Foreign);
-            Assert.Equal(1, defaultRate.Rate);
+            Assert.Equal(bitcoin, token.Amount.ToBitcoin()) ;
         }
     }
 }
