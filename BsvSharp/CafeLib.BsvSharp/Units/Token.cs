@@ -49,17 +49,17 @@ namespace CafeLib.BsvSharp.Units
         public static implicit operator Token(Amount value) => new(value);
 
         public bool HasAll => ValueSetOrder > TokenValues.R;
-        public bool HasAmount => ValueSetOrder > TokenValues.R || ValueSetOrder == TokenValues.S;
-        public bool HasRate => ValueSetOrder > TokenValues.R || ValueSetOrder == TokenValues.R;
-        public bool HasFiat => ValueSetOrder > TokenValues.R || ValueSetOrder == TokenValues.F;
+        public bool HasAmount => ValueSetOrder is > TokenValues.R or TokenValues.S;
+        public bool HasRate => ValueSetOrder is > TokenValues.R or TokenValues.R;
+        public bool HasFiat => ValueSetOrder is > TokenValues.R or TokenValues.F;
 
-        public bool HasComputedAmount => ValueSetOrder == TokenValues.FR || ValueSetOrder == TokenValues.RF || ValueSetOrder == TokenValues.ZF;
-        public bool HasComputedFiat => ValueSetOrder == TokenValues.RS || ValueSetOrder == TokenValues.SR || ValueSetOrder == TokenValues.ZS;
-        public bool HasComputedRate => ValueSetOrder == TokenValues.FS || ValueSetOrder == TokenValues.SF;
+        public bool HasComputedAmount => ValueSetOrder is TokenValues.FR or TokenValues.RF or TokenValues.ZF;
+        public bool HasComputedFiat => ValueSetOrder is TokenValues.RS or TokenValues.SR or TokenValues.ZS;
+        public bool HasComputedRate => ValueSetOrder is TokenValues.FS or TokenValues.SF;
 
-        public bool HasSetAmount => ValueSetOrder == TokenValues.S || ValueSetOrder == TokenValues.SR || ValueSetOrder == TokenValues.SF || ValueSetOrder == TokenValues.RS || ValueSetOrder == TokenValues.FS || ValueSetOrder == TokenValues.ZS;
-        public bool HasSetFiat => ValueSetOrder == TokenValues.F || ValueSetOrder == TokenValues.FR || ValueSetOrder == TokenValues.FS || ValueSetOrder == TokenValues.RF || ValueSetOrder == TokenValues.SF || ValueSetOrder == TokenValues.ZF;
-        public bool HasSetRate => ValueSetOrder == TokenValues.R || ValueSetOrder == TokenValues.RS || ValueSetOrder == TokenValues.RF || ValueSetOrder == TokenValues.SR || ValueSetOrder == TokenValues.FR;
+        public bool HasSetAmount => ValueSetOrder is TokenValues.S or TokenValues.SR or TokenValues.SF or TokenValues.RS or TokenValues.FS or TokenValues.ZS;
+        public bool HasSetFiat => ValueSetOrder is TokenValues.F or TokenValues.FR or TokenValues.FS or TokenValues.RF or TokenValues.SF or TokenValues.ZF;
+        public bool HasSetRate => ValueSetOrder is TokenValues.R or TokenValues.RS or TokenValues.RF or TokenValues.SR or TokenValues.FR;
 
         public TokenValues ValueSetOrder { get; set; }
 
