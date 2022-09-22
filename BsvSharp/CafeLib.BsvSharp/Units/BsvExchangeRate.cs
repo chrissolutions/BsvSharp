@@ -32,7 +32,7 @@ namespace CafeLib.BsvSharp.Units
         /// <returns>Return the exchange units.</returns>
         public decimal ToExchangeUnits(Amount amount)
         {
-            return ToForeignUnits(amount.Satoshis);
+            return ToForeignUnits(amount.ToBitcoin());
         }
 
         /// <summary>
