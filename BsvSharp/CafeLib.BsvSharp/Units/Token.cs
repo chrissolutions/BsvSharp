@@ -13,9 +13,9 @@ namespace CafeLib.BsvSharp.Units
     /// </summary>
     public class Token
     {
-        private decimal _tokenQuantity;
-        private BsvExchangeRate _exchangeRate;
         private Amount _amount;
+        private BsvExchangeRate _exchangeRate;
+        private decimal _tokenQuantity;
 
         public Token()
         {
