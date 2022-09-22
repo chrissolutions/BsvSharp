@@ -14,31 +14,33 @@ namespace CafeLib.BsvSharp.Units
     {
         private Amount _amount;
         private decimal _fiatValue;
-        private ExchangeRate _rate;
+        private ExchangeRate _exchangeRate;
 
         public Token()
         {
-            ResetValue();
+            ValueSetOrder = TokenValues.None;
+            _amount = Units.Amount.Zero;
+            _fiatValue = decimal.Zero;
+            _exchangeRate = ExchangeRate.Default;
         }
 
         public Token(Amount amount)
+            : this()
         {
-            ResetValue();
             SetAmount(amount);
         }
 
         public Token(ExchangeRate rate, decimal fiatValue)
+            : this()
         {
-            ResetValue();
             SetRate(rate);
             SetFiatValue(fiatValue);
         }
 
         public Token(Amount amount, ExchangeUnit fiatTicker, decimal fiatValue)
+            : this()
         {
-            ResetValue();
             SetAmount(amount);
-            SetFiatTicker(fiatTicker);
             SetFiatValue(fiatValue);
         }
 
@@ -70,22 +72,16 @@ namespace CafeLib.BsvSharp.Units
 
         public ExchangeRate Rate
         {
-            get => HasRate ? _rate : null; 
-            set => _rate = value;
+            get => HasRate ? _exchangeRate : null; 
+            set => _exchangeRate = value;
         }
 
-        public ExchangeUnit FiatTicker { get; set; }
+        public ExchangeUnit ExchangeUnit => _exchangeRate.Foreign;
 
         public decimal? FiatValue
         {
             get => HasFiat ? _fiatValue : null; 
             set => _fiatValue = value ?? decimal.Zero;
-        }
-
-        public void ResetValue()
-        {
-            // Update to pull default from global preferences.
-            (ValueSetOrder, _amount, FiatTicker, _fiatValue, _rate) = (TokenValues.None, BsvSharp.Units.Amount.Zero, ExchangeUnit.USD, decimal.Zero, null);
         }
 
         /// <summary>
@@ -105,9 +101,9 @@ namespace CafeLib.BsvSharp.Units
                 case TokenValues.SF:
                 case TokenValues.FS:
                     // Satoshis (Value) and Fiat (ToValue,ToTicker) are set, check and compute ExchangeRate
-                    _rate = new ExchangeRate {
+                    _exchangeRate = new ExchangeRate {
                         Domestic = ExchangeUnit.BSV,
-                        Foreign = FiatTicker,
+                        Foreign = ExchangeUnit,
                         Timestamp = DateTime.UtcNow,
                         Rate = _fiatValue / _amount.ToBitcoin()
                     };
@@ -116,13 +112,13 @@ namespace CafeLib.BsvSharp.Units
                 case TokenValues.SR:
                 case TokenValues.RS:
                     // Satoshis and ExchangeRate are set, check and compute Fiat (ToValue,ToTicker)
-                    (_fiatValue, FiatTicker) = (_rate.ToForeignUnits(_amount), _rate.Foreign);
+                    _fiatValue = _exchangeRate.ToForeignUnits(_amount);
                     break;
 
                 case TokenValues.FR:
                 case TokenValues.RF:
                     // Fiat (ToValue,ToTicker) and ExchangeRate are set, check and compute Satoshis (Value)
-                    _amount = new Amount(Math.Round(_rate.ToDomesticUnits(_fiatValue), 8, MidpointRounding.AwayFromZero), BitcoinUnit.Bitcoin);
+                    _amount = new Amount(Math.Round(_exchangeRate.ToDomesticUnits(_fiatValue), 8, MidpointRounding.AwayFromZero), BitcoinUnit.Bitcoin);
                     break;
 
                 case TokenValues.ZS:
@@ -224,11 +220,6 @@ namespace CafeLib.BsvSharp.Units
             UpdateConstrainedValues();
         }
 
-        public void SetFiatTicker(ExchangeUnit fiatTicker) 
-        {
-            FiatTicker = fiatTicker;
-        }
-
         /// <summary>
         /// Set a specific fiat or foreign currency value, or clears a previously set value.
         /// If the fiat value is zero, it constrains the bitcoin amount to be zero as well, but leaves Rate as it was.
@@ -290,7 +281,6 @@ namespace CafeLib.BsvSharp.Units
                     case TokenValues.RS:
                     case TokenValues.SR:
                     case TokenValues.ZS:
-                        // No change.
                         break;
 
                     case TokenValues.FS:
@@ -319,9 +309,9 @@ namespace CafeLib.BsvSharp.Units
         public void SetRate(ExchangeRate rate)
         {
             //rate.CheckOfTickerIsBSV();
-            _rate = rate.Rate != decimal.Zero ? rate : null;
+            _exchangeRate = rate.Rate != decimal.Zero ? rate : null;
 
-            if (_rate != null) 
+            if (_exchangeRate != null) 
             {
                 // Update _SetOrder to reflect a new exchange Rate value.
                 switch (ValueSetOrder)
