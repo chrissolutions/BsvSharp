@@ -79,7 +79,7 @@ namespace CafeLib.BsvSharp.Units
 
         public ExchangeUnit ExchangeUnit => _exchangeRate.Foreign;
 
-        public decimal? FiatValue
+        public decimal? ExchangeValue
         {
             get => HasFiat ? _exchangeValue : null; 
             set => _exchangeValue = value ?? decimal.Zero;
