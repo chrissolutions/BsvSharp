@@ -53,8 +53,8 @@ namespace CafeLib.BsvSharp.UnitTests.Units
             var token = new Token();
             var exchangeRate = new BsvExchangeRate(foreign, rate);
 
-            token.SetRate(exchangeRate);
-            token.SetFiatValue(500);
+            token.SetExchangeRate(exchangeRate);
+            token.SetExchangeValue(500);
 
             var defaultRate = BsvExchangeRate.Default;
             Assert.Equal(ExchangeUnit.BSV, defaultRate.Domestic);
