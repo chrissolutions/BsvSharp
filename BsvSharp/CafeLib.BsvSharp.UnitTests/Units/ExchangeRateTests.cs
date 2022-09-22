@@ -17,11 +17,14 @@ namespace CafeLib.BsvSharp.UnitTests.Units
             Assert.Equal(ratio, exchangeRate.ToDomesticUnits(rate));
         }
 
-        //[Fact]
-        //public void ExchangeRate_Test()
-        //{
-        //    var exchangeRate = new ExchangeRate(ExchangeUnit.BSV, ExchangeUnit.USD, 50);
-        //    Assert.Equal(50, exchangeRate.ToForeignUnits(1));
-        //}
+        [Theory]
+        [InlineData(ExchangeUnit.USD, 50, 1)]
+        [InlineData(ExchangeUnit.BTC, 400, 1)]
+        public void BsvExchangeRate_Test(ExchangeUnit foreign, decimal rate, decimal ratio)
+        {
+            var exchangeRate = new BsvExchangeRate(ExchangeUnit.USD, 50);
+            Assert.Equal(foreign, exchangeRate.Foreign);
+            Assert.Equal(rate, exchangeRate.ToForeignUnits(ratio));
+        }
     }
 }
