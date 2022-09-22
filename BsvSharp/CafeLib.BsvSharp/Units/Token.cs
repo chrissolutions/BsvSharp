@@ -76,11 +76,7 @@ namespace CafeLib.BsvSharp.Units
 
         public ExchangeUnit ExchangeUnit => _exchangeRate.Foreign;
 
-        public decimal? TokenQuantity
-        {
-            get => HasQuantity ? _tokenQuantity : null; 
-            set => _tokenQuantity = value ?? decimal.Zero;
-        }
+        public decimal TokenQuantity => GetQuantity();
 
         /// <summary>
         /// Clear token amount.
@@ -298,8 +294,19 @@ namespace CafeLib.BsvSharp.Units
         /// <exception cref="TokenException">token exception of token does not have an amount.</exception>
         private Amount GetAmount()
         {
-            if (!HasAmount) throw new TokenException("Token does not have an amount.  Missing HasAmount check.");
+            if (!HasAmount) throw new TokenException("Token does not have an amount.  Use HasAmount to verify.");
             return _amount;
+        }
+
+        /// <summary>
+        /// Verify and return the bitcoin token quantity.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="TokenException">token exception of token does not have a token quantity.</exception>
+        private decimal GetQuantity()
+        {
+            if (!HasQuantity) throw new TokenException("Token does not have an quantity.  Use HasQuantity to verify.");
+            return _tokenQuantity;
         }
 
         /// <summary>
