@@ -22,7 +22,7 @@ namespace CafeLib.BsvSharp.UnitTests.Units
         [InlineData(ExchangeUnit.BTC, 400, 1)]
         public void BsvExchangeRate_Test(ExchangeUnit foreign, decimal rate, decimal ratio)
         {
-            var exchangeRate = new BsvExchangeRate(ExchangeUnit.USD, 50);
+            var exchangeRate = new BsvExchangeRate(foreign, rate);
             Assert.Equal(foreign, exchangeRate.Foreign);
             Assert.Equal(rate, exchangeRate.ToForeignUnits(ratio));
         }
