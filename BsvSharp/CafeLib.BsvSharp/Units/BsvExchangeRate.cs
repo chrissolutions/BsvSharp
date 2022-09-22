@@ -3,6 +3,7 @@
 #endregion
 
 using System;
+// ReSharper disable UnusedMember.Local
 
 namespace CafeLib.BsvSharp.Units 
 {
@@ -11,7 +12,10 @@ namespace CafeLib.BsvSharp.Units
     /// </summary>
     public sealed record BsvExchangeRate : ExchangeRate
     {
+        public new static readonly ExchangeRate Default = new BsvExchangeRate();
+
         private BsvExchangeRate()
+            : base(ExchangeUnit.BSV, ExchangeUnit.BSV, 1)
         {
         }
 

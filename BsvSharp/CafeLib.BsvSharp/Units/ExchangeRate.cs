@@ -52,7 +52,6 @@ namespace CafeLib.BsvSharp.Units
         /// </summary>
         public decimal Rate { get; init; } = 1;
 
-
         /// <summary>
         /// Divide foreign units by rate to convert into domestic units.
         /// </summary>
