@@ -11,7 +11,7 @@ using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Keys
 {
-    public class WifPrivateKey : WifKey
+    public sealed class WifPrivateKey : WifKey
     {
         public bool IsValid
         {

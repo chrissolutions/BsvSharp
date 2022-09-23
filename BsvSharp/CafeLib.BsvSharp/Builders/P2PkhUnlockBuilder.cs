@@ -10,17 +10,17 @@ using CafeLib.BsvSharp.Signatures;
 
 namespace CafeLib.BsvSharp.Builders
 {
-    public class P2PkhUnlockBuilder : SignedUnlockBuilder
+    public sealed class P2PkhUnlockBuilder : SignedUnlockBuilder
     {
         /// <summary>
         /// P2PkhUnlockBuilder constructor.
         /// </summary>
-        /// <param name="publicKey">public key</param>
-        public P2PkhUnlockBuilder(PublicKey publicKey)
-            : base(publicKey, TemplateId.Pay2PublicKeyHash)
+        /// <param name="signerPublicKey">signer public key</param>
+        public P2PkhUnlockBuilder(PublicKey signerPublicKey)
+            : base(signerPublicKey, TemplateId.Pay2PublicKeyHash)
         {
             AddData(new byte[72]) // This will become the CHECKSIG signature
-                .AddData(publicKey);
+                .AddData(signerPublicKey);
         }
         
         public P2PkhUnlockBuilder(Script script)

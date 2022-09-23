@@ -11,10 +11,6 @@ namespace CafeLib.BsvSharp.Keys.Base58
 {
     internal sealed class Base58HdPrivateKey : Base58Data
     {
-        public Base58HdPrivateKey()
-        {
-        }
-
         public Base58HdPrivateKey(HdPrivateKey privateKey)
         {
             SetKey(privateKey, null);

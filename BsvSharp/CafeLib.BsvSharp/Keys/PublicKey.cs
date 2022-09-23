@@ -248,13 +248,13 @@ namespace CafeLib.BsvSharp.Keys
         /// RIPEMD160 applied to SHA256 of the 33 or 65 public key bytes.
         /// </summary>
         /// <returns>20 byte hash as a KzUInt160</returns>
-        public UInt160 GetId() => ToPubKeyHash();
+        public UInt160 GetId() => ToPublicKeyHash();
 
         /// <summary>
         /// RIPEMD160 applied to SHA256 of the 33 or 65 public key bytes.
         /// </summary>
         /// <returns>20 byte hash as a KzUInt160</returns>
-        public UInt160 ToPubKeyHash() => Data.Hash160();
+        public UInt160 ToPublicKeyHash() => Data.Hash160();
 
         /// <summary>
         /// Obtain an address.
@@ -264,7 +264,7 @@ namespace CafeLib.BsvSharp.Keys
         public Address ToAddress(NetworkType? networkType = null)
             => new(Encoders.Base58Check.Encode(RootService.GetNetwork(networkType).PublicKeyAddress
                 .ToArray()
-                .Concat(ToPubKeyHash())));
+                .Concat(ToPublicKeyHash())));
 
         /// <summary>
         /// Obtain the hex representation of the public key.
