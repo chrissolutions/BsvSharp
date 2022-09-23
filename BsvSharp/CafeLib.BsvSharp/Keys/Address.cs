@@ -32,7 +32,7 @@ namespace CafeLib.BsvSharp.Keys
     /// * next 20 bytes - the hash value computed by taking the `ripemd160(sha256(PUBLIC_KEY))`
     /// * last 4 bytes  - a checksum value taken from the first four bytes of sha256(sha256(previous_21_bytes))
     /// </summary>
-    public class Address : IEquatable<Address>
+    public sealed class Address : IEquatable<Address>
     {
         private UInt160 _address;
 
@@ -60,7 +60,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <summary>
         /// Public Key Hash.
         /// </summary>
-        public UInt160 PubKeyHash => this;
+        public UInt160 PublicKeyHash => this;
 
         public AddressType AddressType
         {
@@ -68,7 +68,7 @@ namespace CafeLib.BsvSharp.Keys
             {
                 return Version switch
                 {
-                    0 or 111 => AddressType.PubkeyHash,
+                    0 or 111 => AddressType.PublicKeyHash,
                     5 or 196 => AddressType.ScriptHash,
                     _ => throw new FormatException($"{nameof(Version)} is not a valid address type."),
                 };
@@ -100,7 +100,7 @@ namespace CafeLib.BsvSharp.Keys
         /// </summary>
         /// <param name="base58Address"></param>
         /// <returns></returns>
-        public static Address FromBase58(string base58Address) 
+        public static Address FromBase58(string base58Address)
         {
             if (base58Address.Length is 25 or 34)
             {
@@ -150,7 +150,7 @@ namespace CafeLib.BsvSharp.Keys
         /// </summary>
         /// <returns>encoded public key hash</returns>
         public string ToHex() => Encoders.Hex.Encode(new[] { (byte)Version }.Concat(_address.ToArray()));
-        
+
         public override int GetHashCode() => ToString().GetHashCode();
 
         public bool Equals(Address o) => o is not null && Version == o.Version && _address == o._address;

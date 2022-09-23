@@ -71,8 +71,8 @@ namespace CafeLib.BsvSharp.UnitTests.Signatures
             var sign = new Signature(Encoders.Base64.Decode(signature));
 
             var pubKey = privKey.CreatePublicKey();
-            Assert.Equal(address.PubKeyHash, pubKey.GetId());
-            Assert.True(address.PubKeyHash.VerifyMessage(message, signature));
+            Assert.Equal(address.PublicKeyHash, pubKey.GetId());
+            Assert.True(address.PublicKeyHash.VerifyMessage(message, signature));
             Assert.True(pubKey.VerifyMessage(message, sign));
         }
 
@@ -82,7 +82,7 @@ namespace CafeLib.BsvSharp.UnitTests.Signatures
             const string message = "Localbitcoins.com will change the world";
             const string signature = "IJ/17TjGGUqmEppAliYBUesKHoHzfY4gR4DW0Yg7QzrHUB5FwX1uTJ/H21CF8ncY8HHNB5/lh8kPAOeD5QxV8Xc=";
             var address = new Address("1Q1wVsNNiUo68caU7BfyFFQ8fVBqxC2DSc");
-            var result = address.PubKeyHash.VerifyMessage(message, signature);
+            var result = address.PublicKeyHash.VerifyMessage(message, signature);
             Assert.True(result);
         }
     }

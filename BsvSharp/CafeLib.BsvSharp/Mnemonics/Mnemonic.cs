@@ -20,7 +20,7 @@ namespace CafeLib.BsvSharp.Mnemonics
     /// <summary>
     /// BIP39 based support for converting binary data of specific lengths into sequences of words to facilitate written record keeping and verbal transmission.
     /// </summary>
-    public class Mnemonic
+    public sealed class Mnemonic
     {
         /// <summary>
         /// A phrase of space separated words. Each word encodes 11 bits. Words are all in Language and are contained in WordList.

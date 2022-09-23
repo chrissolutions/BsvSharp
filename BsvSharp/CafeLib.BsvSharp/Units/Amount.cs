@@ -29,8 +29,20 @@ namespace CafeLib.BsvSharp.Units
         /// </summary>
         public long Satoshis { get; }
 
+        /// <summary>
+        /// Amount constructor
+        /// </summary>
         public Amount(long satoshis = long.MinValue)
             : this (satoshis, BitcoinUnit.Satoshi)
+        {
+        }
+
+        /// <summary>
+        /// Amount constructor
+        /// </summary>
+        /// <param name="bitcoins">number of bitcoins</param>
+        public Amount(decimal bitcoins)
+            : this(bitcoins, BitcoinUnit.Bitcoin)
         {
         }
 
@@ -58,17 +70,13 @@ namespace CafeLib.BsvSharp.Units
             }
         }
 
-        public static bool TryParse(string text, BitcoinUnit unit, out Amount amount)
-        {
-            amount = Null;
-            if (!decimal.TryParse(text.Replace("_", ""), out var value)) return false;
-            amount = new Amount(value, unit);
-            return true;
-        }
+        public static Amount FromBitcoin(decimal bitcoins) => new(bitcoins);
+
+        public decimal ToBitcoin() => ToBitcoinUnit(BitcoinUnit.Bitcoin);
+
+        public decimal ToBitcoinUnit(BitcoinUnit unit) => (decimal)Satoshis / (long)unit;
 
         public override string ToString() => ToString(true, false);
-
-        public decimal ToBitcoin() => (decimal)Satoshis / (long)(BitcoinUnit.Bitcoin);
 
         private string ToString(bool group, bool units, BitcoinUnit unit = BitcoinUnit.MilliBitcoin)
         {
@@ -108,6 +116,14 @@ namespace CafeLib.BsvSharp.Units
         }
 
         public static string ToString(long value) => new Amount(value).ToString();
+
+        public static bool TryParse(string text, BitcoinUnit unit, out Amount amount)
+        {
+            amount = Null;
+            if (!decimal.TryParse(text.Replace("_", ""), out var value)) return false;
+            amount = new Amount(value, unit);
+            return true;
+        }
 
         public bool Equals(Amount o) => Satoshis == o.Satoshis;
         public override bool Equals(object obj) => obj is Amount amount && Equals(amount);

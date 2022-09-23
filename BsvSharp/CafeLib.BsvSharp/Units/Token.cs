@@ -3,6 +3,7 @@
 #endregion
 
 using System;
+using CafeLib.BsvSharp.Exceptions;
 
 namespace CafeLib.BsvSharp.Units
 {
@@ -13,87 +14,307 @@ namespace CafeLib.BsvSharp.Units
     public class Token
     {
         private Amount _amount;
-        private decimal _fiatValue;
-        private ExchangeRate _rate;
+        private BsvExchangeRate _exchangeRate;
+        private decimal _tokenQuantity;
 
         public Token()
         {
-            ResetValue();
+            ValueSetOrder = TokenValues.None;
+            _amount = Amount.Zero;
+            _tokenQuantity = decimal.Zero;
+            _exchangeRate = new BsvExchangeRate(ExchangeUnit.NULL, decimal.One);
         }
 
         public Token(Amount amount)
+            : this()
         {
-            ResetValue();
             SetAmount(amount);
         }
 
-        public Token(ExchangeRate rate, decimal fiatValue)
+        public Token(BsvExchangeRate exchangeRate, decimal tokenQuantity)
+            : this(Amount.Zero)
         {
-            ResetValue();
-            SetRate(rate);
-            SetFiatValue(fiatValue);
+            SetExchangeRate(exchangeRate);
+            SetQuantity(tokenQuantity);
         }
 
-        public Token(Amount amount, CurrencyTicker fiatTicker, decimal fiatValue)
+        public Token(Amount amount, BsvExchangeRate exchangeRate, decimal tokenQuantity)
+            : this(amount)
         {
-            ResetValue();
-            SetAmount(amount);
-            SetFiatTicker(fiatTicker);
-            SetFiatValue(fiatValue);
+            SetExchangeRate(exchangeRate);
+            SetQuantity(tokenQuantity);
         }
-
 
         public static implicit operator Token(Amount value) => new(value);
 
         public bool HasAll => ValueSetOrder > TokenValues.R;
-        public bool HasAmount => ValueSetOrder > TokenValues.R || ValueSetOrder == TokenValues.S;
-        public bool HasRate => ValueSetOrder > TokenValues.R || ValueSetOrder == TokenValues.R;
-        public bool HasFiat => ValueSetOrder > TokenValues.R || ValueSetOrder == TokenValues.F;
+        public bool HasAmount => ValueSetOrder is > TokenValues.R or TokenValues.S;
+        public bool HasRate => ValueSetOrder is > TokenValues.R or TokenValues.R;
+        public bool HasQuantity => ValueSetOrder is > TokenValues.R or TokenValues.F;
 
-        public bool HasComputedAmount => ValueSetOrder == TokenValues.FR || ValueSetOrder == TokenValues.RF || ValueSetOrder == TokenValues.ZF;
-        public bool HasComputedFiat => ValueSetOrder == TokenValues.RS || ValueSetOrder == TokenValues.SR || ValueSetOrder == TokenValues.ZS;
-        public bool HasComputedRate => ValueSetOrder == TokenValues.FS || ValueSetOrder == TokenValues.SF;
+        public bool HasComputedAmount => ValueSetOrder is TokenValues.FR or TokenValues.RF or TokenValues.ZF;
+        public bool HasComputedQuantity => ValueSetOrder is TokenValues.RS or TokenValues.SR or TokenValues.ZS;
+        public bool HasComputedRate => ValueSetOrder is TokenValues.FS or TokenValues.SF;
 
-        public bool HasSetAmount => ValueSetOrder == TokenValues.S || ValueSetOrder == TokenValues.SR || ValueSetOrder == TokenValues.SF || ValueSetOrder == TokenValues.RS || ValueSetOrder == TokenValues.FS || ValueSetOrder == TokenValues.ZS;
-        public bool HasSetFiat => ValueSetOrder == TokenValues.F || ValueSetOrder == TokenValues.FR || ValueSetOrder == TokenValues.FS || ValueSetOrder == TokenValues.RF || ValueSetOrder == TokenValues.SF || ValueSetOrder == TokenValues.ZF;
-        public bool HasSetRate => ValueSetOrder == TokenValues.R || ValueSetOrder == TokenValues.RS || ValueSetOrder == TokenValues.RF || ValueSetOrder == TokenValues.SR || ValueSetOrder == TokenValues.FR;
+        public bool HasSetAmount => ValueSetOrder is TokenValues.S or TokenValues.SR or TokenValues.SF or TokenValues.RS or TokenValues.FS or TokenValues.ZS;
+        public bool HasSetQuantity => ValueSetOrder is TokenValues.F or TokenValues.FR or TokenValues.FS or TokenValues.RF or TokenValues.SF or TokenValues.ZF;
+        public bool HasSetRate => ValueSetOrder is TokenValues.R or TokenValues.RS or TokenValues.RF or TokenValues.SR or TokenValues.FR;
 
         public TokenValues ValueSetOrder { get; set; }
 
-        public Amount? Amount
+        public Amount Amount => GetAmount();
+
+        public long Satoshis => GetAmount().Satoshis;
+
+        public BsvExchangeRate ExchangeRate
         {
-            get => HasAmount ? _amount : null;
-            set => _amount = value ?? Units.Amount.Zero;
+            get => HasRate ? _exchangeRate : null; 
+            set => _exchangeRate = value;
         }
 
-        public long? Satoshis => HasAmount ? _amount.Satoshis : null;
+        public ExchangeUnit ExchangeUnit => _exchangeRate.Foreign;
 
-        public ExchangeRate Rate
+        public decimal Quantity => GetQuantity();
+
+        /// <summary>
+        /// Clear token amount.
+        /// </summary>
+        public void ClearAmount()
         {
-            get => HasRate ? _rate : null; 
-            set => _rate = value;
+            _amount = Amount.Zero;
+
+            // Update _SetOrder to reflect the loss of Amount Satoshis.
+            switch (ValueSetOrder)
+            {
+                case TokenValues.None:
+                case TokenValues.S:
+                case TokenValues.ZS:
+                    ValueSetOrder = TokenValues.None;
+                    break;
+
+                case TokenValues.F:
+                case TokenValues.R:
+                case TokenValues.RF:
+                case TokenValues.FR:
+                case TokenValues.ZF:
+                    break;
+
+                case TokenValues.FS:
+                case TokenValues.SF:
+                    ValueSetOrder = TokenValues.F;
+                    break;
+
+                case TokenValues.SR:
+                case TokenValues.RS:
+                    ValueSetOrder = TokenValues.R;
+                    break;
+
+                default:
+                    throw new NotSupportedException(nameof(ValueSetOrder));
+            }
+
+            UpdateConstrainedValues();
         }
 
-        public CurrencyTicker FiatTicker { get; set; }
-
-        public decimal? FiatValue
+        /// <summary>
+        /// Set a specific bitcoin amount.
+        /// </summary>
+        /// <param name="amount">bitcoin amount</param>
+        public void SetAmount(Amount amount)
         {
-            get => HasFiat ? _fiatValue : null; 
-            set => _fiatValue = value ?? decimal.Zero;
+            _amount = amount;
+            var isZero = _amount == Amount.Zero;
+
+            switch (ValueSetOrder)
+            {
+                case TokenValues.None:
+                case TokenValues.S:
+                case TokenValues.ZS:
+                case TokenValues.ZF:
+                    ValueSetOrder = isZero ? TokenValues.ZS : TokenValues.S;
+                    break;
+
+                case TokenValues.F:
+                case TokenValues.SF:
+                case TokenValues.RF:
+                case TokenValues.FS:
+                    ValueSetOrder = isZero ? TokenValues.ZS : TokenValues.FS;
+                    break;
+
+                case TokenValues.R:
+                case TokenValues.SR:
+                case TokenValues.FR:
+                case TokenValues.RS:
+                    ValueSetOrder = TokenValues.RS;
+                    break;
+
+                default:
+                    throw new NotSupportedException(nameof(ValueSetOrder));
+            }
+
+            UpdateConstrainedValues();
         }
 
-        public void ResetValue()
+        /// <summary>
+        /// Clears a previously set token quantity.
+        /// </summary>
+        public void ClearQuantity()
         {
-            // Update to pull default from global preferences.
-            (ValueSetOrder, _amount, FiatTicker, _fiatValue, _rate) = (TokenValues.None, BsvSharp.Units.Amount.Zero, CurrencyTicker.USD, decimal.Zero, null);
+            // Retain the ToTicker as the best default even when clearing value.
+            _tokenQuantity = decimal.Zero;
+
+            // Update _SetOrder to reflect the loss of Fiat/Foreign value.
+            switch (ValueSetOrder)
+            {
+                case TokenValues.None:
+                case TokenValues.F:
+                case TokenValues.ZF:
+                    ValueSetOrder = TokenValues.None;
+                    break;
+
+                case TokenValues.S:
+                case TokenValues.R:
+                case TokenValues.RS:
+                case TokenValues.SR:
+                case TokenValues.ZS:
+                    break;
+
+                case TokenValues.FS:
+                case TokenValues.SF:
+                    ValueSetOrder = TokenValues.S;
+                    break;
+
+                case TokenValues.FR:
+                case TokenValues.RF:
+                    ValueSetOrder = TokenValues.R;
+                    break;
+
+                default:
+                    throw new NotSupportedException(nameof(ValueSetOrder));
+            }
+
+            UpdateConstrainedValues();
+        }
+
+        /// <summary>
+        /// Set token quantity.
+        /// </summary>
+        /// <param name="tokenQuantity"></param>
+        /// <param name="exchangeUnit"></param>
+        /// <exception cref="NotSupportedException"></exception>
+        public void SetQuantity(decimal tokenQuantity, ExchangeUnit? exchangeUnit = null)
+        {
+            _tokenQuantity = tokenQuantity;
+
+            // Update _SetOrder to reflect a new Fiat/Foreign value.
+            var isZero = _tokenQuantity == decimal.Zero;
+
+            ValueSetOrder = ValueSetOrder switch
+            {
+                TokenValues.None or TokenValues.F or TokenValues.ZS or TokenValues.ZF => isZero ? TokenValues.ZF : TokenValues.F,
+                TokenValues.S or TokenValues.FS or TokenValues.RS or TokenValues.SF => isZero ? TokenValues.ZF : TokenValues.SF,
+                TokenValues.R or TokenValues.SR or TokenValues.FR or TokenValues.RF => TokenValues.RF,
+                _ => throw new NotSupportedException(nameof(ValueSetOrder)),
+            };
+
+            UpdateConstrainedValues(exchangeUnit);
+        }
+
+        /// <summary>
+        /// Clear exchange rate.
+        /// </summary>
+        public void ClearExchangeRate()
+        {
+            _exchangeRate = null;
+
+            // Update _SetOrder to reflect the loss of exchange Rate value.
+            switch (ValueSetOrder)
+            {
+                case TokenValues.None:
+                case TokenValues.R:
+                    ValueSetOrder = TokenValues.None;
+                    break;
+
+                case TokenValues.S:
+                case TokenValues.F:
+                case TokenValues.SF:
+                case TokenValues.FS:
+                    break;
+
+                case TokenValues.SR:
+                case TokenValues.RS:
+                    ValueSetOrder = Amount == Amount.Zero ? TokenValues.ZS : TokenValues.S;
+                    break;
+
+                case TokenValues.RF:
+                case TokenValues.FR:
+                    ValueSetOrder = _tokenQuantity == decimal.Zero ? TokenValues.ZF : TokenValues.F;
+                    break;
+
+                default:
+                    throw new NotSupportedException(nameof(ValueSetOrder));
+            }
+
+            UpdateConstrainedValues();
+        }
+
+        /// <summary>
+        /// Set a specific exchange rate.
+        /// A zero exchange rate is treated as a null value, clearing exchange rate constraints.
+        /// </summary>
+        /// <param name="exchangeRate"></param>
+        public void SetExchangeRate(BsvExchangeRate exchangeRate)
+        {
+            if (exchangeRate == null || exchangeRate.Rate == decimal.Zero)
+            {
+                ClearExchangeRate();
+                return;
+            }
+
+            _exchangeRate = exchangeRate;
+
+            // Update _SetOrder to reflect a new exchange Rate value.
+            ValueSetOrder = ValueSetOrder switch
+            {
+                TokenValues.None or TokenValues.R => TokenValues.R,
+                TokenValues.S or TokenValues.FS or TokenValues.RS or TokenValues.SR or TokenValues.ZS => TokenValues.SR,
+                TokenValues.F or TokenValues.SF or TokenValues.RF or TokenValues.FR or TokenValues.ZF => TokenValues.FR,
+                _ => throw new NotSupportedException(nameof(ValueSetOrder)),
+            };
+
+            UpdateConstrainedValues();
+        }
+
+        #region Helpers
+
+        /// <summary>
+        /// Verify and return the bitcoin amount.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="TokenException">token exception of token does not have an amount.</exception>
+        private Amount GetAmount()
+        {
+            if (!HasAmount) throw new TokenException("Token does not have an amount.  Use HasAmount to verify.");
+            return _amount;
+        }
+
+        /// <summary>
+        /// Verify and return the bitcoin token quantity.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="TokenException">token exception of token does not have a token quantity.</exception>
+        private decimal GetQuantity()
+        {
+            if (!HasQuantity) throw new TokenException("Token does not have an quantity.  Use HasQuantity to verify.");
+            return _tokenQuantity;
         }
 
         /// <summary>
         /// Some sequences of set values are sufficient to fully constrain the least recently set value.
         /// </summary>
-        private void UpdateConstrainedValues()
+        private void UpdateConstrainedValues(ExchangeUnit? exchangeUnit = null)
         {
-            switch (ValueSetOrder) 
+            switch (ValueSetOrder)
             {
                 case TokenValues.None:
                 case TokenValues.S:
@@ -105,285 +326,34 @@ namespace CafeLib.BsvSharp.Units
                 case TokenValues.SF:
                 case TokenValues.FS:
                     // Satoshis (Value) and Fiat (ToValue,ToTicker) are set, check and compute ExchangeRate
-                    _rate = new ExchangeRate {
-                        OfTicker = CurrencyTicker.BSV,
-                        ToTicker = FiatTicker,
-                        When = DateTime.UtcNow,
-                        Rate = _fiatValue / _amount.ToBitcoin()
-                    };
+                    _exchangeRate = new BsvExchangeRate(exchangeUnit.GetValueOrDefault(), _amount.ToBitcoin() / _tokenQuantity);
                     break;
 
                 case TokenValues.SR:
                 case TokenValues.RS:
                     // Satoshis and ExchangeRate are set, check and compute Fiat (ToValue,ToTicker)
-                    (_fiatValue, FiatTicker) = (_rate.ConvertOfValue(_amount), _rate.ToTicker);
+                    _tokenQuantity = _exchangeRate.ToDomesticUnits(_amount.ToBitcoin());
                     break;
 
                 case TokenValues.FR:
                 case TokenValues.RF:
                     // Fiat (ToValue,ToTicker) and ExchangeRate are set, check and compute Satoshis (Value)
-                    _amount = new Amount(Math.Round(_rate.ConvertToValue(_fiatValue), 8, MidpointRounding.AwayFromZero), BitcoinUnit.Bitcoin);
+                    _amount = new Amount(_exchangeRate.ToForeignUnits(Math.Round(_tokenQuantity, 8, MidpointRounding.AwayFromZero)), BitcoinUnit.Bitcoin); 
                     break;
 
                 case TokenValues.ZS:
-                    _fiatValue = decimal.Zero;
+                    _tokenQuantity = decimal.Zero;
                     break;
 
                 case TokenValues.ZF:
-                    _amount = Units.Amount.Zero;
+                    _amount = Amount.Zero;
                     break;
 
-                default: 
+                default:
                     throw new NotSupportedException(nameof(ValueSetOrder));
             }
         }
 
-        /// <summary>
-        /// Set a specific bitcoin amount.
-        /// The amount must be in the range <see cref="BsvSharp.Units.Amount.MinValue"/> to <see cref="BsvSharp.Units.Amount.MaxValue"/>.
-        /// If the amount is zero, it constrains the Fiat value to be zero as well, but leaves Rate as it was.
-        /// </summary>
-        /// <param name="amount"></param>
-        public void SetAmount(Amount? amount)
-        {
-            if (amount.HasValue) 
-            {
-                if (amount > BsvSharp.Units.Amount.MaxValue)
-                    throw new ArgumentException("Maximum value exceeded.");
-
-                if (amount < BsvSharp.Units.Amount.MinValue)
-                    throw new ArgumentException("Minimum value exceeded.");
-
-                _amount = amount.Value;
-                // Update _SetOrder to reflect a new Satoshi value.
-                var isZero = _amount == BsvSharp.Units.Amount.Zero;
-
-                switch (ValueSetOrder) 
-                {
-                    case TokenValues.None:
-                    case TokenValues.S:
-                    case TokenValues.ZS:
-                    case TokenValues.ZF:
-                        ValueSetOrder = isZero ? TokenValues.ZS : TokenValues.S;
-                        break;
-
-                    case TokenValues.F:
-                    case TokenValues.SF:
-                    case TokenValues.RF:
-                    case TokenValues.FS:
-                        ValueSetOrder = isZero ? TokenValues.ZS : TokenValues.FS;
-                        break;
-
-                    case TokenValues.R:
-                    case TokenValues.SR:
-                    case TokenValues.FR:
-                    case TokenValues.RS:
-                        ValueSetOrder = TokenValues.RS;
-                        break;
-
-                    default:
-                        throw new NotSupportedException(nameof(ValueSetOrder));
-                }
-            } 
-            else 
-            {
-                _amount = BsvSharp.Units.Amount.Zero;
-
-                // Update _SetOrder to reflect the loss of Amount Satoshis.
-                switch (ValueSetOrder)
-                {
-                    case TokenValues.None:
-                    case TokenValues.S:
-                    case TokenValues.ZS:
-                        ValueSetOrder = TokenValues.None;
-                        break;
-
-                    case TokenValues.F:
-                    case TokenValues.R:
-                    case TokenValues.RF:
-                    case TokenValues.FR:
-                    case TokenValues.ZF:
-                        // No change.
-                        break;
-
-                    case TokenValues.FS:
-                    case TokenValues.SF:
-                        ValueSetOrder = TokenValues.F;
-                        break;
-
-                    case TokenValues.SR:
-                    case TokenValues.RS:
-                        ValueSetOrder = TokenValues.R;
-                        break;
-
-                    default:
-                        throw new NotSupportedException(nameof(ValueSetOrder));
-                }
-            }
-
-            UpdateConstrainedValues();
-        }
-
-        public void SetFiatTicker(CurrencyTicker fiatTicker) 
-        {
-            FiatTicker = fiatTicker;
-        }
-
-        /// <summary>
-        /// Set a specific fiat or foreign currency value, or clears a previously set value.
-        /// If the fiat value is zero, it constrains the bitcoin amount to be zero as well, but leaves Rate as it was.
-        /// If the fiat value is null, clears fiat constraints on value.
-        /// </summary>
-        /// <param name="fiatValue"></param>
-        public void SetFiatValue(decimal? fiatValue)
-        {
-            if (fiatValue.HasValue)
-            {
-                _fiatValue = fiatValue.Value;
-
-                // Update _SetOrder to reflect a new Fiat/Foreign value.
-                var isZero = _fiatValue == decimal.Zero;
-
-                switch (ValueSetOrder) 
-                {
-                    case TokenValues.None:
-                    case TokenValues.F:
-                    case TokenValues.ZS:
-                    case TokenValues.ZF:
-                        ValueSetOrder = isZero ? TokenValues.ZF : TokenValues.F;
-                        break;
-
-                    case TokenValues.S:
-                    case TokenValues.FS:
-                    case TokenValues.RS:
-                    case TokenValues.SF:
-                        ValueSetOrder = isZero ? TokenValues.ZF : TokenValues.SF;
-                        break;
-
-                    case TokenValues.R:
-                    case TokenValues.SR:
-                    case TokenValues.FR:
-                    case TokenValues.RF:
-                        ValueSetOrder = TokenValues.RF;
-                        break;
-
-                    default:
-                        throw new NotSupportedException(nameof(ValueSetOrder));
-                }
-            } 
-            else
-            {
-                // Retain the ToTicker as the best default even when clearing value.
-                _fiatValue = decimal.Zero;
-
-                // Update _SetOrder to reflect the loss of Fiat/Foreign value.
-                switch (ValueSetOrder)
-                {
-                    case TokenValues.None:
-                    case TokenValues.F:
-                    case TokenValues.ZF:
-                        ValueSetOrder = TokenValues.None;
-                        break;
-
-                    case TokenValues.S:
-                    case TokenValues.R:
-                    case TokenValues.RS:
-                    case TokenValues.SR:
-                    case TokenValues.ZS:
-                        // No change.
-                        break;
-
-                    case TokenValues.FS:
-                    case TokenValues.SF:
-                        ValueSetOrder = TokenValues.S;
-                        break;
-
-                    case TokenValues.FR:
-                    case TokenValues.RF:
-                        ValueSetOrder = TokenValues.R;
-                        break;
-
-                    default:
-                        throw new NotSupportedException(nameof(ValueSetOrder));
-                }
-            }
-
-            UpdateConstrainedValues();
-        }
-
-        /// <summary>
-        /// Set a specific exchange rate, or clears a previously set value.
-        /// A zero exchange rate is treated as a null value, clearing exchange rate constraints.
-        /// </summary>
-        /// <param name="rate"></param>
-        public void SetRate(ExchangeRate rate)
-        {
-            rate.CheckOfTickerIsBSV();
-            _rate = rate.Rate != decimal.Zero ? rate : null;
-
-            if (_rate != null) 
-            {
-                // Update _SetOrder to reflect a new exchange Rate value.
-                switch (ValueSetOrder)
-                {
-                    case TokenValues.None:
-                    case TokenValues.R:
-                        ValueSetOrder = TokenValues.R;
-                        break;
-
-                    case TokenValues.S:
-                    case TokenValues.FS:
-                    case TokenValues.RS:
-                    case TokenValues.SR:
-                    case TokenValues.ZS:
-                        ValueSetOrder = TokenValues.SR;
-                        break;
-
-                    case TokenValues.F:
-                    case TokenValues.SF:
-                    case TokenValues.RF:
-                    case TokenValues.FR:
-                    case TokenValues.ZF:
-                        ValueSetOrder = TokenValues.FR;
-                        break;
-
-                    default:
-                        throw new NotSupportedException(nameof(ValueSetOrder));
-                }
-            } 
-            else 
-            {
-                // Update _SetOrder to reflect the loss of exchange Rate value.
-                switch (ValueSetOrder)
-                {
-                    case TokenValues.None:
-                    case TokenValues.R:
-                        ValueSetOrder = TokenValues.None;
-                        break;
-
-                    case TokenValues.S:
-                    case TokenValues.F:
-                    case TokenValues.SF:
-                    case TokenValues.FS:
-                        // No change.
-                        break;
-
-                    case TokenValues.SR:
-                    case TokenValues.RS:
-                        ValueSetOrder = _amount == BsvSharp.Units.Amount.Zero ? TokenValues.ZS : TokenValues.S;
-                        break;
-
-                    case TokenValues.RF:
-                    case TokenValues.FR:
-                        ValueSetOrder = _fiatValue == decimal.Zero ? TokenValues.ZF : TokenValues.F;
-                        break;
-
-                    default:
-                        throw new NotSupportedException(nameof(ValueSetOrder));
-                }
-            }
-
-            UpdateConstrainedValues();
-        }
+        #endregion
     }
 }

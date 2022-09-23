@@ -10,22 +10,22 @@ namespace CafeLib.BsvSharp.Builders
 {
     public class LockingScriptBuilder : ScriptBuilder
     {
-        public UInt160 PubKeyHash { get; }
+        public UInt160 ScriptPubkeyHash { get; }
 
         public LockingScriptBuilder(Address address, TemplateId templateId = TemplateId.Unknown)
-            : this(address.PubKeyHash, templateId)
+            : this(address.PublicKeyHash, templateId)
         {
         }
 
         public LockingScriptBuilder(PublicKey publicKey, TemplateId templateId = TemplateId.Unknown)
-            : this(publicKey.ToPubKeyHash(), templateId)
+            : this(publicKey.ToPublicKeyHash(), templateId)
         {
         }
 
-        protected LockingScriptBuilder(UInt160 pubKeyHash, TemplateId templateId)
+        protected LockingScriptBuilder(UInt160 pubkeyHash, TemplateId templateId)
             : base(templateId)
         {
-            PubKeyHash = pubKeyHash;
+            ScriptPubkeyHash = pubkeyHash;
         }
 
         protected LockingScriptBuilder(Script script)

@@ -14,7 +14,7 @@ namespace CafeLib.BsvSharp.Keys
     /// <summary>
     /// Represent a BIP32 style key path.
     /// </summary>
-    public class KeyPath : IEnumerable<uint>
+    public sealed class KeyPath : IEnumerable<uint>
     {
         /// <summary>
         /// True if the path starts with m.
@@ -29,7 +29,7 @@ namespace CafeLib.BsvSharp.Keys
         /// </summary>
         private readonly uint[] _indices;
 
-        public IEnumerator<uint> GetEnumerator() => ((IEnumerable<uint>) _indices).GetEnumerator();
+        public IEnumerator<uint> GetEnumerator() => ((IEnumerable<uint>)_indices).GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -96,7 +96,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <returns></returns>
         private static uint[] ParseIndices(string path)
         {
-			return path.Split('/').Where(p => p != "m" && p != "M" && p != "").Select(ParseIndex).ToArray();
+            return path.Split('/').Where(p => p != "m" && p != "M" && p != "").Select(ParseIndex).ToArray();
         }
 
         /// <summary>
@@ -117,9 +117,9 @@ namespace CafeLib.BsvSharp.Keys
         /// </param>
         /// <returns></returns>
         public static KeyPath Parse(string path)
-		{
-			return new KeyPath(path);
-		}
+        {
+            return new KeyPath(path);
+        }
 
         /// <summary>
         /// Extends path with additional indices.
@@ -128,12 +128,12 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="additionalIndices"></param>
         /// <returns>New path with concatenated indices.</returns>
 		public KeyPath Derive(KeyPath additionalIndices)
-		{
+        {
             return new KeyPath(_indices.Concat(additionalIndices._indices).ToArray())
             {
                 _fromPrivateKey = _fromPrivateKey
             };
-		}
+        }
 
         /// <summary>
         /// Extends path with additional index.
@@ -141,7 +141,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="index">Values with HardenedBit set are hardened.</param>
         /// <returns>New path with concatenated index.</returns>
 		public KeyPath Derive(uint index)
-		{
+        {
             return new KeyPath(_indices.Concat(new[] { index }).ToArray())
             {
                 _fromPrivateKey = _fromPrivateKey
@@ -155,11 +155,11 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="hardened">If true, HardenedBit will be added to index.</param>
         /// <returns>New path with concatenated index.</returns>
 		public KeyPath Derive(int index, bool hardened)
-		{
-			if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), "Must be non-negative.");
-			var i = (uint)index;
+        {
+            if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), "Must be non-negative.");
+            var i = (uint)index;
             return Derive(hardened ? i | HardenedBit : i);
-		}
+        }
 
         /// <summary>
         /// Extends path with additional indices from string formatted path.
@@ -168,14 +168,14 @@ namespace CafeLib.BsvSharp.Keys
         /// <param name="path">The indices in path will be concatenated.</param>
         /// <returns>New path with concatenated indices.</returns>
 		public KeyPath Derive(string path)
-		{
-			return Derive(new KeyPath(path));
-		}
+        {
+            return Derive(new KeyPath(path));
+        }
 
         /// <summary>
         /// Returns a new path with one less index, or null if path has no indices.
         /// </summary>
-		public KeyPath Parent => Count == 0 ? null  : new KeyPath(_indices.Take(_indices.Length - 1).ToArray()) { _fromPrivateKey = _fromPrivateKey };
+		public KeyPath Parent => Count == 0 ? null : new KeyPath(_indices.Take(_indices.Length - 1).ToArray()) { _fromPrivateKey = _fromPrivateKey };
 
         /// <summary>
         /// Returns a new path with the last index incremented by one.
@@ -191,11 +191,11 @@ namespace CafeLib.BsvSharp.Keys
         }
 
         public override string ToString()
-		{
+        {
             var sb = new StringBuilder();
             sb.Append(_fromPrivateKey != null && _fromPrivateKey.Value ? "m/" : "M/");
 
-            foreach (var index in _indices) 
+            foreach (var index in _indices)
             {
                 sb.Append(index & ~HardenedBit);
                 if (index >= HardenedBit) sb.Append("'");
@@ -204,7 +204,7 @@ namespace CafeLib.BsvSharp.Keys
 
             sb.Length--;
             return sb.ToString();
-		}
+        }
 
         public override int GetHashCode() => ToString().GetHashCode();
 
@@ -220,8 +220,8 @@ namespace CafeLib.BsvSharp.Keys
         /// Throws InvalidOperation if there are no indices.
         /// </summary>
 		public bool IsHardened
-		{
-			get
+        {
+            get
             {
                 if (Count == 0) throw new InvalidOperationException("No index found");
                 return (_indices[Count - 1] & HardenedBit) != 0;
