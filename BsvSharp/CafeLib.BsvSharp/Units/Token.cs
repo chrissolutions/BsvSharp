@@ -22,7 +22,7 @@ namespace CafeLib.BsvSharp.Units
             ValueSetOrder = TokenValues.None;
             _amount = Amount.Zero;
             _tokenQuantity = decimal.Zero;
-            _exchangeRate = BsvExchangeRate.Default;
+            _exchangeRate = new BsvExchangeRate(ExchangeUnit.NULL, decimal.One);
         }
 
         public Token(Amount amount)
@@ -68,7 +68,7 @@ namespace CafeLib.BsvSharp.Units
 
         public long Satoshis => GetAmount().Satoshis;
 
-        public BsvExchangeRate Rate
+        public BsvExchangeRate ExchangeRate
         {
             get => HasRate ? _exchangeRate : null; 
             set => _exchangeRate = value;
@@ -202,7 +202,9 @@ namespace CafeLib.BsvSharp.Units
         /// Set token quantity.
         /// </summary>
         /// <param name="tokenQuantity"></param>
-        public void SetQuantity(decimal tokenQuantity)
+        /// <param name="exchangeUnit"></param>
+        /// <exception cref="NotSupportedException"></exception>
+        public void SetQuantity(decimal tokenQuantity, ExchangeUnit? exchangeUnit = null)
         {
             _tokenQuantity = tokenQuantity;
 
@@ -217,7 +219,7 @@ namespace CafeLib.BsvSharp.Units
                 _ => throw new NotSupportedException(nameof(ValueSetOrder)),
             };
 
-            UpdateConstrainedValues();
+            UpdateConstrainedValues(exchangeUnit);
         }
 
         /// <summary>
@@ -312,7 +314,7 @@ namespace CafeLib.BsvSharp.Units
         /// <summary>
         /// Some sequences of set values are sufficient to fully constrain the least recently set value.
         /// </summary>
-        private void UpdateConstrainedValues()
+        private void UpdateConstrainedValues(ExchangeUnit? exchangeUnit = null)
         {
             switch (ValueSetOrder)
             {
@@ -326,7 +328,7 @@ namespace CafeLib.BsvSharp.Units
                 case TokenValues.SF:
                 case TokenValues.FS:
                     // Satoshis (Value) and Fiat (ToValue,ToTicker) are set, check and compute ExchangeRate
-                    _exchangeRate = new BsvExchangeRate(ExchangeUnit, _tokenQuantity / _amount.ToBitcoin());
+                    _exchangeRate = new BsvExchangeRate(exchangeUnit.GetValueOrDefault(), _amount.ToBitcoin() / _tokenQuantity);
                     break;
 
                 case TokenValues.SR:
