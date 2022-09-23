@@ -70,13 +70,7 @@ namespace CafeLib.BsvSharp.Units
             }
         }
 
-        public static bool TryParse(string text, BitcoinUnit unit, out Amount amount)
-        {
-            amount = Null;
-            if (!decimal.TryParse(text.Replace("_", ""), out var value)) return false;
-            amount = new Amount(value, unit);
-            return true;
-        }
+        public static Amount FromBitcoin(decimal bitcoins) => new(bitcoins);
 
         public decimal ToBitcoin() => ToBitcoinUnit(BitcoinUnit.Bitcoin);
 
@@ -122,6 +116,14 @@ namespace CafeLib.BsvSharp.Units
         }
 
         public static string ToString(long value) => new Amount(value).ToString();
+
+        public static bool TryParse(string text, BitcoinUnit unit, out Amount amount)
+        {
+            amount = Null;
+            if (!decimal.TryParse(text.Replace("_", ""), out var value)) return false;
+            amount = new Amount(value, unit);
+            return true;
+        }
 
         public bool Equals(Amount o) => Satoshis == o.Satoshis;
         public override bool Equals(object obj) => obj is Amount amount && Equals(amount);

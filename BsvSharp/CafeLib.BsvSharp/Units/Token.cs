@@ -39,13 +39,11 @@ namespace CafeLib.BsvSharp.Units
         }
 
         public Token(Amount amount, BsvExchangeRate exchangeRate, decimal tokenQuantity)
-            : this()
+            : this(amount)
         {
-            SetAmount(amount);
             SetExchangeRate(exchangeRate);
             SetQuantity(tokenQuantity);
         }
-
 
         public static implicit operator Token(Amount value) => new(value);
 

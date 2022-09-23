@@ -52,6 +52,20 @@ namespace CafeLib.BsvSharp.UnitTests.Units
             Assert.Equal(rate, token.ExchangeRate.Rate);
         }
 
+        [Theory]
+        [InlineData(ExchangeUnit.USD, 50, 10, 500)]
+        [InlineData(ExchangeUnit.BTC, .0025, 400, 1)]
+        [InlineData(ExchangeUnit.BTC, .0025, 500, 1.25)]
+        public void Token_Compute_All_Test(ExchangeUnit foreign, decimal rate, decimal tokenQuantity, decimal bitcoin)
+        {
+            var token = new Token(new Amount(bitcoin), new BsvExchangeRate(foreign, rate), tokenQuantity);
+            Assert.True(token.HasAll);
+            Assert.Equal(foreign, token.ExchangeUnit);
+            Assert.Equal(rate, token.ExchangeRate.Rate);
+            Assert.Equal(bitcoin, token.Amount.ToBitcoin());
+            Assert.Equal(tokenQuantity, token.Quantity);
+        }
+
         [Fact]
         public void Token_Clear_Amount_Test()
         {
