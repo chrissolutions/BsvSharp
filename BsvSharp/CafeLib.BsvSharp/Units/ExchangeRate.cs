@@ -9,7 +9,7 @@ namespace CafeLib.BsvSharp.Units
     /// <summary>
     /// Represent the exchange rate of one currency to another at a specific moment in time.
     /// </summary>
-    public record ExchangeRate() : IExchangeRate
+    public record ExchangeRate()
     {
         public static readonly ExchangeRate Default = new();
 
