@@ -29,8 +29,20 @@ namespace CafeLib.BsvSharp.Units
         /// </summary>
         public long Satoshis { get; }
 
+        /// <summary>
+        /// Amount constructor
+        /// </summary>
         public Amount(long satoshis = long.MinValue)
             : this (satoshis, BitcoinUnit.Satoshi)
+        {
+        }
+
+        /// <summary>
+        /// Amount constructor
+        /// </summary>
+        /// <param name="bitcoins">number of bitcoins</param>
+        public Amount(decimal bitcoins)
+            : this(bitcoins, BitcoinUnit.Bitcoin)
         {
         }
 

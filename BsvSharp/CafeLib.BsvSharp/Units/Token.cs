@@ -76,7 +76,7 @@ namespace CafeLib.BsvSharp.Units
 
         public ExchangeUnit ExchangeUnit => _exchangeRate.Foreign;
 
-        public decimal TokenQuantity => GetQuantity();
+        public decimal Quantity => GetQuantity();
 
         /// <summary>
         /// Clear token amount.
@@ -326,13 +326,13 @@ namespace CafeLib.BsvSharp.Units
                 case TokenValues.SF:
                 case TokenValues.FS:
                     // Satoshis (Value) and Fiat (ToValue,ToTicker) are set, check and compute ExchangeRate
-                    _exchangeRate = new BsvExchangeRate(ExchangeUnit, _tokenQuantity / Amount.ToBitcoin());
+                    _exchangeRate = new BsvExchangeRate(ExchangeUnit, _tokenQuantity / _amount.ToBitcoin());
                     break;
 
                 case TokenValues.SR:
                 case TokenValues.RS:
                     // Satoshis and ExchangeRate are set, check and compute Fiat (ToValue,ToTicker)
-                    _tokenQuantity = _exchangeRate.ToForeignUnits(Amount);
+                    _tokenQuantity = _exchangeRate.ToDomesticUnits(_amount.ToBitcoin());
                     break;
 
                 case TokenValues.FR:
