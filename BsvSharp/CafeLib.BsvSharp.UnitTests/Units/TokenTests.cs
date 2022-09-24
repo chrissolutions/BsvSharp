@@ -9,15 +9,15 @@ namespace CafeLib.BsvSharp.UnitTests.Units
         [InlineData(ExchangeUnit.USD, 50, 10, 500)]
         [InlineData(ExchangeUnit.BTC, .0025, 400, 1)]
         [InlineData(ExchangeUnit.BTC, .0025, 500, 1.25)]
-        public void Token_Compute_Amount_Test(ExchangeUnit foreign, decimal rate, decimal bitcoins, decimal exchangeValue)
+        public void Token_Compute_Amount_Test(ExchangeUnit foreignUnit, decimal rate, decimal bitcoins, decimal foreignAmount)
         {
             var token = new Token();
-            var exchangeRate = new BsvExchangeRate(foreign, rate);
+            var exchangeRate = new BsvExchangeRate(foreignUnit, rate);
 
             token.SetExchangeRate(exchangeRate);
             token.SetQuantity(bitcoins);
 
-            Assert.Equal(exchangeValue, token.Amount.ToBitcoin());
+            Assert.Equal(foreignAmount, token.Amount.ToBitcoin());
             Assert.True(token.HasComputedAmount);
             Assert.True(token.HasAll);
         }
@@ -26,12 +26,12 @@ namespace CafeLib.BsvSharp.UnitTests.Units
         [InlineData(ExchangeUnit.USD, 50, 10, 500)]
         [InlineData(ExchangeUnit.BTC, .0025, 400, 1)]
         [InlineData(ExchangeUnit.BTC, .0025, 500, 1.25)]
-        public void Token_Compute_Quantity_Test(ExchangeUnit foreign, decimal rate, decimal bitcoins, decimal exchangeValue)
+        public void Token_Compute_Quantity_Test(ExchangeUnit foreignUnit, decimal rate, decimal bitcoins, decimal foreignAmount)
         {
-            var token = new Token(new Amount(exchangeValue));
+            var token = new Token(new Amount(foreignAmount));
             Assert.True(token.HasAmount);
             Assert.False(token.HasComputedQuantity);
-            var exchangeRate = new BsvExchangeRate(foreign, rate);
+            var exchangeRate = new BsvExchangeRate(foreignUnit, rate);
             token.SetExchangeRate(exchangeRate);
             Assert.True(token.HasComputedQuantity);
             Assert.Equal(bitcoins, token.Quantity);
@@ -41,14 +41,14 @@ namespace CafeLib.BsvSharp.UnitTests.Units
         [InlineData(ExchangeUnit.USD, 50, 10, 500)]
         [InlineData(ExchangeUnit.BTC, .0025, 400, 1)]
         [InlineData(ExchangeUnit.BTC, .0025, 500, 1.25)]
-        public void Token_Compute_Rate_Test(ExchangeUnit foreign, decimal rate, decimal bitcoins, decimal exchangeValue)
+        public void Token_Compute_Rate_Test(ExchangeUnit foreignUnit, decimal rate, decimal bitcoins, decimal foreignAmount)
         {
-            var token = new Token(new Amount(exchangeValue));
+            var token = new Token(new Amount(foreignAmount));
             Assert.True(token.HasAmount);
             Assert.False(token.HasComputedRate);
-            token.SetQuantity(bitcoins, foreign);
+            token.SetQuantity(bitcoins, foreignUnit);
             Assert.True(token.HasComputedRate);
-            Assert.Equal(foreign, token.ExchangeUnit);
+            Assert.Equal(foreignUnit, token.ExchangeUnit);
             Assert.Equal(rate, token.ExchangeRate.Rate);
         }
 
@@ -56,13 +56,13 @@ namespace CafeLib.BsvSharp.UnitTests.Units
         [InlineData(ExchangeUnit.USD, 50, 10, 500)]
         [InlineData(ExchangeUnit.BTC, .0025, 400, 1)]
         [InlineData(ExchangeUnit.BTC, .0025, 500, 1.25)]
-        public void Token_Compute_All_Test(ExchangeUnit foreign, decimal rate, decimal bitcoins, decimal exchangeValue)
+        public void Token_Compute_All_Test(ExchangeUnit foreignUnit, decimal rate, decimal bitcoins, decimal foreignAmount)
         {
-            var token = new Token(new Amount(exchangeValue), new BsvExchangeRate(foreign, rate), bitcoins);
+            var token = new Token(new Amount(foreignAmount), new BsvExchangeRate(foreignUnit, rate), bitcoins);
             Assert.True(token.HasAll);
-            Assert.Equal(foreign, token.ExchangeUnit);
+            Assert.Equal(foreignUnit, token.ExchangeUnit);
             Assert.Equal(rate, token.ExchangeRate.Rate);
-            Assert.Equal(exchangeValue, token.Amount.ToBitcoin());
+            Assert.Equal(foreignAmount, token.Amount.ToBitcoin());
             Assert.Equal(bitcoins, token.Quantity);
         }
 
