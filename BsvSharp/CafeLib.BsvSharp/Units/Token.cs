@@ -4,6 +4,7 @@
 
 using System;
 using CafeLib.BsvSharp.Exceptions;
+using CafeLib.Core.Support;
 
 namespace CafeLib.BsvSharp.Units
 {
@@ -11,10 +12,10 @@ namespace CafeLib.BsvSharp.Units
     /// In practice, the value of an amount is often required in terms of a non-Bitcoin fiat or foreign currency.
     /// There are three quantities
     /// </summary>
-    public class Token
+    public class Token<TExchangeRate> where TExchangeRate : class, IExchangeRate, new()
     {
         private Amount _amount;
-        private BsvExchangeRate _exchangeRate;
+        private TExchangeRate _exchangeRate;
         private decimal _tokenQuantity;
 
         public Token()
@@ -22,7 +23,7 @@ namespace CafeLib.BsvSharp.Units
             ValueSetOrder = TokenValues.None;
             _amount = Amount.Zero;
             _tokenQuantity = decimal.Zero;
-            _exchangeRate = new BsvExchangeRate(ExchangeUnit.NULL, decimal.One);
+            _exchangeRate = new TExchangeRate();
         }
 
         public Token(Amount amount)
@@ -31,21 +32,21 @@ namespace CafeLib.BsvSharp.Units
             SetAmount(amount);
         }
 
-        public Token(BsvExchangeRate exchangeRate, decimal tokenQuantity)
+        public Token(TExchangeRate exchangeRate, decimal tokenQuantity)
             : this(Amount.Zero)
         {
             SetExchangeRate(exchangeRate);
             SetQuantity(tokenQuantity);
         }
 
-        public Token(Amount amount, BsvExchangeRate exchangeRate, decimal tokenQuantity)
+        public Token(Amount amount, TExchangeRate exchangeRate, decimal tokenQuantity)
             : this(amount)
         {
             SetExchangeRate(exchangeRate);
             SetQuantity(tokenQuantity);
         }
 
-        public static implicit operator Token(Amount value) => new(value);
+        public static implicit operator Token<TExchangeRate>(Amount value) => new(value);
 
         public bool HasAll => ValueSetOrder > TokenValues.R;
         public bool HasAmount => ValueSetOrder is > TokenValues.R or TokenValues.S;
@@ -66,9 +67,9 @@ namespace CafeLib.BsvSharp.Units
 
         public long Satoshis => GetAmount().Satoshis;
 
-        public BsvExchangeRate ExchangeRate
+        public TExchangeRate ExchangeRate
         {
-            get => HasRate ? _exchangeRate : null; 
+            get => HasRate ? _exchangeRate : default; 
             set => _exchangeRate = value;
         }
 
@@ -225,7 +226,7 @@ namespace CafeLib.BsvSharp.Units
         /// </summary>
         public void ClearExchangeRate()
         {
-            _exchangeRate = null;
+            _exchangeRate = default;
 
             // Update _SetOrder to reflect the loss of exchange Rate value.
             switch (ValueSetOrder)
@@ -251,6 +252,8 @@ namespace CafeLib.BsvSharp.Units
                     ValueSetOrder = _tokenQuantity == decimal.Zero ? TokenValues.ZF : TokenValues.F;
                     break;
 
+                case TokenValues.ZS:
+                case TokenValues.ZF:
                 default:
                     throw new NotSupportedException(nameof(ValueSetOrder));
             }
@@ -263,7 +266,7 @@ namespace CafeLib.BsvSharp.Units
         /// A zero exchange rate is treated as a null value, clearing exchange rate constraints.
         /// </summary>
         /// <param name="exchangeRate"></param>
-        public void SetExchangeRate(BsvExchangeRate exchangeRate)
+        public void SetExchangeRate(TExchangeRate exchangeRate)
         {
             if (exchangeRate == null || exchangeRate.Rate == decimal.Zero)
             {
@@ -326,7 +329,7 @@ namespace CafeLib.BsvSharp.Units
                 case TokenValues.SF:
                 case TokenValues.FS:
                     // Satoshis (Value) and Fiat (ToValue,ToTicker) are set, check and compute ExchangeRate
-                    _exchangeRate = new BsvExchangeRate(exchangeUnit.GetValueOrDefault(), _amount.ToBitcoin() / _tokenQuantity);
+                    _exchangeRate =  Creator.CreateInstance<TExchangeRate>(exchangeUnit.GetValueOrDefault(), _amount.ToBitcoin() / _tokenQuantity, DateTime.UtcNow);
                     break;
 
                 case TokenValues.SR:
