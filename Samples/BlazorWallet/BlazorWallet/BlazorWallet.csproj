@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="CafeLib.Blazor" Version="2.0.0" />
-    <PackageReference Include="CafeLib.BsvSharp" Version="2.0.3" />
+    <PackageReference Include="CafeLib.BsvSharp" Version="2.0.4" />
     <PackageReference Include="CafeLib.BsvSharp.Api.WhatsOnChain" Version="2.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.9" PrivateAssets="all" />
