@@ -14,32 +14,32 @@ namespace CafeLib.BsvSharp.Units
     /// </summary>
     public class Token<TExchangeRate> where TExchangeRate : class, IExchangeRate, new()
     {
-        private Amount _amount;
+        private decimal _amount;
         private TExchangeRate _exchangeRate;
         private decimal _tokenQuantity;
 
         public Token()
         {
             ValueSetOrder = TokenValues.None;
-            _amount = Amount.Zero;
+            _amount = decimal.Zero;
             _tokenQuantity = decimal.Zero;
             _exchangeRate = new TExchangeRate();
         }
 
-        public Token(Amount amount)
+        public Token(decimal amount)
             : this()
         {
             SetAmount(amount);
         }
 
         public Token(TExchangeRate exchangeRate, decimal tokenQuantity)
-            : this(Amount.Zero)
+            : this(decimal.Zero)
         {
             SetExchangeRate(exchangeRate);
             SetQuantity(tokenQuantity);
         }
 
-        public Token(Amount amount, TExchangeRate exchangeRate, decimal tokenQuantity)
+        public Token(decimal amount, TExchangeRate exchangeRate, decimal tokenQuantity)
             : this(amount)
         {
             SetExchangeRate(exchangeRate);
@@ -63,9 +63,7 @@ namespace CafeLib.BsvSharp.Units
 
         public TokenValues ValueSetOrder { get; set; }
 
-        public Amount Amount => GetAmount();
-
-        public long Satoshis => GetAmount().Satoshis;
+        public decimal Amount => GetAmount();
 
         public TExchangeRate ExchangeRate
         {
@@ -82,7 +80,7 @@ namespace CafeLib.BsvSharp.Units
         /// </summary>
         public void ClearAmount()
         {
-            _amount = Amount.Zero;
+            _amount = decimal.Zero;
 
             // Update _SetOrder to reflect the loss of Amount Satoshis.
             switch (ValueSetOrder)
@@ -121,10 +119,10 @@ namespace CafeLib.BsvSharp.Units
         /// Set a specific bitcoin amount.
         /// </summary>
         /// <param name="amount">bitcoin amount</param>
-        public void SetAmount(Amount amount)
+        public void SetAmount(decimal amount)
         {
             _amount = amount;
-            var isZero = _amount == Amount.Zero;
+            var isZero = _amount == decimal.Zero;
 
             switch (ValueSetOrder)
             {
@@ -244,7 +242,7 @@ namespace CafeLib.BsvSharp.Units
 
                 case TokenValues.SR:
                 case TokenValues.RS:
-                    ValueSetOrder = Amount == Amount.Zero ? TokenValues.ZS : TokenValues.S;
+                    ValueSetOrder = Amount == decimal.Zero ? TokenValues.ZS : TokenValues.S;
                     break;
 
                 case TokenValues.RF:
@@ -295,7 +293,7 @@ namespace CafeLib.BsvSharp.Units
         /// </summary>
         /// <returns></returns>
         /// <exception cref="TokenException">token exception of token does not have an amount.</exception>
-        private Amount GetAmount()
+        private decimal GetAmount()
         {
             if (!HasAmount) throw new TokenException("Token does not have an amount.  Use HasAmount to verify.");
             return _amount;
@@ -329,19 +327,19 @@ namespace CafeLib.BsvSharp.Units
                 case TokenValues.SF:
                 case TokenValues.FS:
                     // Satoshis (Value) and Fiat (ToValue,ToTicker) are set, check and compute ExchangeRate
-                    _exchangeRate =  Creator.CreateInstance<TExchangeRate>(exchangeUnit.GetValueOrDefault(), _amount.ToBitcoin() / _tokenQuantity, DateTime.UtcNow);
+                    _exchangeRate =  Creator.CreateInstance<TExchangeRate>(exchangeUnit.GetValueOrDefault(), _amount / _tokenQuantity, DateTime.UtcNow);
                     break;
 
                 case TokenValues.SR:
                 case TokenValues.RS:
                     // Satoshis and ExchangeRate are set, check and compute Fiat (ToValue,ToTicker)
-                    _tokenQuantity = _exchangeRate.ToDomesticUnits(_amount.ToBitcoin());
+                    _tokenQuantity = _exchangeRate.ToDomesticUnits(_amount);
                     break;
 
                 case TokenValues.FR:
                 case TokenValues.RF:
                     // Fiat (ToValue,ToTicker) and ExchangeRate are set, check and compute Satoshis (Value)
-                    _amount = new Amount(_exchangeRate.ToForeignUnits(Math.Round(_tokenQuantity, 8, MidpointRounding.AwayFromZero)), BitcoinUnit.Bitcoin); 
+                    _amount = _exchangeRate.ToForeignUnits(Math.Round(_tokenQuantity, 8, MidpointRounding.AwayFromZero)); 
                     break;
 
                 case TokenValues.ZS:
@@ -349,7 +347,7 @@ namespace CafeLib.BsvSharp.Units
                     break;
 
                 case TokenValues.ZF:
-                    _amount = Amount.Zero;
+                    _amount = decimal.Zero;
                     break;
 
                 default:
