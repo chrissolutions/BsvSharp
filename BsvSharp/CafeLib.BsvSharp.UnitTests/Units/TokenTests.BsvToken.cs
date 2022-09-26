@@ -4,6 +4,7 @@
 #endregion
 
 using CafeLib.BsvSharp.Units;
+using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.UnitTests.Units
 {
@@ -19,7 +20,7 @@ namespace CafeLib.BsvSharp.UnitTests.Units
             }
 
             public BsvToken(Amount amount)
-                : base(amount)
+                : base(amount.ToBitcoin())
             {
             }
 
@@ -29,7 +30,7 @@ namespace CafeLib.BsvSharp.UnitTests.Units
             }
 
             public BsvToken(Amount amount, BsvExchangeRate exchangeRate, decimal tokenQuantity)
-                : base(amount, exchangeRate, tokenQuantity)
+                : base(amount.ToBitcoin(), exchangeRate, tokenQuantity)
             {
             }
         }

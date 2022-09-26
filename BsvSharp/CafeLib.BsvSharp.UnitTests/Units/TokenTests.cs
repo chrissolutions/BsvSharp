@@ -8,9 +8,9 @@ namespace CafeLib.BsvSharp.UnitTests.Units
         [Fact]
         public void Token_Clear_Amount_Test()
         {
-            var token = new BsvToken(new Amount(100, BitcoinUnit.Bitcoin));
+            var token = new BsvToken(new Amount(100.0M));
             Assert.True(token.HasAmount);
-            Assert.Equal(100, token.Amount.ToBitcoin());
+            Assert.Equal(100, token.Amount);
             token.ClearAmount();
             Assert.False(token.HasAmount);
         }
@@ -51,7 +51,7 @@ namespace CafeLib.BsvSharp.UnitTests.Units
             token.SetExchangeRate(exchangeRate);
             token.SetQuantity(bitcoins);
 
-            Assert.Equal(foreignAmount, token.Amount.ToBitcoin());
+            Assert.Equal(foreignAmount, token.Amount);
             Assert.True(token.HasComputedAmount);
             Assert.True(token.HasAll);
         }
@@ -96,7 +96,7 @@ namespace CafeLib.BsvSharp.UnitTests.Units
             Assert.True(token.HasAll);
             Assert.Equal(foreignUnit, token.ExchangeUnit);
             Assert.Equal(rate, token.ExchangeRate.Rate);
-            Assert.Equal(foreignAmount, token.Amount.ToBitcoin());
+            Assert.Equal(foreignAmount, token.Amount);
             Assert.Equal(bitcoins, token.Quantity);
         }
 
@@ -112,7 +112,7 @@ namespace CafeLib.BsvSharp.UnitTests.Units
             token.SetExchangeRate(exchangeRate);
             token.SetQuantity(usd);
 
-            Assert.Equal(foreignAmount, token.Amount.ToBitcoin());
+            Assert.Equal(foreignAmount, token.Amount);
             Assert.True(token.HasComputedAmount);
             Assert.True(token.HasAll);
         }
