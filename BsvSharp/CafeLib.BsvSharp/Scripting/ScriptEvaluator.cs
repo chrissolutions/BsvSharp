@@ -885,27 +885,35 @@ namespace CafeLib.BsvSharp.Scripting
                 //  Non-canonical public key: too short
                 return false;
             }
-            if (first == 0x04)
+
+            switch (first)
             {
-                if (length != 65)
+                case 0x04:
                 {
-                    //  Non-canonical public key: invalid length for uncompressed key
-                    return false;
+                    if (length != 65)
+                    {
+                        //  Non-canonical public key: invalid length for uncompressed key
+                        return false;
+                    }
+
+                    break;
                 }
-            }
-            else if (first == 0x02 || first == 0x03)
-            {
-                if (length != 33)
+                case 0x02:
+                case 0x03:
                 {
-                    //  Non-canonical public key: invalid length for compressed key
-                    return false;
+                    if (length != 33)
+                    {
+                        //  Non-canonical public key: invalid length for compressed key
+                        return false;
+                    }
+
+                    break;
                 }
+                default:
+                    //  Non-canonical public key: neither compressed nor uncompressed
+                    return false;
             }
-            else
-            {
-                //  Non-canonical public key: neither compressed nor uncompressed
-                return false;
-            }
+
             return true;
         }
 
