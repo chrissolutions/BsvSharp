@@ -731,6 +731,25 @@ namespace CafeLib.BsvSharp.Scripting
                                 }
                                 break;
 
+                            case Opcode.OP_CHECKMULTISIG:
+                            case Opcode.OP_CHECKMULTISIGVERIFY:
+                            {
+                                // ([sig ...] num_of_signatures [pubkey ...] num_of_pubkeys -- bool)
+                                var i = 1;
+                                if (_stack.Count < i) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+
+                                // initialize to max size of CScriptNum::MAXIMUM_ELEMENT_SIZE (4 bytes) 
+                                // because only 4 byte integers are supported by  OP_CHECKMULTISIG / OP_CHECKMULTISIGVERIFY
+                                var keysCount = new ScriptNum(_stack.Peek(-i)).ToInt();
+
+                                // TODO: Keys and opcount are parameterized in client. No magic numbers!
+                                if (keysCount is < 0 or > 20) return SetError(out error, ScriptError.PUBKEY_COUNT);
+
+
+
+                            }
+                            break;
+
                             //
                             // Byte string operations
                             //
@@ -755,7 +774,7 @@ namespace CafeLib.BsvSharp.Scripting
                                     var position = _stack.Pop().ToScriptNum(fRequireMinimal).ToInt();
                                     var data = _stack.Pop();
 
-                                    // Make sure the split point is apropriate.
+                                    // Make sure the split point is appropriate.
                                     if (position < 0 || position > data.Length)
                                         return SetError(out error, ScriptError.INVALID_SPLIT_RANGE);
 
@@ -895,7 +914,7 @@ namespace CafeLib.BsvSharp.Scripting
             var length = vchPubKey.Length;
             var first = vchPubKey.FirstByte;
 
-            return length == 33 && (first == 0x02 || first == 0x03);
+            return length == 33 && first is 0x02 or 0x03;
         }
 
         private static bool CheckSignatureEncoding(VarType vchSig, ScriptFlags flags, ref ScriptError error)
@@ -931,13 +950,14 @@ namespace CafeLib.BsvSharp.Scripting
 
         private static bool VerifySignature(ISignatureChecker checker, VarType vchSig, VarType vchPubKey, Script subScript, ScriptFlags flags)
         {
-            bool fSuccess = false;
+            var fSuccess = false;
             try
             {
                 fSuccess = checker.CheckSignature(vchSig, vchPubKey, subScript, flags);
             }
             catch
             {
+                // ignored
             }
 
             return fSuccess;
@@ -993,38 +1013,15 @@ namespace CafeLib.BsvSharp.Scripting
             }
 
             var b0 = op.Data.FirstByte;
-            if (dataSize == 1 && b0 >= 1 && b0 <= 16)
+            return dataSize switch
             {
-                // Could have used OP_1 .. OP_16.
-                return (int)opcode == (int)Opcode.OP_1 + (b0 - 1);
-            }
-
-            if (dataSize == 1 && b0 == 0x81)
-            {
-                // Could have used OP_1NEGATE.
-                return opcode == Opcode.OP_1NEGATE;
-            }
-
-            if (dataSize <= 75)
-            {
-                // Could have used a direct push (opcode indicating number of bytes
-                // pushed + those bytes).
-                return (int)opcode == dataSize;
-            }
-
-            if (dataSize <= 255)
-            {
-                // Could have used OP_PUSHDATA.
-                return opcode == Opcode.OP_PUSHDATA1;
-            }
-
-            if (dataSize <= 65535)
-            {
-                // Could have used OP_PUSHDATA2.
-                return opcode == Opcode.OP_PUSHDATA2;
-            }
-
-            return true;
+                1 when b0 is >= 1 and <= 16 => (int)opcode == (int)Opcode.OP_1 + (b0 - 1),
+                1 when b0 == 0x81 => opcode == Opcode.OP_1NEGATE,
+                <= 75 => (int)opcode == dataSize,
+                <= 255 => opcode == Opcode.OP_PUSHDATA1,
+                <= 65535 => opcode == Opcode.OP_PUSHDATA2,
+                _ => true
+            };
         }
     }
 }
