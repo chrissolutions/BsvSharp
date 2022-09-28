@@ -736,19 +736,34 @@ namespace CafeLib.BsvSharp.Scripting
                             {
                                 // ([sig ...] num_of_signatures [pubkey ...] num_of_pubkeys -- bool)
                                 var i = 1;
-                                if (_stack.Count < i) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                if (_stack.Count < i) 
+                                    return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
                                 // initialize to max size of CScriptNum::MAXIMUM_ELEMENT_SIZE (4 bytes) 
                                 // because only 4 byte integers are supported by  OP_CHECKMULTISIG / OP_CHECKMULTISIGVERIFY
                                 var keysCount = new ScriptNum(_stack.Peek(-i)).ToInt();
+                                if (keysCount < 0 || keysCount > RootService.Network.Consensus.MaxPubkeysPerMultisig) 
+                                    return SetError(out error, ScriptError.PUBKEY_COUNT);
 
-                                // TODO: Keys and opcount are parameterized in client. No magic numbers!
-                                if (keysCount is < 0 or > 20) return SetError(out error, ScriptError.PUBKEY_COUNT);
+                                nOpCount += keysCount;
+                                if (!IsValidMaxOpsPerScript(nOpCount))
+                                    return SetError(out error, ScriptError.OP_COUNT);
+
+                                var iKey = ++i;
+                                i += keysCount;
+
+                                // iKey2 is the position of last non-signature item in
+                                // the stack. Top stack item = 1. With
+                                // SCRIPT_VERIFY_NULLFAIL, this is used for cleanup if
+                                // operation fails.
+                                var iKey2 = keysCount + 2;
+
+                                if (_stack.Count < i)
+                                    return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
 
-
+                                break;
                             }
-                            break;
 
                             //
                             // Byte string operations
