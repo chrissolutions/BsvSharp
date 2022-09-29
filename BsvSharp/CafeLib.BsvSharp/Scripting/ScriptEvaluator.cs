@@ -821,7 +821,30 @@ namespace CafeLib.BsvSharp.Scripting
                                     _stack.Pop();
                                 }
 
+                                // A bug causes CHECKMULTISIG to consume one extra argument whose contents were not checked in any way.
+                                //
+                                // Unfortunately this is a potential source of mutability, so optionally verify it is exactly equal to zero prior
+                                // to removing it from the stack.
+                                if (_stack.Count < 1)
+                                    return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                if ((flags & ScriptFlags.VERIFY_NULLDUMMY) != 0 && !_stack.Peek().IsEmpty)
+                                    return SetError(out error, ScriptError.SIG_NULLDUMMY);
+                                _stack.Pop();
 
+                                _stack.Push(fSuccess ? VarType.True : VarType.False);
+
+                                //if (opcodenum == OpCodes.OP_CHECKMULTISIGVERIFY)
+                                //{
+                                //    if (fSuccess)
+                                //    {
+                                //        _stack.pop();
+                                //    }
+                                //    else
+                                //    {
+                                //        _errStr = 'SCRIPT_ERR_CHECKMULTISIGVERIFY';
+                                //        return false;
+                                //    }
+                                //}
 
                                 break;
                             }
@@ -830,35 +853,38 @@ namespace CafeLib.BsvSharp.Scripting
                             // Byte string operations
                             //
                             case Opcode.OP_CAT:
-                                {
-                                    // (x1 x2 -- out)
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                            {
+                                // (x1 x2 -- out)
+                                if (_stack.Count < 2)
+                                    return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
-                                    var x2 = _stack.Pop();
-                                    var x1 = _stack.Pop();
-                                    if (x1.Length + x2.Length > RootService.GetNetwork(_networkType).Consensus.MaxScriptElementSize) return SetError(out error, ScriptError.PUSH_SIZE);
+                                var x2 = _stack.Pop();
+                                var x1 = _stack.Pop();
+                                if (x1.Length + x2.Length > RootService.GetNetwork(_networkType).Consensus.MaxScriptElementSize)
+                                    return SetError(out error, ScriptError.PUSH_SIZE);
 
-                                    _stack.Push(x1.Cat(x2));
-                                }
+                                _stack.Push(x1.Cat(x2));
                                 break;
+                            }
 
                             case Opcode.OP_SPLIT:
-                                {
-                                    // (data position -- x1 x2)
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                            {
+                                // (data position -- x1 x2)
+                                if (_stack.Count < 2)
+                                    return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
-                                    var position = _stack.Pop().ToScriptNum(fRequireMinimal).ToInt();
-                                    var data = _stack.Pop();
+                                var position = _stack.Pop().ToScriptNum(fRequireMinimal).ToInt();
+                                var data = _stack.Pop();
 
-                                    // Make sure the split point is appropriate.
-                                    if (position < 0 || position > data.Length)
-                                        return SetError(out error, ScriptError.INVALID_SPLIT_RANGE);
+                                // Make sure the split point is appropriate.
+                                if (position < 0 || position > data.Length)
+                                    return SetError(out error, ScriptError.INVALID_SPLIT_RANGE);
 
-                                    var (x1, x2) = data.Split(position);
-                                    _stack.Push(x1);
-                                    _stack.Push(x2);
-                                }
+                                var (x1, x2) = data.Split(position);
+                                _stack.Push(x1);
+                                _stack.Push(x2);
                                 break;
+                            }
 
                             //
                             // Conversion operations
