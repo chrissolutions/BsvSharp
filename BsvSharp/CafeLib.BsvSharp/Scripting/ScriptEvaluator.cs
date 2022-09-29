@@ -302,43 +302,43 @@ namespace CafeLib.BsvSharp.Scripting
                                 break;
 
                             case Opcode.OP_DEPTH:
-                                {
-                                    // -- _stacksize
-                                    _stack.Push(new ScriptNum(_stack.Count).ToValType());
-                                }
+                            {
+                                // -- _stacksize
+                                _stack.Push(new ScriptNum(_stack.Count).ToValType());
                                 break;
+                            }
 
                             case Opcode.OP_DROP:
-                                {
-                                    // (x -- )
-                                    if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Pop();
-                                }
+                            {
+                                // (x -- )
+                                if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Pop();
                                 break;
+                            }
 
                             case Opcode.OP_DUP:
-                                {
-                                    // (x -- x x)
-                                    if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Push(_stack.Peek());
-                                }
+                            {
+                                // (x -- x x)
+                                if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Push(_stack.Peek());
                                 break;
+                            }
 
                             case Opcode.OP_NIP:
-                                {
-                                    // (x1 x2 -- x2)
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Nip();
-                                }
+                            {
+                                // (x1 x2 -- x2)
+                                if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Nip();
                                 break;
+                            }
 
                             case Opcode.OP_OVER:
-                                {
-                                    // (x1 x2 -- x1 x2 x1)
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Over();
-                                }
+                            {
+                                // (x1 x2 -- x1 x2 x1)
+                                if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Over();
                                 break;
+                            }
 
                             case Opcode.OP_PICK:
                             case Opcode.OP_ROLL:
@@ -352,41 +352,41 @@ namespace CafeLib.BsvSharp.Scripting
                                     _stack.Roll(n);
                                 else
                                     _stack.Pick(n);
+                                break;
                             }
-                            break;
 
                             case Opcode.OP_ROT:
-                                {
-                                    // (x1 x2 x3 -- x2 x3 x1)
-                                    if (_stack.Count < 3) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Rot();
-                                }
+                            {
+                                // (x1 x2 x3 -- x2 x3 x1)
+                                if (_stack.Count < 3) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Rot();
                                 break;
+                            }
 
                             case Opcode.OP_SWAP:
-                                {
-                                    // (x1 x2 -- x2 x1)
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Swap();
-                                }
+                            {
+                                // (x1 x2 -- x2 x1)
+                                if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Swap();
                                 break;
+                            }
 
                             case Opcode.OP_TUCK:
-                                {
-                                    // (x1 x2 -- x2 x1 x2)
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Tuck();
-                                }
+                            {
+                                // (x1 x2 -- x2 x1 x2)
+                                if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Tuck();
                                 break;
+                            }
 
                             case Opcode.OP_SIZE:
-                                {
-                                    // (in -- in size)
-                                    if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    var sn = new ScriptNum(_stack.Peek().Length);
-                                    _stack.Push(sn.ToValType());
-                                }
+                            {
+                                // (in -- in size)
+                                if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                var sn = new ScriptNum(_stack.Peek().Length);
+                                _stack.Push(sn.ToValType());
                                 break;
+                            }
 
                             //
                             // Bitwise logic
@@ -394,85 +394,85 @@ namespace CafeLib.BsvSharp.Scripting
                             case Opcode.OP_AND:
                             case Opcode.OP_OR:
                             case Opcode.OP_XOR:
+                            {
+                                // (x1 x2 - out)
+                                if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                var x2 = _stack.Pop();
+                                var x1 = _stack.Pop();
+
+                                // Inputs must be the same size
+                                if (x1.Length != x2.Length) return SetError(out error, ScriptError.INVALID_OPERAND_SIZE);
+
+                                // To avoid allocating, we modify vch1 in place.
+                                switch (op.Code)
                                 {
-                                    // (x1 x2 - out)
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    var x2 = _stack.Pop();
-                                    var x1 = _stack.Pop();
+                                    case Opcode.OP_AND:
+                                        _stack.Push(x1.BitAnd(x2));
+                                        break;
 
-                                    // Inputs must be the same size
-                                    if (x1.Length != x2.Length) return SetError(out error, ScriptError.INVALID_OPERAND_SIZE);
+                                    case Opcode.OP_OR:
+                                        _stack.Push(x1.BitOr(x2));
+                                        break;
 
-                                    // To avoid allocating, we modify vch1 in place.
-                                    switch (op.Code)
-                                    {
-                                        case Opcode.OP_AND:
-                                            _stack.Push(x1.BitAnd(x2));
-                                            break;
-
-                                        case Opcode.OP_OR:
-                                            _stack.Push(x1.BitOr(x2));
-                                            break;
-
-                                        case Opcode.OP_XOR:
-                                            _stack.Push(x1.BitXor(x2));
-                                            break;
-                                    }
+                                    case Opcode.OP_XOR:
+                                        _stack.Push(x1.BitXor(x2));
+                                        break;
                                 }
                                 break;
+                            }
 
                             case Opcode.OP_INVERT:
-                                {
-                                    // (x -- out)
-                                    if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Push(_stack.Pop().BitInvert());
-                                }
+                            {
+                                // (x -- out)
+                                if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Push(_stack.Pop().BitInvert());
                                 break;
+                            }
 
                             case Opcode.OP_LSHIFT:
                             case Opcode.OP_RSHIFT:
+                            {
+                                // (x n -- out)
+                                if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                var nvt = _stack.Pop();
+                                var n = nvt.ToInt32();
+                                if (n < 0)
                                 {
-                                    // (x n -- out)
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    var nvt = _stack.Pop();
-                                    var n = nvt.ToInt32();
-                                    if (n < 0)
-                                    {
-                                        _stack.Push(nvt);
-                                        return SetError(out error, ScriptError.INVALID_NUMBER_RANGE);
-                                    }
-                                    var x = _stack.Pop();
-                                    var r = op.Code == Opcode.OP_LSHIFT ? x.LShift(n) : x.RShift(n);
-                                    _stack.Push(r);
+                                    _stack.Push(nvt);
+                                    return SetError(out error, ScriptError.INVALID_NUMBER_RANGE);
                                 }
+                                var x = _stack.Pop();
+                                var r = op.Code == Opcode.OP_LSHIFT ? x.LShift(n) : x.RShift(n);
+                                _stack.Push(r);
                                 break;
+                            }
 
                             case Opcode.OP_EQUAL:
                             case Opcode.OP_EQUALVERIFY:
-                                // case OP_NOTEQUAL: // use OP_NUMNOTEQUAL
-                                {
-                                    // (x1 x2 - bool)
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    var x2 = _stack.Pop();
-                                    var x1 = _stack.Pop();
+                            // case OP_NOTEQUAL: // use OP_NUMNOTEQUAL
+                            {
+                                // (x1 x2 - bool)
+                                if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                var x2 = _stack.Pop();
+                                var x1 = _stack.Pop();
 
-                                    var fEqual = x1.BitEquals(x2); // (vch1 == vch2);
-                                                                   // OP_NOTEQUAL is disabled because it would be too
-                                                                   // easy to say something like n != 1 and have some
-                                                                   // wiseguy pass in 1 with extra zero bytes after it
-                                                                   // (numerically, 0x01 == 0x0001 == 0x000001)
-                                                                   // if (opcode == OP_NOTEQUAL)
-                                                                   //    fEqual = !fEqual;
-                                    _stack.Push(fEqual ? VarType.True : VarType.False);
-                                    if (op.Code == Opcode.OP_EQUALVERIFY)
-                                    {
-                                        if (fEqual)
-                                            _stack.Pop();
-                                        else
-                                            return SetError(out error, ScriptError.EQUALVERIFY);
-                                    }
+                                var fEqual = x1.BitEquals(x2); // (vch1 == vch2);
+                                                               // OP_NOTEQUAL is disabled because it would be too
+                                                               // easy to say something like n != 1 and have some
+                                                               // wiseguy pass in 1 with extra zero bytes after it
+                                                               // (numerically, 0x01 == 0x0001 == 0x000001)
+                                                               // if (opcode == OP_NOTEQUAL)
+                                                               //    fEqual = !fEqual;
+                                _stack.Push(fEqual ? VarType.True : VarType.False);
+                                if (op.Code == Opcode.OP_EQUALVERIFY)
+                                {
+                                    if (fEqual)
+                                        _stack.Pop();
+                                    else
+                                        return SetError(out error, ScriptError.EQUALVERIFY);
                                 }
                                 break;
+                            }
 
                             //
                             // Numeric
@@ -483,39 +483,39 @@ namespace CafeLib.BsvSharp.Scripting
                             case Opcode.OP_ABS:
                             case Opcode.OP_NOT:
                             case Opcode.OP_0NOTEQUAL:
+                            {
+                                // (in -- out)
+                                if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                var bn = _stack.Pop().ToScriptNum(fRequireMinimal);
+                                switch (op.Code)
                                 {
-                                    // (in -- out)
-                                    if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    var bn = _stack.Pop().ToScriptNum(fRequireMinimal);
-                                    switch (op.Code)
-                                    {
-                                        case Opcode.OP_1ADD:
-                                            bn += ScriptNum.One;
-                                            break;
-                                        case Opcode.OP_1SUB:
-                                            bn -= ScriptNum.One;
-                                            break;
-                                        case Opcode.OP_NEGATE:
+                                    case Opcode.OP_1ADD:
+                                        bn += ScriptNum.One;
+                                        break;
+                                    case Opcode.OP_1SUB:
+                                        bn -= ScriptNum.One;
+                                        break;
+                                    case Opcode.OP_NEGATE:
+                                        bn = -bn;
+                                        break;
+                                    case Opcode.OP_ABS:
+                                        if (bn < ScriptNum.Zero)
+                                        {
                                             bn = -bn;
-                                            break;
-                                        case Opcode.OP_ABS:
-                                            if (bn < ScriptNum.Zero)
-                                            {
-                                                bn = -bn;
-                                            }
-                                            break;
-                                        case Opcode.OP_NOT:
-                                            bn = (bn == ScriptNum.Zero);
-                                            break;
-                                        case Opcode.OP_0NOTEQUAL:
-                                            bn = (bn != ScriptNum.Zero);
-                                            break;
-                                        default:
-                                            return SetError(out error, ScriptError.BAD_OPCODE);
-                                    }
-                                    _stack.Push(bn.ToValType());
+                                        }
+                                        break;
+                                    case Opcode.OP_NOT:
+                                        bn = (bn == ScriptNum.Zero);
+                                        break;
+                                    case Opcode.OP_0NOTEQUAL:
+                                        bn = (bn != ScriptNum.Zero);
+                                        break;
+                                    default:
+                                        return SetError(out error, ScriptError.BAD_OPCODE);
                                 }
+                                _stack.Push(bn.ToValType());
                                 break;
+                            }
 
                             case Opcode.OP_ADD:
                             case Opcode.OP_SUB:
@@ -533,113 +533,113 @@ namespace CafeLib.BsvSharp.Scripting
                             case Opcode.OP_GREATERTHANOREQUAL:
                             case Opcode.OP_MIN:
                             case Opcode.OP_MAX:
+                            {
+                                // (x1 x2 -- out)
+                                if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                var bn2 = _stack.Pop().ToScriptNum(fRequireMinimal);
+                                var bn1 = _stack.Pop().ToScriptNum(fRequireMinimal);
+                                // ReSharper disable once RedundantAssignment
+                                var bn = new ScriptNum(0);
+                                switch (op.Code)
                                 {
-                                    // (x1 x2 -- out)
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    var bn2 = _stack.Pop().ToScriptNum(fRequireMinimal);
-                                    var bn1 = _stack.Pop().ToScriptNum(fRequireMinimal);
-                                    // ReSharper disable once RedundantAssignment
-                                    var bn = new ScriptNum(0);
-                                    switch (op.Code)
+                                    case Opcode.OP_ADD:
+                                        bn = bn1 + bn2;
+                                        break;
+
+                                    case Opcode.OP_SUB:
+                                        bn = bn1 - bn2;
+                                        break;
+
+                                    case Opcode.OP_MUL:
+                                        bn = bn1 * bn2;
+                                        break;
+
+                                    case Opcode.OP_DIV:
+                                        // denominator must not be 0
+                                        if (bn2 == 0) return SetError(out error, ScriptError.DIV_BY_ZERO);
+                                        bn = bn1 / bn2;
+                                        break;
+
+                                    case Opcode.OP_MOD:
+                                        // divisor must not be 0
+                                        if (bn2 == 0) return SetError(out error, ScriptError.MOD_BY_ZERO);
+                                        bn = bn1 % bn2;
+                                        break;
+
+                                    case Opcode.OP_BOOLAND:
+                                        bn = (bn1 != ScriptNum.Zero && bn2 != ScriptNum.Zero);
+                                        break;
+
+                                    case Opcode.OP_BOOLOR:
+                                        bn = (bn1 != ScriptNum.Zero || bn2 != ScriptNum.Zero);
+                                        break;
+
+                                    case Opcode.OP_NUMEQUAL:
+                                        bn = (bn1 == bn2);
+                                        break;
+
+                                    case Opcode.OP_NUMEQUALVERIFY:
+                                        bn = (bn1 == bn2);
+                                        break;
+
+                                    case Opcode.OP_NUMNOTEQUAL:
+                                        bn = (bn1 != bn2);
+                                        break;
+
+                                    case Opcode.OP_LESSTHAN:
+                                        bn = (bn1 < bn2);
+                                        break;
+
+                                    case Opcode.OP_GREATERTHAN:
+                                        bn = (bn1 > bn2);
+                                        break;
+
+                                    case Opcode.OP_LESSTHANOREQUAL:
+                                        bn = (bn1 <= bn2);
+                                        break;
+
+                                    case Opcode.OP_GREATERTHANOREQUAL:
+                                        bn = (bn1 >= bn2);
+                                        break;
+
+                                    case Opcode.OP_MIN:
+                                        bn = (bn1 < bn2 ? bn1 : bn2);
+                                        break;
+
+                                    case Opcode.OP_MAX:
+                                        bn = (bn1 > bn2 ? bn1 : bn2);
+                                        break;
+
+                                    default:
+                                        return SetError(out error, ScriptError.BAD_OPCODE);
+                                }
+                                _stack.Push(bn.ToValType());
+
+                                if (op.Code == Opcode.OP_NUMEQUALVERIFY)
+                                {
+                                    var vch = _stack.Pop();
+                                    if (!vch.ToBool())
                                     {
-                                        case Opcode.OP_ADD:
-                                            bn = bn1 + bn2;
-                                            break;
-
-                                        case Opcode.OP_SUB:
-                                            bn = bn1 - bn2;
-                                            break;
-
-                                        case Opcode.OP_MUL:
-                                            bn = bn1 * bn2;
-                                            break;
-
-                                        case Opcode.OP_DIV:
-                                            // denominator must not be 0
-                                            if (bn2 == 0) return SetError(out error, ScriptError.DIV_BY_ZERO);
-                                            bn = bn1 / bn2;
-                                            break;
-
-                                        case Opcode.OP_MOD:
-                                            // divisor must not be 0
-                                            if (bn2 == 0) return SetError(out error, ScriptError.MOD_BY_ZERO);
-                                            bn = bn1 % bn2;
-                                            break;
-
-                                        case Opcode.OP_BOOLAND:
-                                            bn = (bn1 != ScriptNum.Zero && bn2 != ScriptNum.Zero);
-                                            break;
-
-                                        case Opcode.OP_BOOLOR:
-                                            bn = (bn1 != ScriptNum.Zero || bn2 != ScriptNum.Zero);
-                                            break;
-
-                                        case Opcode.OP_NUMEQUAL:
-                                            bn = (bn1 == bn2);
-                                            break;
-
-                                        case Opcode.OP_NUMEQUALVERIFY:
-                                            bn = (bn1 == bn2);
-                                            break;
-
-                                        case Opcode.OP_NUMNOTEQUAL:
-                                            bn = (bn1 != bn2);
-                                            break;
-
-                                        case Opcode.OP_LESSTHAN:
-                                            bn = (bn1 < bn2);
-                                            break;
-
-                                        case Opcode.OP_GREATERTHAN:
-                                            bn = (bn1 > bn2);
-                                            break;
-
-                                        case Opcode.OP_LESSTHANOREQUAL:
-                                            bn = (bn1 <= bn2);
-                                            break;
-
-                                        case Opcode.OP_GREATERTHANOREQUAL:
-                                            bn = (bn1 >= bn2);
-                                            break;
-
-                                        case Opcode.OP_MIN:
-                                            bn = (bn1 < bn2 ? bn1 : bn2);
-                                            break;
-
-                                        case Opcode.OP_MAX:
-                                            bn = (bn1 > bn2 ? bn1 : bn2);
-                                            break;
-
-                                        default:
-                                            return SetError(out error, ScriptError.BAD_OPCODE);
-                                    }
-                                    _stack.Push(bn.ToValType());
-
-                                    if (op.Code == Opcode.OP_NUMEQUALVERIFY)
-                                    {
-                                        var vch = _stack.Pop();
-                                        if (!vch.ToBool())
-                                        {
-                                            _stack.Push(vch);
-                                            return SetError(out error, ScriptError.NUMEQUALVERIFY);
-                                        }
+                                        _stack.Push(vch);
+                                        return SetError(out error, ScriptError.NUMEQUALVERIFY);
                                     }
                                 }
                                 break;
+                            }
 
                             case Opcode.OP_WITHIN:
-                                {
-                                    // (x1 min2 max3 -- out)
-                                    if (_stack.Count < 3) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    var bn3 = _stack.Pop().ToScriptNum(fRequireMinimal);
-                                    var bn2 = _stack.Pop().ToScriptNum(fRequireMinimal);
-                                    var bn1 = _stack.Pop().ToScriptNum(fRequireMinimal);
-                                    // ReSharper disable once UnusedVariable
-                                    var bn = new ScriptNum(0);
-                                    var fValue = (bn2 <= bn1 && bn1 < bn3);
-                                    _stack.Push(fValue ? VarType.True : VarType.False);
-                                }
+                            {
+                                // (x1 min2 max3 -- out)
+                                if (_stack.Count < 3) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                var bn3 = _stack.Pop().ToScriptNum(fRequireMinimal);
+                                var bn2 = _stack.Pop().ToScriptNum(fRequireMinimal);
+                                var bn1 = _stack.Pop().ToScriptNum(fRequireMinimal);
+                                // ReSharper disable once UnusedVariable
+                                var bn = new ScriptNum(0);
+                                var fValue = (bn2 <= bn1 && bn1 < bn3);
+                                _stack.Push(fValue ? VarType.True : VarType.False);
                                 break;
+                            }
 
                             //
                             // Crypto
@@ -649,87 +649,87 @@ namespace CafeLib.BsvSharp.Scripting
                             case Opcode.OP_SHA256:
                             case Opcode.OP_HASH160:
                             case Opcode.OP_HASH256:
+                            {
+                                // (in -- hash)
+                                if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                var vch = _stack.Pop();
+                                byte[] data;
+                                switch (op.Code)
                                 {
-                                    // (in -- hash)
-                                    if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    var vch = _stack.Pop();
-                                    byte[] data;
-                                    switch (op.Code)
-                                    {
-                                        case Opcode.OP_SHA1:
-                                            data = vch.Span.Sha1();
-                                            break;
+                                    case Opcode.OP_SHA1:
+                                        data = vch.Span.Sha1();
+                                        break;
 
-                                        case Opcode.OP_RIPEMD160:
-                                            data = vch.Span.Ripemd160();
-                                            break;
+                                    case Opcode.OP_RIPEMD160:
+                                        data = vch.Span.Ripemd160();
+                                        break;
 
-                                        case Opcode.OP_HASH160:
-                                            data = vch.Span.Hash160();
-                                            break;
+                                    case Opcode.OP_HASH160:
+                                        data = vch.Span.Hash160();
+                                        break;
 
-                                        case Opcode.OP_SHA256:
-                                            data = vch.Span.Sha256();
-                                            break;
+                                    case Opcode.OP_SHA256:
+                                        data = vch.Span.Sha256();
+                                        break;
 
-                                        case Opcode.OP_HASH256:
-                                            data = vch.Span.Hash256();
-                                            break;
+                                    case Opcode.OP_HASH256:
+                                        data = vch.Span.Hash256();
+                                        break;
 
-                                        default:
-                                            return SetError(out error, ScriptError.BAD_OPCODE);
-                                    }
-                                    _stack.Push(new VarType(data));
+                                    default:
+                                        return SetError(out error, ScriptError.BAD_OPCODE);
                                 }
+                                _stack.Push(new VarType(data));
                                 break;
+                            }
 
                             case Opcode.OP_CODESEPARATOR:
-                                {
-                                    // Hash starts after the code separator
-                                    pStart = ros.Data.Start;
-                                }
+                            {
+                                // Hash starts after the code separator
+                                pStart = ros.Data.Start;
                                 break;
+                            }
 
                             case Opcode.OP_CHECKSIG:
                             case Opcode.OP_CHECKSIGVERIFY:
+                            {
+                                // (sig pubkey -- bool)
+                                if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                var vchPubKey = _stack.Pop();
+                                var vchSig = _stack.Pop();
+
+                                if (!CheckSignatureEncoding(vchSig, flags, ref error) || !CheckPubkeyEncoding(vchPubKey, flags, ref error))
                                 {
-                                    // (sig pubkey -- bool)
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    var vchPubKey = _stack.Pop();
-                                    var vchSig = _stack.Pop();
+                                    // error is set
+                                    return false;
+                                }
 
-                                    if (!CheckSignatureEncoding(vchSig, flags, ref error) || !CheckPubkeyEncoding(vchPubKey, flags, ref error))
+                                // Subset of script starting at the most recent code separator.
+                                var subScript = script.Slice(pStart, pend);
+
+                                // Remove signature for pre-fork scripts
+                                CleanupScriptCode(subScript, vchSig, flags);
+
+                                var fSuccess = VerifySignature(checker, vchSig, vchPubKey, subScript, flags);
+                                if (!fSuccess && (flags & ScriptFlags.VERIFY_NULLFAIL) != 0 && vchSig.Length > 0)
+                                {
+                                    return SetError(out error, ScriptError.SIG_NULLFAIL);
+                                }
+
+                                _stack.Push(fSuccess ? VarType.True : VarType.False);
+                                if (op.Code == Opcode.OP_CHECKSIGVERIFY)
+                                {
+                                    if (fSuccess)
                                     {
-                                        // error is set
-                                        return false;
+                                        _stack.Pop();
                                     }
-
-                                    // Subset of script starting at the most recent code separator.
-                                    var subScript = script.Slice(pStart, pend);
-
-                                    // Remove signature for pre-fork scripts
-                                    CleanupScriptCode(subScript, vchSig, flags);
-
-                                    var fSuccess = VerifySignature(checker, vchSig, vchPubKey, subScript, flags);
-                                    if (!fSuccess && (flags & ScriptFlags.VERIFY_NULLFAIL) != 0 && vchSig.Length > 0)
+                                    else
                                     {
-                                        return SetError(out error, ScriptError.SIG_NULLFAIL);
-                                    }
-
-                                    _stack.Push(fSuccess ? VarType.True : VarType.False);
-                                    if (op.Code == Opcode.OP_CHECKSIGVERIFY)
-                                    {
-                                        if (fSuccess)
-                                        {
-                                            _stack.Pop();
-                                        }
-                                        else
-                                        {
-                                            return SetError(out error, ScriptError.CHECKSIGVERIFY);
-                                        }
+                                        return SetError(out error, ScriptError.CHECKSIGVERIFY);
                                     }
                                 }
                                 break;
+                            }
 
                             case Opcode.OP_CHECKMULTISIG:
                             case Opcode.OP_CHECKMULTISIGVERIFY:
@@ -889,38 +889,38 @@ namespace CafeLib.BsvSharp.Scripting
                             // Conversion operations
                             //
                             case Opcode.OP_NUM2BIN:
-                                {
-                                    // (in size -- out)
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                            {
+                                // (in size -- out)
+                                if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
-                                    var size = _stack.Pop().ToScriptNum(fRequireMinimal).ToInt();
-                                    if (size < 0 || size > RootService.GetNetwork(_networkType).Consensus.MaxScriptElementSize)
-                                        return SetError(out error, ScriptError.PUSH_SIZE);
+                                var size = _stack.Pop().ToScriptNum(fRequireMinimal).ToInt();
+                                if (size < 0 || size > RootService.GetNetwork(_networkType).Consensus.MaxScriptElementSize)
+                                    return SetError(out error, ScriptError.PUSH_SIZE);
 
-                                    var num = _stack.Pop();
+                                var num = _stack.Pop();
 
-                                    var (bin, ok) = num.Num2Bin((uint)size);
+                                var (bin, ok) = num.Num2Bin((uint)size);
 
-                                    if (!ok) return SetError(out error, ScriptError.IMPOSSIBLE_ENCODING);
+                                if (!ok) return SetError(out error, ScriptError.IMPOSSIBLE_ENCODING);
 
-                                    _stack.Push(bin);
-                                }
+                                _stack.Push(bin);
                                 break;
+                            }
 
                             case Opcode.OP_BIN2NUM:
-                                {
-                                    // (in -- out)
-                                    if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                            {
+                                // (in -- out)
+                                if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
-                                    var bin = _stack.Pop();
+                                var bin = _stack.Pop();
 
-                                    var (num, ok) = bin.Bin2Num();
+                                var (num, ok) = bin.Bin2Num();
 
-                                    if (!ok) return SetError(out error, ScriptError.INVALID_NUMBER_RANGE);
+                                if (!ok) return SetError(out error, ScriptError.INVALID_NUMBER_RANGE);
 
-                                    _stack.Push(num);
-                                }
+                                _stack.Push(num);
                                 break;
+                            }
 
                             default:
                                 return SetError(out error, ScriptError.BAD_OPCODE);
