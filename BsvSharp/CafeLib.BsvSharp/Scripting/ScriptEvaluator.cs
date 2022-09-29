@@ -833,18 +833,17 @@ namespace CafeLib.BsvSharp.Scripting
 
                                 _stack.Push(fSuccess ? VarType.True : VarType.False);
 
-                                //if (opcodenum == OpCodes.OP_CHECKMULTISIGVERIFY)
-                                //{
-                                //    if (fSuccess)
-                                //    {
-                                //        _stack.pop();
-                                //    }
-                                //    else
-                                //    {
-                                //        _errStr = 'SCRIPT_ERR_CHECKMULTISIGVERIFY';
-                                //        return false;
-                                //    }
-                                //}
+                                if (op.Code == Opcode.OP_CHECKMULTISIGVERIFY)
+                                {
+                                    if (fSuccess)
+                                    {
+                                        _stack.Pop();
+                                    }
+                                    else
+                                    {
+                                        return SetError(out error, ScriptError.CHECKMULTISIGVERIFY);
+                                    }
+                                }
 
                                 break;
                             }
