@@ -761,6 +761,16 @@ namespace CafeLib.BsvSharp.Scripting
                                 if (_stack.Count < i)
                                     return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
+                                var nSigsCount = new ScriptNum(_stack.Peek(-i), fRequireMinimal).ToInt();
+                                if (nSigsCount < 0 || nSigsCount > keysCount)
+                                    return SetError(out error, ScriptError.SIG_COUNT);
+
+                                var iSig = ++i;
+                                i += nSigsCount;
+                                if (_stack.Count < i)
+                                    return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+
+
 
                                 break;
                             }
