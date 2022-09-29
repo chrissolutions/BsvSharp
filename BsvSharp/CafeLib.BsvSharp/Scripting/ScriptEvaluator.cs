@@ -121,12 +121,12 @@ namespace CafeLib.BsvSharp.Scripting
                             case Opcode.OP_14:
                             case Opcode.OP_15:
                             case Opcode.OP_16:
-                                {
-                                    var sn = new ScriptNum((int)op.Code - (int)Opcode.OP_1 + 1);
-                                    _stack.Push(sn.ToValType());
-                                    // ( -- value)
-                                }
+                            {
+                                var sn = new ScriptNum((int)op.Code - (int)Opcode.OP_1 + 1);
+                                _stack.Push(sn.ToValType());
+                                // ( -- value)
                                 break;
+                            }
 
                             //
                             // Control
@@ -146,82 +146,82 @@ namespace CafeLib.BsvSharp.Scripting
                             case Opcode.OP_NOP8:
                             case Opcode.OP_NOP9:
                             case Opcode.OP_NOP10:
+                            {
+                                if ((flags & ScriptFlags.VERIFY_DISCOURAGE_UPGRADABLE_NOPS) != 0)
                                 {
-                                    if ((flags & ScriptFlags.VERIFY_DISCOURAGE_UPGRADABLE_NOPS) != 0)
-                                    {
-                                        return SetError(out error, ScriptError.DISCOURAGE_UPGRADABLE_NOPS);
-                                    }
+                                    return SetError(out error, ScriptError.DISCOURAGE_UPGRADABLE_NOPS);
                                 }
                                 break;
+                            }
 
                             case Opcode.OP_IF:
                             case Opcode.OP_NOTIF:
+                            {
+                                // <expression> if [statements] [else [statements]]
+                                // endif
+                                var fValue = false;
+                                if (fExec)
                                 {
-                                    // <expression> if [statements] [else [statements]]
-                                    // endif
-                                    var fValue = false;
-                                    if (fExec)
-                                    {
-                                        if (_stack.Count < 1)
-                                        {
-                                            return SetError(out error, ScriptError.UNBALANCED_CONDITIONAL);
-                                        }
-                                        var vch = _stack.Pop();
-                                        if ((flags & ScriptFlags.VERIFY_MINIMALIF) != 0)
-                                        {
-                                            if (vch.Length > 1 || vch.Length == 1 && vch.FirstByte != 1)
-                                            {
-                                                _stack.Push(vch);
-                                                return SetError(out error, ScriptError.MINIMALIF);
-                                            }
-                                        }
-                                        fValue = vch.ToBool();
-                                        if (op.Code == Opcode.OP_NOTIF)
-                                        {
-                                            fValue = !fValue;
-                                        }
-                                    }
-                                    vfExec.Push(fValue);
-                                }
-                                break;
-
-                            case Opcode.OP_ELSE:
-                                {
-                                    if (vfExec.Count < 1)
-                                    {
-                                        return SetError(out error, ScriptError.UNBALANCED_CONDITIONAL);
-                                    }
-                                    vfExec.Push(!vfExec.Pop());
-                                }
-                                break;
-
-                            case Opcode.OP_ENDIF:
-                                {
-                                    if (vfExec.Count < 1)
-                                    {
-                                        return SetError(out error, ScriptError.UNBALANCED_CONDITIONAL);
-                                    }
-                                    vfExec.Pop();
-                                }
-                                break;
-
-                            case Opcode.OP_VERIFY:
-                                {
-                                    // (true -- ) or
-                                    // (false -- false) and return
                                     if (_stack.Count < 1)
                                     {
-                                        return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                        return SetError(out error, ScriptError.UNBALANCED_CONDITIONAL);
                                     }
                                     var vch = _stack.Pop();
-                                    var fValue = vch.ToBool();
-                                    if (!fValue)
+                                    if ((flags & ScriptFlags.VERIFY_MINIMALIF) != 0)
                                     {
-                                        _stack.Push(vch);
-                                        return SetError(out error, ScriptError.VERIFY);
+                                        if (vch.Length > 1 || vch.Length == 1 && vch.FirstByte != 1)
+                                        {
+                                            _stack.Push(vch);
+                                            return SetError(out error, ScriptError.MINIMALIF);
+                                        }
+                                    }
+                                    fValue = vch.ToBool();
+                                    if (op.Code == Opcode.OP_NOTIF)
+                                    {
+                                        fValue = !fValue;
                                     }
                                 }
+                                vfExec.Push(fValue);
                                 break;
+                            }
+
+                            case Opcode.OP_ELSE:
+                            {
+                                if (vfExec.Count < 1)
+                                {
+                                    return SetError(out error, ScriptError.UNBALANCED_CONDITIONAL);
+                                }
+                                vfExec.Push(!vfExec.Pop());
+                                break;
+                            }
+
+                            case Opcode.OP_ENDIF:
+                            {
+                                if (vfExec.Count < 1)
+                                {
+                                    return SetError(out error, ScriptError.UNBALANCED_CONDITIONAL);
+                                }
+                                vfExec.Pop();
+                                break;
+                            }
+
+                            case Opcode.OP_VERIFY:
+                            {
+                                // (true -- ) or
+                                // (false -- false) and return
+                                if (_stack.Count < 1)
+                                {
+                                    return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                }
+                                var vch = _stack.Pop();
+                                var fValue = vch.ToBool();
+                                if (!fValue)
+                                {
+                                    _stack.Push(vch);
+                                    return SetError(out error, ScriptError.VERIFY);
+                                }
+                                break;
+                            }
 
                             case Opcode.OP_RETURN:
                                 return SetError(out error, ScriptError.OP_RETURN);
@@ -230,76 +230,76 @@ namespace CafeLib.BsvSharp.Scripting
                             // Stack ops
                             //
                             case Opcode.OP_TOALTSTACK:
-                                {
-                                    if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    altStack.Push(_stack.Pop());
-                                }
+                            {
+                                if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                altStack.Push(_stack.Pop());
                                 break;
+                            }
 
                             case Opcode.OP_FROMALTSTACK:
-                                {
-                                    if (altStack.Count < 1) return SetError(out error, ScriptError.INVALID_ALTSTACK_OPERATION);
-                                    _stack.Push(altStack.Pop());
-                                }
+                            {
+                                if (altStack.Count < 1) return SetError(out error, ScriptError.INVALID_ALTSTACK_OPERATION);
+                                _stack.Push(altStack.Pop());
                                 break;
+                            }
 
                             case Opcode.OP_2DROP:
-                                {
-                                    // (x1 x2 -- )
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Drop2();
-                                }
+                            {
+                                // (x1 x2 -- )
+                                if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Drop2();
                                 break;
+                            }
 
                             case Opcode.OP_2DUP:
-                                {
-                                    // (x1 x2 -- x1 x2 x1 x2)
-                                    if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Dup2();
-                                }
+                            {
+                                // (x1 x2 -- x1 x2 x1 x2)
+                                if (_stack.Count < 2) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Dup2();
                                 break;
+                            }
 
                             case Opcode.OP_3DUP:
-                                {
-                                    // (x1 x2 x3 -- x1 x2 x3 x1 x2 x3)
-                                    if (_stack.Count < 3) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Dup3();
-                                }
+                            {
+                                // (x1 x2 x3 -- x1 x2 x3 x1 x2 x3)
+                                if (_stack.Count < 3) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Dup3();
                                 break;
+                            }
 
                             case Opcode.OP_2OVER:
-                                {
-                                    // (x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2)
-                                    if (_stack.Count < 4) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Over2();
-                                }
+                            {
+                                // (x1 x2 x3 x4 -- x1 x2 x3 x4 x1 x2)
+                                if (_stack.Count < 4) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Over2();
                                 break;
+                            }
 
                             case Opcode.OP_2ROT:
-                                {
-                                    // (x1 x2 x3 x4 x5 x6 -- x3 x4 x5 x6 x1 x2)
-                                    if (_stack.Count < 6) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Rot2();
-                                }
+                            {
+                                // (x1 x2 x3 x4 x5 x6 -- x3 x4 x5 x6 x1 x2)
+                                if (_stack.Count < 6) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Rot2();
                                 break;
+                            }
 
                             case Opcode.OP_2SWAP:
-                                {
-                                    // (x1 x2 x3 x4 -- x3 x4 x1 x2)
-                                    if (_stack.Count < 4) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    _stack.Swap2();
-                                }
+                            {
+                                // (x1 x2 x3 x4 -- x3 x4 x1 x2)
+                                if (_stack.Count < 4) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                _stack.Swap2();
                                 break;
+                            }
 
                             case Opcode.OP_IFDUP:
-                                {
-                                    // (x - 0 | x x)
-                                    if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
-                                    var vch = _stack.Peek();
-                                    if (vch.ToBool())
-                                        _stack.Push(vch);
-                                }
+                            {
+                                // (x - 0 | x x)
+                                if (_stack.Count < 1) return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
+                                var vch = _stack.Peek();
+                                if (vch.ToBool())
+                                    _stack.Push(vch);
                                 break;
+                            }
 
                             case Opcode.OP_DEPTH:
                             {
