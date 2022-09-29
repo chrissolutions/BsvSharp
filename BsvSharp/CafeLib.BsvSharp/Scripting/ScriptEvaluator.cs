@@ -807,6 +807,21 @@ namespace CafeLib.BsvSharp.Scripting
                                     }
                                 }
 
+                                // Clean up stack of actual arguments
+                                while (i-- > 1)
+                                {
+                                    // If the operation failed, we require that all signatures must be empty vector
+                                    if (!fSuccess && (flags & ScriptFlags.VERIFY_NULLFAIL) != 0 && iKey2 <= 0 && !_stack.Peek().IsEmpty)
+                                        return SetError(out error, ScriptError.SIG_NULLFAIL);
+
+                                    if (iKey2 > 0)
+                                    {
+                                        iKey2--;
+                                    }
+                                    _stack.Pop();
+                                }
+
+
 
                                 break;
                             }
