@@ -710,7 +710,7 @@ namespace CafeLib.BsvSharp.Scripting
                                     // Remove signature for pre-fork scripts
                                     CleanupScriptCode(subScript, vchSig, flags);
 
-                                    bool fSuccess = VerifySignature(checker, vchSig, vchPubKey, subScript, flags);
+                                    var fSuccess = VerifySignature(checker, vchSig, vchPubKey, subScript, flags);
                                     if (!fSuccess && (flags & ScriptFlags.VERIFY_NULLFAIL) != 0 && vchSig.Length > 0)
                                     {
                                         return SetError(out error, ScriptError.SIG_NULLFAIL);
@@ -770,6 +770,17 @@ namespace CafeLib.BsvSharp.Scripting
                                 if (_stack.Count < i)
                                     return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
+                                // Subset of script starting at the most recent // codeseparator
+                                var subScript = script.Slice(pStart, pend);
+
+                                // Remove signature for pre-fork scripts
+                                for (var k = 0; k < nSigsCount; k++)
+                                {
+                                    var vchSig = _stack.Peek(index: -iSig - k);
+                                    CleanupScriptCode(subScript, vchSig, flags);
+                                }
+
+                                
 
 
                                 break;
