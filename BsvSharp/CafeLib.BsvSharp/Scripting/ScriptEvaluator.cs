@@ -741,28 +741,28 @@ namespace CafeLib.BsvSharp.Scripting
 
                                 // initialize to max size of CScriptNum::MAXIMUM_ELEMENT_SIZE (4 bytes) 
                                 // because only 4 byte integers are supported by  OP_CHECKMULTISIG / OP_CHECKMULTISIGVERIFY
-                                var keysCount = new ScriptNum(_stack.Peek(-i)).ToInt();
-                                if (keysCount < 0 || keysCount > RootService.Network.Consensus.MaxPubkeysPerMultisig) 
+                                var nKeysCount = new ScriptNum(_stack.Peek(-i)).ToInt();
+                                if (nKeysCount < 0 || nKeysCount > RootService.Network.Consensus.MaxPubkeysPerMultisig) 
                                     return SetError(out error, ScriptError.PUBKEY_COUNT);
 
-                                nOpCount += keysCount;
+                                nOpCount += nKeysCount;
                                 if (!IsValidMaxOpsPerScript(nOpCount))
                                     return SetError(out error, ScriptError.OP_COUNT);
 
                                 var iKey = ++i;
-                                i += keysCount;
+                                i += nKeysCount;
 
                                 // iKey2 is the position of last non-signature item in
                                 // the stack. Top stack item = 1. With
                                 // SCRIPT_VERIFY_NULLFAIL, this is used for cleanup if
                                 // operation fails.
-                                var iKey2 = keysCount + 2;
+                                var iKey2 = nKeysCount + 2;
 
                                 if (_stack.Count < i)
                                     return SetError(out error, ScriptError.INVALID_STACK_OPERATION);
 
                                 var nSigsCount = new ScriptNum(_stack.Peek(-i), fRequireMinimal).ToInt();
-                                if (nSigsCount < 0 || nSigsCount > keysCount)
+                                if (nSigsCount < 0 || nSigsCount > nKeysCount)
                                     return SetError(out error, ScriptError.SIG_COUNT);
 
                                 var iSig = ++i;
@@ -791,9 +791,20 @@ namespace CafeLib.BsvSharp.Scripting
                                         return false;
                                     }
 
+                                    if (VerifySignature(checker, vchSig, vchPubkey, subScript, flags))
+                                    {
+                                        iSig++;
+                                        nSigsCount--;
+                                    }
 
+                                    iKey++;
+                                    nKeysCount--;
 
-                                    fSuccess = false;
+                                    // If there are more signatures left than keys left, then too many signatures have failed.
+                                    if (nSigsCount > nKeysCount)
+                                    {
+                                        fSuccess = false;
+                                    }
                                 }
 
 
