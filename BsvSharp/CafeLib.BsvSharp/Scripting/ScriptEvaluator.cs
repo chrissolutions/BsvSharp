@@ -698,7 +698,7 @@ namespace CafeLib.BsvSharp.Scripting
                                     var vchPubKey = _stack.Pop();
                                     var vchSig = _stack.Pop();
 
-                                    if (!CheckSignatureEncoding(vchSig, flags, ref error) || !CheckPubKeyEncoding(vchPubKey, flags, ref error))
+                                    if (!CheckSignatureEncoding(vchSig, flags, ref error) || !CheckPubkeyEncoding(vchPubKey, flags, ref error))
                                     {
                                         // error is set
                                         return false;
@@ -780,7 +780,21 @@ namespace CafeLib.BsvSharp.Scripting
                                     CleanupScriptCode(subScript, vchSig, flags);
                                 }
 
-                                
+                                var fSuccess = true;
+                                while (fSuccess && nSigsCount > 0)
+                                {
+                                    var vchSig = _stack.Peek(-iSig);
+                                    var vchPubkey = _stack.Peek(-iKey);
+
+                                    if (!CheckSignatureEncoding(vchSig, flags, ref error) || !CheckPubkeyEncoding(vchPubkey, flags, ref error))
+                                    { 
+                                        return false;
+                                    }
+
+
+
+                                    fSuccess = false;
+                                }
 
 
                                 break;
@@ -897,7 +911,7 @@ namespace CafeLib.BsvSharp.Scripting
             }
         }
 
-        private static bool CheckPubKeyEncoding(VarType vchPubKey, ScriptFlags flags, ref ScriptError error)
+        private static bool CheckPubkeyEncoding(VarType vchPubKey, ScriptFlags flags, ref ScriptError error)
         {
             if ((flags & ScriptFlags.VERIFY_STRICTENC) != 0 && !IsCompressedOrUncompressedPubKey(vchPubKey))
                 return SetError(out error, ScriptError.PUBKEYTYPE);
