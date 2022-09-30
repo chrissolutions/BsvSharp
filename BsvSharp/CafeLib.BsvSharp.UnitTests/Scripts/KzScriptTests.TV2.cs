@@ -21,26 +21,30 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
             /// <summary>
             /// ScriptSig as hex string.
             /// </summary>
-            public string sig;
+            public readonly string sig;
             /// <summary>
             /// ScriptPub .
             /// </summary>
-            public string pub;
+            public readonly string pub;
             /// <summary>
             /// Flags
             /// </summary>
-            public string flags;
+            public readonly string flags;
             /// <summary>
             /// Result: Error or OK.
             /// </summary>
-            public string error;
+            public readonly string error;
+            /// <summary>
+            /// Description.
+            /// </summary>
+            public readonly string description;
 
-            public Script scriptSig;
+            public readonly Script scriptSig;
             public Script scriptPubKey;
-            public ScriptFlags scriptFlags;
-            public ScriptError scriptError;
-            public Opcode[] opcodes;
-            public Opcode? keyopcode;
+            public readonly ScriptFlags scriptFlags;
+            public readonly ScriptError scriptError;
+            public readonly Opcode[] opcodes;
+            public readonly Opcode? keyopcode;
 
             public TV2(params string[] args)
             {
@@ -48,6 +52,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                 pub = args[1];
                 flags = args[2];
                 error = args[3];
+                description = args[4];
 
                 scriptSig = ScriptBuilder.ParseTestScript(sig).ToScript();
                 scriptPubKey = ScriptBuilder.ParseTestScript(pub).ToScript();

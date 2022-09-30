@@ -122,7 +122,8 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                     var pub = r[1].Value<string>();
                     var flags = r[2].Value<string>();
                     var error = r[3].Value<string>();
-                    tv2s.Add(new TV2(sig, pub, flags, error));
+                    var description = r.Count() > 4 ? r[4].Value<string>() : "no comment";
+                    tv2s.Add(new TV2(sig, pub, flags, error, description));
                 }
             }
 
@@ -151,7 +152,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                 foreach (var tv in list)
                 {
                     i++;
-                    var tv2 = new TV2(tv.sig, tv.pub, tv.flags, tv.error);
+                    var tv2 = new TV2(tv.sig, tv.pub, tv.flags, tv.error, tv.description);
                     //_testOutputHelper.WriteLine($"{opcode} {i}");
                     //_testOutputHelper.WriteLine($"Sig: {tv.scriptSig.ToHexString()} => {tv.scriptSig}");
                     //_testOutputHelper.WriteLine($"Pub: {tv.scriptPub.ToHexString()} => {tv.scriptPub}");
@@ -195,6 +196,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                         _testOutputHelper.WriteLine($"{opcode}");
                         _testOutputHelper.WriteLine($"Sig: {tv.scriptSig.ToHexString()} => {tv.scriptSig}");
                         _testOutputHelper.WriteLine($"Pub: {tv.scriptPubKey.ToHexString()} => {tv.scriptPubKey}");
+                        _testOutputHelper.WriteLine($"Description: {tv.description}");
                     }
                     Assert.True(correct);
                 }
