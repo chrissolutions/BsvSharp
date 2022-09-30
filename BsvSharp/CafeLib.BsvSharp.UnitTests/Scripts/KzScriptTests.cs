@@ -3,15 +3,11 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CafeLib.BsvSharp.Builders;
-using CafeLib.BsvSharp.Encoding;
-using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Scripting;
-using CafeLib.BsvSharp.Services;
 using CafeLib.BsvSharp.Transactions;
 using CafeLib.BsvSharp.Units;
 using CafeLib.Core.Extensions;
@@ -25,33 +21,6 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
     public partial class KzScriptTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
-
-        [Fact]
-        public void Decode()
-        {
-            var address = new PublicKey(true);
-            var e = UInt160.FromHex("c2eaba3b9c29575322c6e24fdc1b49bdfe405bad", true);
-            var s1 = Encoders.Base58Check.Encode(RootService.Network.PublicKeyAddress.ToArray().Concat(e));
-            var s2 = Encoders.Base58Check.Encode(RootService.Network.ScriptAddress.ToArray().Concat(e));
-            //e.Span.CopyTo(address.Span);
-            //var id = address.GetID();
-            Assert.True(true);
-        }
-
-        /// <summary>
-        /// Test Vector
-        /// </summary>
-        public class TestValue1
-        {
-            /// <summary>
-            /// Script as hex string.
-            /// </summary>
-            public string Hex;
-            /// <summary>
-            /// Script as decoded OPs.
-            /// </summary>
-            public string Decode;
-        }
 
         public KzScriptTests(ITestOutputHelper testOutputHelper)
         {
@@ -152,7 +121,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                 foreach (var tv in list)
                 {
                     i++;
-                    var tv2 = new TV2(tv.sig, tv.pub, tv.flags, tv.error, tv.description);
+                    //var tv2 = new TV2(tv.sig, tv.pub, tv.flags, tv.error, tv.description);
                     //_testOutputHelper.WriteLine($"{opcode} {i}");
                     //_testOutputHelper.WriteLine($"Sig: {tv.scriptSig.ToHexString()} => {tv.scriptSig}");
                     //_testOutputHelper.WriteLine($"Pub: {tv.scriptPub.ToHexString()} => {tv.scriptPub}");

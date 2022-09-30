@@ -110,7 +110,6 @@ namespace CafeLib.BsvSharp.Scripting
                 if (op.Code > Opcode.OP_16) return false;
             }
 
-            Data = new VarType(ros);
             return true;
         }
 
