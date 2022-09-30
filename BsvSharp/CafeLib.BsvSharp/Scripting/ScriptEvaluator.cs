@@ -976,22 +976,19 @@ namespace CafeLib.BsvSharp.Scripting
             return true;
         }
 
-        private static bool IsCompressedOrUncompressedPubKey(VarType vchPubKey)
+        private static bool IsCompressedOrUncompressedPubKey(byte[] vchPubKey)
         {
-            var length = vchPubKey.Length;
-            var first = vchPubKey.FirstByte;
-
-            if (length < 33)
+            if (vchPubKey.Length < 33)
             {
                 //  Non-canonical public key: too short
                 return false;
             }
 
-            switch (first)
+            switch (vchPubKey[0])
             {
                 case 0x04:
                 {
-                    if (length != 65)
+                    if (vchPubKey.Length != 65)
                     {
                         //  Non-canonical public key: invalid length for uncompressed key
                         return false;
@@ -1002,7 +999,7 @@ namespace CafeLib.BsvSharp.Scripting
                 case 0x02:
                 case 0x03:
                 {
-                    if (length != 33)
+                    if (vchPubKey.Length != 33)
                     {
                         //  Non-canonical public key: invalid length for compressed key
                         return false;
@@ -1014,7 +1011,6 @@ namespace CafeLib.BsvSharp.Scripting
                     //  Non-canonical public key: neither compressed nor uncompressed
                     return false;
             }
-
             return true;
         }
 
