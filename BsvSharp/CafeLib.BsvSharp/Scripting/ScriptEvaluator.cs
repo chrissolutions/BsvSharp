@@ -741,7 +741,7 @@ namespace CafeLib.BsvSharp.Scripting
 
                                 // initialize to max size of CScriptNum::MAXIMUM_ELEMENT_SIZE (4 bytes) 
                                 // because only 4 byte integers are supported by  OP_CHECKMULTISIG / OP_CHECKMULTISIGVERIFY
-                                var nKeysCount = new ScriptNum(_stack.Peek(-i)).ToInt();
+                                var nKeysCount = new ScriptNum(_stack.Peek(-i), fRequireMinimal).ToInt();
                                 if (nKeysCount < 0 || nKeysCount > RootService.Network.Consensus.MaxPubkeysPerMultisig) 
                                     return SetError(out error, ScriptError.PUBKEY_COUNT);
 

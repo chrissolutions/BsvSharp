@@ -182,7 +182,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                     {
                         _ when tv.scriptPubKey.IsPay2ScriptHash() => true,          // P2SH is unsupported.
                         _ when tv.scriptError == ScriptError.CLEANSTACK => true,    // CLEANSTACK dependent on unsupported P2SH.
-                        _ when opcode == Opcode.OP_CHECKMULTISIG => true,           // OP_CHECKMULTISIG not implemented.
+                        //_ when opcode == Opcode.OP_CHECKMULTISIG => true,           // OP_CHECKMULTISIG not implemented.
                         _ when opcode == Opcode.OP_CHECKMULTISIGVERIFY => true,     // OP_CHECKMULTISIGVERIFY not implemented.
                         _ when opcode == Opcode.OP_CHECKLOCKTIMEVERIFY => true,     // OP_CHECKLOCKTIMEVERIFY not implemented.
                         _ when opcode == Opcode.OP_CHECKSEQUENCEVERIFY => true,     // OP_CHECKSEQUENCEVERIFY not implemented.
