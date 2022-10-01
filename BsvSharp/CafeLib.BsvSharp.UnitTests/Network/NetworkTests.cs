@@ -10,6 +10,8 @@ namespace CafeLib.BsvSharp.UnitTests.Network
         [Theory]
         [InlineData(NetworkType.Main, 620538)]
         [InlineData(NetworkType.Test, 1344302)]
+        [InlineData(NetworkType.Regression, 10000)]
+        [InlineData(NetworkType.Scaling, 100)]
         public void Network_Type_Test(NetworkType networkType, int genesis)
         {
             var network = RootService.GetNetwork(networkType);

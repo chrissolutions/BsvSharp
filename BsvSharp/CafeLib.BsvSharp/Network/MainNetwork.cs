@@ -22,6 +22,8 @@ namespace CafeLib.BsvSharp.Network
                 Bip65Height = 388381,
                 // 00000000000000000379eaa19dce8c9b722d46ae6a57c2f1a988119488b50931
                 Bip66Height = 363725,
+                // 000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5
+                CsvHeight = 419328,
                 ProofOfWorkLimit = UInt256.FromHex("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
                 // two weeks
                 ProofOfWorkTargetTimespan = 14 * 24 * 60 * 60,

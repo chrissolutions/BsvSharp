@@ -23,6 +23,7 @@ namespace CafeLib.BsvSharp.Network
                 // 000000002104c8c45e99a8853285a3b592602a3ccde2b832481da85e9e4ba182
                 Bip66Height = 363725,
                 // 00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb
+                CsvHeight = 770112,
                 ProofOfWorkLimit = UInt256.FromHex("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
                 // two weeks
                 ProofOfWorkTargetTimespan = 14 * 24 * 60 * 60,
@@ -66,7 +67,6 @@ namespace CafeLib.BsvSharp.Network
                 },
             };
         }
-
 
         private static byte[][] GetPrefixes()
         {
