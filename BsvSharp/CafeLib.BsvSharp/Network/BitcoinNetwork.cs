@@ -90,6 +90,9 @@ namespace CafeLib.BsvSharp.Network
                 // August 1, 2017 hard fork
                 UahfHeight = 478558,
 
+                // February 2020, Genesis Upgrade
+                GenesisHeight = 620538,
+
                 // November 13, 2017 hard fork
                 DaaHeight = 504031,
                 Deployments =

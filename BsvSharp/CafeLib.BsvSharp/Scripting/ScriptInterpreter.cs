@@ -42,8 +42,8 @@ namespace CafeLib.BsvSharp.Scripting
         /// <param name="flags">script flags</param>
         /// <param name="checker">signature checker</param>
         /// <param name="error">error output parameter</param>
-        /// <returns>true if verfied; false if not verfied</returns>
-        /// <remarks>P2SH scripts are not verfied</remarks>
+        /// <returns>true if verified; false if not verified</returns>
+        /// <remarks>P2SH scripts are not verified</remarks>
         public static bool VerifyScript(Script scriptSig, Script scriptPubKey, ScriptFlags flags, ISignatureChecker checker, out ScriptError error)
         {
             SetError(out error, ScriptError.UNKNOWN_ERROR);
