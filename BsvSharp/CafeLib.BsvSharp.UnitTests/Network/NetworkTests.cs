@@ -1,12 +1,5 @@
-﻿using CafeLib.BsvSharp.Builders;
-using CafeLib.BsvSharp.Extensions;
-using CafeLib.BsvSharp.Keys;
-using CafeLib.BsvSharp.Network;
-using CafeLib.BsvSharp.Scripting;
+﻿using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Services;
-using CafeLib.BsvSharp.Signatures;
-using CafeLib.BsvSharp.Transactions;
-using CafeLib.Core.Numerics;
 using Xunit;
 
 namespace CafeLib.BsvSharp.UnitTests.Network
