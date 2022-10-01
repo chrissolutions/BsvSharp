@@ -7,7 +7,7 @@ namespace CafeLib.BsvSharp.Network
     public class TestNetwork : BitcoinNetwork
     {
         public TestNetwork()
-            : base(NetworkType.Test, new Lazy<byte[][]>(GetPrefixes).Value)
+            : base(NetworkType.Test, GetConsensus(), new Lazy<byte[][]>(GetPrefixes).Value)
         {
         }
 

@@ -6,14 +6,14 @@ namespace CafeLib.BsvSharp.UnitTests.Network
 {
     public class NetworkTests
     {
-        [Fact]
-        public void Network_Type_Test()
+        [Theory]
+        [InlineData(NetworkType.Main, 620538)]
+        [InlineData(NetworkType.Test, 1344302)]
+        public void Network_Type_Test(NetworkType networkType, int genesis)
         {
-            var networkMain = RootService.GetNetwork(NetworkType.Main);
-            Assert.Equal(NetworkType.Main, networkMain.NodeType);
-
-            var networkTest = RootService.GetNetwork(NetworkType.Test);
-            Assert.Equal(NetworkType.Test, networkTest.NodeType);
+            var network = RootService.GetNetwork(networkType);
+            Assert.Equal(networkType, network.NodeType);
+            Assert.Equal(network.Consensus.GenesisHeight, genesis);
         }
     }
 }
