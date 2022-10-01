@@ -43,10 +43,12 @@ namespace CafeLib.BsvSharp.Network
                 // August 1, 2017 hard fork
                 UahfHeight = 1155875,
 
+                // November 13, 2017 hard fork
+                DaaHeight = 1188697,
+
                 // February 2020, Genesis Upgrade
                 GenesisHeight = 1344302,
 
-                DaaHeight = 1188697,
                 Deployments =
                 {
                     [(int) DeploymentPos.DeploymentTestDummy] = new Bip9Deployment
