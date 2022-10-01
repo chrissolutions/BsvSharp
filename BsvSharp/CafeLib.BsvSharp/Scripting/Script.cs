@@ -5,7 +5,6 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using CafeLib.BsvSharp.Builders;
@@ -14,6 +13,7 @@ using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Persistence;
+using CafeLib.BsvSharp.Services;
 using CafeLib.BsvSharp.Signatures;
 using CafeLib.Core.Buffers;
 using Newtonsoft.Json;
@@ -25,7 +25,7 @@ namespace CafeLib.BsvSharp.Scripting
     {
         internal VarType Data { get; private set; }
 
-        public static Script None { get; } = new Script(Array.Empty<byte>());
+        public static Script None { get; } = new(Array.Empty<byte>());
 
         public long Length => Data.Length;
 
@@ -54,7 +54,6 @@ namespace CafeLib.BsvSharp.Scripting
         /// Serialize Script to data writer
         /// </summary>
         /// <param name="writer">data writer</param>
-        /// <param name="parameters">parameters</param>
         /// <returns>data writer</returns>
         public IDataWriter WriteTo(IDataWriter writer)
         {
@@ -64,36 +63,7 @@ namespace CafeLib.BsvSharp.Scripting
             return writer;
         }
         
-
-        public void Read(BinaryReader s)
-        {
-            var count = s.ReadInt32();
-            if (count == -1)
-            {
-                Data = VarType.Empty;
-            }
-            else
-            {
-                var bytes = new byte[count];
-                s.Read(bytes);
-                Data = new VarType(bytes);
-            }
-        }
-
-        public void Write(BinaryWriter writer)
-        {
-            if (Data.IsEmpty)
-            {
-                writer.Write(-1);
-            }
-            else
-            {
-                writer.Write(Data.Length);
-                writer.Write(Data.Span);
-            }
-        }
-
-        public Script Slice(SequencePosition start, SequencePosition end) => new Script(Data.Span.Slice(start.GetInteger(), end.GetInteger()));
+        public Script Slice(SequencePosition start, SequencePosition end) => new(Data.Span[start.GetInteger()..end.GetInteger()]);
 
         public bool IsPushOnly()
         {
@@ -296,7 +266,7 @@ namespace CafeLib.BsvSharp.Scripting
         public static bool operator ==(Script x, Script y) => x.Equals(y);
         public static bool operator !=(Script x, Script y) => !(x == y);
 
-        public static implicit operator Script(VarType rhs) => new Script(rhs);
+        public static implicit operator Script(VarType rhs) => new(rhs);
         public static explicit operator VarType(Script rhs) => rhs.Data;
 
         /// <summary>
@@ -390,7 +360,7 @@ namespace CafeLib.BsvSharp.Scripting
 
         /// <summary>
         /// Returns true if the script is an unspendable OP_RETURN.
-        /// Prior to the Genesis upgrade (block 620538), an OP_RETURN script could never evaluate to true.
+        /// Prior to the Genesis upgrade, an OP_RETURN script could never evaluate to true.
         /// After Genesis, the value at the top of the stack when executing an OP_RETURN determines the script result.
         /// Therefore, after Genesis, a value of zero is pushed before the OP_RETURN (which may be followed by arbitrary push datas)
         /// to create an unspendable output.
@@ -403,22 +373,28 @@ namespace CafeLib.BsvSharp.Scripting
         public static bool IsOpReturn(ReadOnlyByteSpan script, int? height = null) 
         {
             var result = false;
-            if (script.Length > 0 && script[0] == 0x6a)
+            switch (script.Length)
             {
-                if (height <= 620538)
+                case > 0 when script[0] == 0x6a:
                 {
-                    result = true;
+                    if (height <= RootService.Network.Consensus.GenesisHeight)
+                    {
+                        result = true;
+                    }
+
+                    break;
                 }
-            } 
-            else if (script.Length > 1 && script[1] == 0x6a && script[0] == 0) 
-            {
-                result = true;
+
+                case > 1 when script[1] == 0x6a && script[0] == 0:
+                    result = true;
+                    break;
             }
+
             return result;
         }
 
-        public static (bool unspendable, TemplateId templateId) ParseKnownScriptPubTemplates(ReadOnlyByteSpan scriptPubBuf0, int? height) {
-
+        public static (bool unspendable, TemplateId templateId) ParseKnownScriptPubTemplates(ReadOnlyByteSpan scriptPubBuf0, int? height)
+        {
             // Check for OP_RETURN outputs, these are unspendable and are flagged with a -1 SpentByTxId value.
             // After Genesis, bare OP_RETURN is spendable (anything that pushes true on sig script can spend.
             var unspendable = IsOpReturn(scriptPubBuf0, height);

@@ -44,6 +44,10 @@ namespace CafeLib.BsvSharp.Network
 
                 // November 13, 2017 hard fork
                 DaaHeight = 504031,
+
+                // February 2020, Genesis Upgrade
+                GenesisHeight = 620538,
+
                 Deployments =
                 {
                     [(int) DeploymentPos.DeploymentTestDummy] = new Bip9Deployment
@@ -66,8 +70,8 @@ namespace CafeLib.BsvSharp.Network
         {
             // Deployment of BIP68, BIP112, and BIP113.
             var prefixes = new byte[(int)Base58Type.MaxBase58Types][];
-            prefixes[(int)Base58Type.PrivateKeyCompressed] = new byte[] { (byte)'L', (byte)'K' };
-            prefixes[(int)Base58Type.PrivateKeyUncompressed] = new byte[] { (byte)'5' };
+            prefixes[(int)Base58Type.PrivateKeyCompressed] = new[] { (byte)'L', (byte)'K' };
+            prefixes[(int)Base58Type.PrivateKeyUncompressed] = new[] { (byte)'5' };
             prefixes[(int)Base58Type.PubkeyAddress] = new byte[] { 0 };
             prefixes[(int)Base58Type.PubkeyAddress] = new byte[] { 0 };
             prefixes[(int)Base58Type.ScriptAddress] = new byte[] { 5 };
