@@ -7,7 +7,7 @@ namespace CafeLib.BsvSharp.Network
     public class TestNetwork : BitcoinNetwork
     {
         public TestNetwork()
-            : base(NetworkType.Test, new Lazy<byte[][]>(GetPrefixes).Value)
+            : base(NetworkType.Test, GetConsensus(), new Lazy<byte[][]>(GetPrefixes).Value)
         {
         }
 
@@ -23,6 +23,7 @@ namespace CafeLib.BsvSharp.Network
                 // 000000002104c8c45e99a8853285a3b592602a3ccde2b832481da85e9e4ba182
                 Bip66Height = 363725,
                 // 00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb
+                CsvHeight = 770112,
                 ProofOfWorkLimit = UInt256.FromHex("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
                 // two weeks
                 ProofOfWorkTargetTimespan = 14 * 24 * 60 * 60,
@@ -43,10 +44,12 @@ namespace CafeLib.BsvSharp.Network
                 // August 1, 2017 hard fork
                 UahfHeight = 1155875,
 
+                // November 13, 2017 hard fork
+                DaaHeight = 1188697,
+
                 // February 2020, Genesis Upgrade
                 GenesisHeight = 1344302,
 
-                DaaHeight = 1188697,
                 Deployments =
                 {
                     [(int) DeploymentPos.DeploymentTestDummy] = new Bip9Deployment
@@ -64,7 +67,6 @@ namespace CafeLib.BsvSharp.Network
                 },
             };
         }
-
 
         private static byte[][] GetPrefixes()
         {

@@ -33,14 +33,31 @@ namespace CafeLib.BsvSharp.Network
         /// </summary>
         public UInt256 Bip34Hash { get; internal set; }
 
-        /** Block height at which BIP65 becomes active */
-        public int Bip65Height;
-        /** Block height at which BIP66 becomes active */
-        public int Bip66Height;
-        /** Block height at which UAHF kicks in */
-        public int UahfHeight;
-        /** Block height at which the new DAA becomes active */
-        public int DaaHeight;
+        /// <summary>
+        /// Block height at which BIP65 becomes active
+        /// </summary>
+        public int Bip65Height { get; internal set; }
+
+        /// <summary>
+        /// Block height at which BIP66 becomes active
+        /// </summary>
+        public int Bip66Height { get; internal set; }
+
+        /// <summary>
+        /// Block height at which BIP112 becomes active
+        /// </summary>
+        public int CsvHeight { get; internal set; }
+
+        /// <summary>
+        /// Block height at which UAHF kicks in
+        /// </summary>
+        public int UahfHeight { get; internal set; }
+
+        /// <summary>
+        /// Block height at which the new DAA becomes active
+        /// </summary>
+        public int DaaHeight { get; internal set; }
+
         /**
          * Minimum blocks including miner confirmation of the total of 2016 blocks
          * in a retargeting period, (nPowTargetTimespan / nPowTargetSpacing) which

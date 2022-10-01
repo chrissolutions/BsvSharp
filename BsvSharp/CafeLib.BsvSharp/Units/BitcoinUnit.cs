@@ -10,9 +10,10 @@ namespace CafeLib.BsvSharp.Units
     public enum BitcoinUnit : long
     {
         Bitcoin = 100_000_000,
-        MilliBitcoin = 100_000,
-        Duro = 500,
         Bit = 100,
+        Cent = 1_000_000,
+        Duro = 500,
+        MilliBitcoin = 100_000,
         Satoshi = 1
     }
 }
