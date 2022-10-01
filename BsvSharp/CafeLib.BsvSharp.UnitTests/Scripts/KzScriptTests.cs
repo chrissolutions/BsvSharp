@@ -3,15 +3,11 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CafeLib.BsvSharp.Builders;
-using CafeLib.BsvSharp.Encoding;
-using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Scripting;
-using CafeLib.BsvSharp.Services;
 using CafeLib.BsvSharp.Transactions;
 using CafeLib.BsvSharp.Units;
 using CafeLib.Core.Extensions;
@@ -25,33 +21,6 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
     public partial class KzScriptTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
-
-        [Fact]
-        public void Decode()
-        {
-            var address = new PublicKey(true);
-            var e = UInt160.FromHex("c2eaba3b9c29575322c6e24fdc1b49bdfe405bad", true);
-            var s1 = Encoders.Base58Check.Encode(RootService.Network.PublicKeyAddress.ToArray().Concat(e));
-            var s2 = Encoders.Base58Check.Encode(RootService.Network.ScriptAddress.ToArray().Concat(e));
-            //e.Span.CopyTo(address.Span);
-            //var id = address.GetID();
-            Assert.True(true);
-        }
-
-        /// <summary>
-        /// Test Vector
-        /// </summary>
-        public class TestValue1
-        {
-            /// <summary>
-            /// Script as hex string.
-            /// </summary>
-            public string Hex;
-            /// <summary>
-            /// Script as decoded OPs.
-            /// </summary>
-            public string Decode;
-        }
 
         public KzScriptTests(ITestOutputHelper testOutputHelper)
         {
@@ -122,7 +91,8 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                     var pub = r[1].Value<string>();
                     var flags = r[2].Value<string>();
                     var error = r[3].Value<string>();
-                    tv2s.Add(new TV2(sig, pub, flags, error));
+                    var description = r.Count() > 4 ? r[4].Value<string>() : "no comment";
+                    tv2s.Add(new TV2(sig, pub, flags, error, description));
                 }
             }
 
@@ -151,7 +121,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                 foreach (var tv in list)
                 {
                     i++;
-                    var tv2 = new TV2(tv.sig, tv.pub, tv.flags, tv.error);
+                    //var tv2 = new TV2(tv.sig, tv.pub, tv.flags, tv.error, tv.description);
                     //_testOutputHelper.WriteLine($"{opcode} {i}");
                     //_testOutputHelper.WriteLine($"Sig: {tv.scriptSig.ToHexString()} => {tv.scriptSig}");
                     //_testOutputHelper.WriteLine($"Pub: {tv.scriptPub.ToHexString()} => {tv.scriptPub}");
@@ -182,8 +152,6 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                     {
                         _ when tv.scriptPubKey.IsPay2ScriptHash() => true,          // P2SH is unsupported.
                         _ when tv.scriptError == ScriptError.CLEANSTACK => true,    // CLEANSTACK dependent on unsupported P2SH.
-                        _ when opcode == Opcode.OP_CHECKMULTISIG => true,           // OP_CHECKMULTISIG not implemented.
-                        _ when opcode == Opcode.OP_CHECKMULTISIGVERIFY => true,     // OP_CHECKMULTISIGVERIFY not implemented.
                         _ when opcode == Opcode.OP_CHECKLOCKTIMEVERIFY => true,     // OP_CHECKLOCKTIMEVERIFY not implemented.
                         _ when opcode == Opcode.OP_CHECKSEQUENCEVERIFY => true,     // OP_CHECKSEQUENCEVERIFY not implemented.
                         _ => (ok && tv.scriptError == ScriptError.OK) || tv.scriptError == error
@@ -195,6 +163,7 @@ namespace CafeLib.BsvSharp.UnitTests.Scripts
                         _testOutputHelper.WriteLine($"{opcode}");
                         _testOutputHelper.WriteLine($"Sig: {tv.scriptSig.ToHexString()} => {tv.scriptSig}");
                         _testOutputHelper.WriteLine($"Pub: {tv.scriptPubKey.ToHexString()} => {tv.scriptPubKey}");
+                        _testOutputHelper.WriteLine($"Description: {tv.description}");
                     }
                     Assert.True(correct);
                 }
