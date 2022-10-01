@@ -1,5 +1,6 @@
 ﻿using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Services;
+using CafeLib.Core.Extensions;
 using Xunit;
 
 namespace CafeLib.BsvSharp.UnitTests.Network
@@ -13,6 +14,7 @@ namespace CafeLib.BsvSharp.UnitTests.Network
         {
             var network = RootService.GetNetwork(networkType);
             Assert.Equal(networkType, network.NodeType);
+            Assert.Equal(networkType.GetDescriptor(), network.NetworkId);
             Assert.Equal(network.Consensus.GenesisHeight, genesis);
         }
     }
