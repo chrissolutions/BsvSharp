@@ -32,9 +32,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CafeLib.BsvSharp" Version="2.0.7" />
-    <PackageReference Include="CafeLib.Core" Version="2.0.0" />
-    <PackageReference Include="CafeLib.Web.Request" Version="2.0.0" />
+    <PackageReference Include="CafeLib.BsvSharp" Version="2.0.8" />
+    <PackageReference Include="CafeLib.Core" Version="2.0.1" />
+    <PackageReference Include="CafeLib.Web.Request" Version="2.0.1" />
     <PackageReference Include="DnsClient" Version="1.6.1" />
   </ItemGroup>
 
