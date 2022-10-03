@@ -3,7 +3,6 @@
 #endregion
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace CafeLib.BsvSharp.Transactions
 {
@@ -12,7 +11,6 @@ namespace CafeLib.BsvSharp.Transactions
     /// to selectively disable some checks. See [Transaction.serialize()]
     /// </summary>
     [Flags]
-    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public enum TransactionOption
     {
         ///  Disables checking if the transaction spends more Bitcoin than the sum of the input amounts

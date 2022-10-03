@@ -3,7 +3,6 @@
 #endregion
 
 using System;
-using System.Buffers;
 using System.Linq;
 using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Encoding;
@@ -28,8 +27,8 @@ namespace CafeLib.BsvSharp.Transactions
         private ScriptBuilder _changeScriptBuilder;
         private bool _hasChangeScript;
         private Amount _fee = Amount.Null;
-        private readonly Consensus _consensus;
-        private long _feePerKb;
+        private readonly Lazy<Consensus> _consensus;
+        private long _feePerKb = -1L;
 
         public string TxId => Encoders.HexReverse.Encode(TxHash);
 
@@ -70,9 +69,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="networkType">network type</param>
         public Transaction(NetworkType? networkType = null)
         {
-            var network = RootService.GetNetwork(networkType);
-            _consensus = network.Consensus;
-            _feePerKb = network.Consensus.FeePerKilobyte;
+            _consensus = new Lazy<Consensus>(() => RootService.GetNetwork(networkType).Consensus);
             Inputs = new TransactionInputList();
             Outputs = new TransactionOutputList();
         }
@@ -85,15 +82,17 @@ namespace CafeLib.BsvSharp.Transactions
         /// <param name="vout">outputs</param>
         /// <param name="lockTime">lock time</param>
         /// <param name="fee">transaction fee</param>
+        /// <param name="networkType">network type</param>
         /// <param name="option">options</param>
-        public Transaction(int version, TransactionInputList vin, TransactionOutputList vout, uint lockTime, long fee = 0L, TransactionOption option = 0)
+        public Transaction(int version, TransactionInputList vin, TransactionOutputList vout, uint lockTime, long fee = 0L, NetworkType? networkType = null, TransactionOption option = 0)
         {
             Version = version;
             Inputs = vin;
             Outputs = vout;
             LockTime = lockTime;
-            _fee = new Amount(fee);
             Option = option;
+            _fee = new Amount(fee);
+            _consensus = new Lazy<Consensus>(() => RootService.GetNetwork(networkType).Consensus);
         }
 
         /// <summary>
@@ -449,16 +448,16 @@ namespace CafeLib.BsvSharp.Transactions
         /// <returns></returns>
         public Transaction LockUntilDate(DateTime future)
         {
-            if (future.ToUnixTime() < _consensus.LocktimeBlockheightLimit)
+            if (future.ToUnixTime() < Consensus.LocktimeBlockheightLimit)
             {
                 throw new LockTimeException("Block time is set too early");
             }
 
             Inputs.ForEach(x =>
             {
-                if (x.SequenceNumber == _consensus.DefaultSeqnumber)
+                if (x.SequenceNumber == Consensus.DefaultSeqnumber)
                 {
-                    x.SequenceNumber = (uint)_consensus.DefaultLocktimeSeqnumber;
+                    x.SequenceNumber = (uint)Consensus.DefaultLocktimeSeqnumber;
                 }
             });
 
@@ -622,6 +621,9 @@ namespace CafeLib.BsvSharp.Transactions
 
         #region Helpers
 
+
+        private Consensus Consensus => _consensus.Value;
+
         private UInt256 GetHash() => Hashes.Hash256(Serialize());
 
 
@@ -669,7 +671,7 @@ namespace CafeLib.BsvSharp.Transactions
 
             if ((Option & TransactionOption.DisableLargeFees) != 0) return;
 
-            var maximumFee = _consensus.FeeSecurityMargin * EstimateFee();
+            var maximumFee = Consensus.FeeSecurityMargin * EstimateFee();
             if (unspent <= maximumFee) return;
 
             if (!_hasChangeScript)
@@ -754,8 +756,13 @@ namespace CafeLib.BsvSharp.Transactions
         private Amount EstimateFee()
         {
             var estimatedSize = EstimateSize();
-            var fee = new Amount((long)Math.Ceiling((double)estimatedSize / 1000 * _feePerKb));
+            var fee = new Amount((long)Math.Ceiling((double)estimatedSize / 1000 * GetFeePerKb()));
             return fee;
+        }
+
+        private Amount GetFeePerKb()
+        {
+            return _feePerKb == -1L ? Consensus.FeePerKilobyte : _feePerKb;
         }
 
         /// <summary>
@@ -767,7 +774,7 @@ namespace CafeLib.BsvSharp.Transactions
             var result = sizeof(int) + sizeof(int); // size of version + size of locktime
             result += new VarInt(Inputs.Length).Length;
             result += new VarInt(Outputs.Length).Length;
-            result += _consensus.ScriptMaxSize * Inputs.Count; //P2PKH script size.
+            result += Consensus.ScriptMaxSize * Inputs.Count; //P2PKH script size.
 
             var writer = new ByteDataWriter();
             Outputs.ForEach(x => x.WriteTo(writer));
@@ -817,7 +824,7 @@ namespace CafeLib.BsvSharp.Transactions
         {
             if ((Option & TransactionOption.DisableDustOutputs) != 0) return;
 
-            if (Outputs.Any(x => x.Amount < _consensus.DustLimit && !x.IsDataOut))
+            if (Outputs.Any(x => x.Amount < Consensus.DustLimit && !x.IsDataOut))
             {
                 throw new TransactionAmountException("You have outputs with spending values below the dust limit");
             }
