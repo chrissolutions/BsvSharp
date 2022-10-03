@@ -12,8 +12,8 @@ vars.root = GetCurrentDirectory();
 // Setup CafeLib components (name, version).
 public static readonly IDictionary<string, string> Components = new Dictionary<string, string>
 {
-    {"BsvSharp", "2.0.7"},
-    {"BsvSharp.Api", "2.0.7"}
+    {"BsvSharp", "2.0.9"},
+    {"BsvSharp.Api", "2.0.9"}
 };
 
 // Get arguments.

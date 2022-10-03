@@ -204,8 +204,8 @@ namespace CafeLib.BsvSharp.UnitTests.Keys
         {
             var seed512 = UInt512.FromHex(seed, true);
             var mnemonic = new Mnemonic(words, language);
-            var ntropy = mnemonic.Entropy;
-            Assert.True(Encoders.Hex.Decode(entropy).SequenceEqual(ntropy));
+            var bytes = mnemonic.Entropy;
+            Assert.True(Encoders.Hex.Decode(entropy).SequenceEqual(bytes));
 
             var hdPrivateKeyFromMnemonic = mnemonic.ToHdPrivateKey(password);
             var hdPrivateKey = HdPrivateKey.FromSeed(seed512);
