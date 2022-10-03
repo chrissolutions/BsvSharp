@@ -37,11 +37,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CafeLib.Core" Version="2.0.0" />
-    <PackageReference Include="CafeLib.Core.Buffers" Version="2.0.0" />
-    <PackageReference Include="CafeLib.Core.Encodings" Version="2.0.0" />
-    <PackageReference Include="CafeLib.Core.Numerics" Version="2.0.0" />
-    <PackageReference Include="CafeLib.Cryptography" Version="2.0.0" />
+    <PackageReference Include="CafeLib.Core" Version="2.0.1" />
+    <PackageReference Include="CafeLib.Core.Buffers" Version="2.0.1" />
+    <PackageReference Include="CafeLib.Core.Encodings" Version="2.0.1" />
+    <PackageReference Include="CafeLib.Core.Numerics" Version="2.0.1" />
+    <PackageReference Include="CafeLib.Cryptography" Version="2.0.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
