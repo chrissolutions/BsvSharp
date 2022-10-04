@@ -28,21 +28,19 @@ namespace CafeLib.BsvSharp.Chain
         private const long MaxTimeOffset = 2 * 60 * 60;
 
         /// Essential fields of a Bitcoin SV block header.
+        private readonly UInt256 _hash;
         private int _version;
-        private UInt256 _prevBlockHash;
+        private UInt256 _prevHash;
         private UInt256 _merkleRootHash;
         private uint _timestamp;
         private uint _bits;
         private uint _nonce;
 
-        private readonly UInt256 _hash;
         public UInt256 Hash => _hash;
-
-        public int Height { get; set; }
 
         /// Public access to essential header fields.
         public int Version => _version;
-        public UInt256 PrevBlock => _prevBlockHash;
+        public UInt256 PrevHash => _prevHash;
         public UInt256 MerkleRoot => _merkleRootHash;
         public uint Timestamp => _timestamp;
         public uint Bits => _bits;
@@ -66,7 +64,7 @@ namespace CafeLib.BsvSharp.Chain
             : this()
         {
             _version = version;
-            _prevBlockHash = prevBlockHash;
+            _prevHash = prevBlockHash;
             _merkleRootHash = merkleRootHash;
             _timestamp = timestamp;
             _bits = bits;
@@ -104,7 +102,7 @@ namespace CafeLib.BsvSharp.Chain
             var start = reader.Data.Position;
 
             if (!reader.TryReadLittleEndian(out _version)) return false;
-            if (!reader.TryReadUInt256(ref _prevBlockHash)) return false;
+            if (!reader.TryReadUInt256(ref _prevHash)) return false;
             if (!reader.TryReadUInt256(ref _merkleRootHash)) return false;
             if (!reader.TryReadLittleEndian(out _timestamp)) return false;
             if (!reader.TryReadLittleEndian(out _bits)) return false;

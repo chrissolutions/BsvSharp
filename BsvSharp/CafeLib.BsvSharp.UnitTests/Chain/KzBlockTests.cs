@@ -31,7 +31,7 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         {
             var bytes = GetBlockBytes(height);
 
-            var kzb = new Block { Height = height };
+            var kzb = new Block();
             var ros = new ReadOnlyByteSequence(bytes);
             var ok = kzb.TryReadBlock(ref ros);
 
@@ -55,13 +55,12 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         {
             var kzb = GetBlock(0);
 
-            Assert.True(kzb.Height == 0);
             Assert.True(kzb.Bits == 486604799U);
             Assert.True(kzb.Nonce == 2083236893U);
             Assert.True(kzb.Timestamp == 1231006505U);
             Assert.True(kzb.Hash.ToString() == "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
             Assert.True(kzb.MerkleRoot.ToString() == "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
-            Assert.True(kzb.PrevBlock.ToString() == "0000000000000000000000000000000000000000000000000000000000000000");
+            Assert.True(kzb.PrevHash.ToString() == "0000000000000000000000000000000000000000000000000000000000000000");
             Assert.True(kzb.Transactions.Length == 1);
             var tx = kzb.Transactions[0];
             Assert.True(tx.TxHash.ToString() == "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
