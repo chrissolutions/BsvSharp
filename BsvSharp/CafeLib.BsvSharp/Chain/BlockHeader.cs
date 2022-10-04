@@ -81,19 +81,19 @@ namespace CafeLib.BsvSharp.Chain
         public static BlockHeader FromHex(string hex)
         {
             var bytes = Encoders.Hex.Decode(hex);
-            return FromBuffer(bytes);
+            return FromBytes(bytes);
         }
 
         /// <summary>
-        /// Create a block header from byte buffer.
+        /// Create a block header from bytes.
         /// </summary>
-        /// <param name="buffer"></param>
+        /// <param name="bytes">array of bytes</param>
         /// <returns></returns>
-        public static BlockHeader FromBuffer(byte[] buffer)
+        public static BlockHeader FromBytes(byte[] bytes)
         {
             var blockHeader = new BlockHeader();
-            var reader = new ByteSequenceReader(buffer);
-            return blockHeader.TryReadBlockHeader(ref reader) ? blockHeader : throw new FormatException(nameof(buffer));
+            var reader = new ByteSequenceReader(bytes);
+            return blockHeader.TryReadBlockHeader(ref reader) ? blockHeader : throw new FormatException(nameof(bytes));
         }
 
         public bool TryReadBlockHeader(ref ByteSequenceReader reader)
