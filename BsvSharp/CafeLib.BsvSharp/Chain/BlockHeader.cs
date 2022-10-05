@@ -4,7 +4,6 @@
 
 using System;
 using System.Buffers;
-using System.Collections.Generic;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Extensions;
@@ -107,35 +106,29 @@ namespace CafeLib.BsvSharp.Chain
             return TrySerializeHeader(writer) ? writer.ToArray() : null;
         }
 
-        ///// Returns *true* if the sha256 hash of the block header matches the difficulty target, *false* otherwise.
-        //bool hasValidProofOfWork()
-        //{
-        //    var pow = BigInt.parse(id, radix: 16);
-        //    var target = getTargetDifficulty();
-        //    if (pow.compareTo(target) > 0)
-        //    {
-        //        return false;
-        //    }
-        //    return true;
-        //}
+        public bool HasValidProofOfWork()
+        {
+            return _hash > GetTargetDifficulty();
+        }
 
-        ///// Returns current difficulty target or calculates a specific difficulty target.
-        /////
-        ///// [targetBits] - The difficulty target to calculate. If this is *null* the currently set target in the header is returned.
-        /////
-        ///// Returns the difficulty target
-        //BigInt getTargetDifficulty({ int targetBits = null}) {
-        //    if (targetBits == null) {
-        //        targetBits = _bits;
-        //    }
+        /// <summary>
+        /// Returns current difficulty target or calculates a specific difficulty target.
+        /// </summary>
+        /// <param name="targetBits">The difficulty target to calculate. If this is *null* the currently set target in the header is used</param>
+        /// <returns></returns>
+        public UInt256 GetTargetDifficulty(ulong? targetBits = null)
+        {
+            targetBits ??= _bits;
 
-        //    BigInt target = BigInt.from(targetBits & 0xffffff);
-        //    var mov = 8 * ((targetBits >> 24) - 3);
-        //    while (mov-- > 0) {
-        //        target = target* BigInt.from(2);
-        //    }
-        //    return target;
-        //}
+            var target = new UInt256(targetBits.Value);
+            var mov = 8 * ((targetBits >> 24) - 3);
+            while (mov-- > 0)
+            {
+                target >>= 1;
+            }
+
+            return target;
+        }
 
 
         /// <summary>
