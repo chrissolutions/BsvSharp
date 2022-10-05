@@ -130,7 +130,6 @@ namespace CafeLib.BsvSharp.Chain
             return target;
         }
 
-
         /// <summary>
         /// Check for valid timestamp.
         /// </summary>

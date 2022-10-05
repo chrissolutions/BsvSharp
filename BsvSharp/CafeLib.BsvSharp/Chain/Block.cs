@@ -2,6 +2,7 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
+using System.Collections.Generic;
 using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Transactions;
@@ -20,10 +21,39 @@ namespace CafeLib.BsvSharp.Chain
     {
         public TransactionList Transactions { get; private set; }
 
+        /// <summary>
+        /// Block default constructor.
+        /// </summary>
         public Block()
         {
             Transactions = new TransactionList();
         }
+
+        /// <summary>
+        /// Block constructor
+        /// </summary>
+        /// <param name="txs"></param>
+        /// <param name="version"></param>
+        /// <param name="hashPrevBlock"></param>
+        /// <param name="hashMerkleRoot"></param>
+        /// <param name="time"></param>
+        /// <param name="bits"></param>
+        /// <param name="nonce"></param>
+        public Block
+        (
+            IEnumerable<Transaction> txs,
+            int version,
+            UInt256 hashPrevBlock,
+            UInt256 hashMerkleRoot,
+            uint time,
+            uint bits,
+            uint nonce
+        )
+            : base(version, hashPrevBlock, hashMerkleRoot, time, bits, nonce)
+        {
+            Transactions = new TransactionList(txs);
+        }
+
 
         /// <summary>
         /// Create block from bytes.
