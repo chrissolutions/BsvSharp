@@ -2,7 +2,6 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
-using System.Collections.Generic;
 using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Transactions;
@@ -26,21 +25,6 @@ namespace CafeLib.BsvSharp.Chain
             Transactions = new TransactionList();
         }
 
-        public Block
-        (
-            IEnumerable<Transaction> txs,
-            int version,
-            UInt256 hashPrevBlock,
-            UInt256 hashMerkleRoot,
-            uint time,
-            uint bits,
-            uint nonce
-        )
-            : base(version, hashPrevBlock, hashMerkleRoot, time, bits, nonce)
-        {
-            Transactions = new TransactionList(txs);
-        }
-
         /// <summary>
         /// Create block from bytes.
         /// </summary>
@@ -51,7 +35,7 @@ namespace CafeLib.BsvSharp.Chain
         {
             var block = new Block();
             var ros = new ReadOnlyByteSequence(bytes);
-            var ok = block.DeserializeBlock(ref ros);
+            var ok = block.Deserialize(ref ros);
             return ok ? block : throw new BlockException(nameof(bytes));
         }
 
@@ -60,7 +44,7 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         /// <param name="sequence">byte sequence</param>
         /// <returns>true if successful; false otherwise</returns>
-        public bool DeserializeBlock(ref ReadOnlyByteSequence sequence)
+        public bool Deserialize(ref ReadOnlyByteSequence sequence)
         {
             var reader = new ByteSequenceReader(sequence);
             if (!TryDeserialzeBlock(ref reader)) return false;
@@ -74,9 +58,9 @@ namespace CafeLib.BsvSharp.Chain
         /// <returns></returns>
         public new ReadOnlyByteSequence Serialize()
         {
-            var buffer = new ByteDataWriter();
-            TrySerializeBlock();
-            var ros = new ReadOnlyByteSequence(buffer.Span);
+            var writer = new ByteDataWriter();
+            if (!TrySerializeBlock(writer)) return null;
+            var ros = new ReadOnlyByteSequence(writer.Span);
             return ros;
         }
 
@@ -89,7 +73,7 @@ namespace CafeLib.BsvSharp.Chain
         private UInt256 ComputeMerkleRoot() => Transactions.ComputeMerkleRoot();
 
         /// <summary>
-        /// Verify merkel tree root.
+        /// Verify merkle tree root.
         /// </summary>
         /// <returns></returns>
         private bool VerifyMerkleRoot() => ComputeMerkleRoot() == MerkleRoot;
@@ -119,36 +103,17 @@ namespace CafeLib.BsvSharp.Chain
         /// 
         /// </summary>
         /// <returns></returns>
-        private bool TrySerializeBlock()
+        private bool TrySerializeBlock(IDataWriter writer)
         {
-            
+            if (!TrySerializeHeader(writer)) return false;
 
+            foreach (var tx in Transactions)
+            {
+                tx.WriteTo(writer);
+            }
 
             return true;
         }
-
-        //private IEnumerable<(Transaction tx, TransactionOutput o, int i)> GetOutputsSendingToAddresses(UInt160[] addresses)
-        //{
-        //    var v = new UInt160();
-        //    foreach (var tx in Transactions)
-        //    {
-        //        foreach (var output in tx.Outputs)
-        //        {
-        //            foreach (var op in output.Script.Decode())
-        //            {
-        //                if (op.Code == Opcode.OP_PUSH20) 
-        //                {
-        //                    op.Data.CopyTo(v.Span);
-        //                    var i = Array.BinarySearch(addresses, v);
-        //                    if (i >= 0) 
-        //                    {
-        //                        yield return (tx, output, i);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
 
         #endregion
     }
