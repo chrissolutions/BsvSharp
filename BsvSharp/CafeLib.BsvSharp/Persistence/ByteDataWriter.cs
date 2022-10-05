@@ -45,8 +45,7 @@ namespace CafeLib.BsvSharp.Persistence
 
         public IDataWriter Write(byte v)
         {
-            ByteSpan span = stackalloc byte[1] {v}; 
-            _buffer.Add(span);
+            _buffer.Add(v);
             return this;
         }
 

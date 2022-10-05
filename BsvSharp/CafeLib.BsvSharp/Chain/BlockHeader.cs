@@ -4,9 +4,11 @@
 
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Extensions;
+using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
@@ -92,10 +94,49 @@ namespace CafeLib.BsvSharp.Chain
         {
             var blockHeader = new BlockHeader();
             var reader = new ByteSequenceReader(bytes);
-            return blockHeader.TryReadBlockHeader(ref reader) ? blockHeader : throw new BlockException(nameof(bytes));
+            return blockHeader.TryDeserializeHeader(ref reader) ? blockHeader : throw new BlockException(nameof(bytes));
         }
 
-        public bool TryReadBlockHeader(ref ByteSequenceReader reader)
+        /// <summary>
+        /// Serialize block header/
+        /// </summary>
+        /// <returns></returns>
+        public byte[] Serialize()
+        {
+            var writer = new ByteDataWriter();
+            return TrySerializeHeader(writer) ? writer.ToArray() : null;
+        }
+
+        ///// Returns *true* if the sha256 hash of the block header matches the difficulty target, *false* otherwise.
+        //bool hasValidProofOfWork()
+        //{
+        //    var pow = BigInt.parse(id, radix: 16);
+        //    var target = getTargetDifficulty();
+        //    if (pow.compareTo(target) > 0)
+        //    {
+        //        return false;
+        //    }
+        //    return true;
+        //}
+
+        /// <summary>
+        /// Check for valid timestamp.
+        /// </summary>
+        /// <returns>Returns *true* if the timestamp is smaller than or equal to the [BlockHeader.MAX_TIME_OFFSET], *false* otherwise</returns>
+        public bool HasValidTimestamp()
+        {
+            int currentTime = (int)Math.Round((double)((DateTime.Now - DateTime.UnixEpoch).Milliseconds / 1000));
+            return Timestamp <= currentTime + MaxTimeOffset;
+        }
+
+        #region Protected Methods
+
+        /// <summary>
+        /// Deserialize the block header from the sequence reader.
+        /// </summary>
+        /// <param name="reader">sequence reader</param>
+        /// <returns>true if successful; false otherwise</returns>
+        protected bool TryDeserializeHeader(ref ByteSequenceReader reader)
         {
             if (reader.Data.Remaining < BlockHeaderSize)
                 return false;
@@ -119,13 +160,20 @@ namespace CafeLib.BsvSharp.Chain
         }
 
         /// <summary>
-        /// Check for valid timestamp.
+        /// Serialize block header.
         /// </summary>
-        /// <returns>Returns *true* if the timestamp is smaller than or equal to the [BlockHeader.MAX_TIME_OFFSET], *false* otherwise</returns>
-        public bool HasValidTimestamp()
+        /// <returns></returns>
+        protected bool TrySerializeHeader(IDataWriter writer)
         {
-            var currentTime = (DateTime.Now - DateTime.UnixEpoch).Milliseconds / 1000;
-            return Timestamp <= currentTime + MaxTimeOffset;
+            writer.Write(_version);
+            writer.Write(_prevHash);
+            writer.Write(_merkleRootHash);
+            writer.Write(_timestamp);
+            writer.Write(_bits);
+            writer.Write(_nonce);
+            return true;
         }
+
+        #endregion
     }
 }

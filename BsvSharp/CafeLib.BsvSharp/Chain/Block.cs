@@ -41,25 +41,41 @@ namespace CafeLib.BsvSharp.Chain
             Transactions = new TransactionList(txs);
         }
 
+        /// <summary>
+        /// Create block from bytes.
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        /// <exception cref="BlockException"></exception>
         public new static Block FromBytes(byte[] bytes)
         {
             var block = new Block();
             var ros = new ReadOnlyByteSequence(bytes);
-            var ok = block.TryReadBlock(ref ros);
+            var ok = block.DeserializeBlock(ref ros);
             return ok ? block : throw new BlockException(nameof(bytes));
         }
 
-        public bool TryReadBlock(ref ReadOnlyByteSequence sequence)
+        /// <summary>
+        /// Deserialize block.
+        /// </summary>
+        /// <param name="sequence">byte sequence</param>
+        /// <returns>true if successful; false otherwise</returns>
+        public bool DeserializeBlock(ref ReadOnlyByteSequence sequence)
         {
             var reader = new ByteSequenceReader(sequence);
-            if (!TryReadBlock(ref reader)) return false;
+            if (!TryDeserialzeBlock(ref reader)) return false;
             sequence = sequence.Data.Slice(reader.Data.Consumed);
             return true;
         }
 
-        public ReadOnlyByteSequence Serialize()
+        /// <summary>
+        /// Serialize block.
+        /// </summary>
+        /// <returns></returns>
+        public new ReadOnlyByteSequence Serialize()
         {
             var buffer = new ByteDataWriter();
+            TrySerializeBlock();
             var ros = new ReadOnlyByteSequence(buffer.Span);
             return ros;
         }
@@ -67,13 +83,25 @@ namespace CafeLib.BsvSharp.Chain
         #region Helpers
 
         /// <summary>
+        /// Compute the merkle tree root.
+        /// </summary>
+        /// <returns></returns>
+        private UInt256 ComputeMerkleRoot() => Transactions.ComputeMerkleRoot();
+
+        /// <summary>
+        /// Verify merkel tree root.
+        /// </summary>
+        /// <returns></returns>
+        private bool VerifyMerkleRoot() => ComputeMerkleRoot() == MerkleRoot;
+
+        /// <summary>
         /// Read data from the byte sequence into the block.
         /// </summary>
         /// <param name="reader">byte sequence reader</param>
         /// <returns>true if successful; false otherwise</returns>
-        private bool TryReadBlock(ref ByteSequenceReader reader)
+        private bool TryDeserialzeBlock(ref ByteSequenceReader reader)
         {
-            if (!TryReadBlockHeader(ref reader)) return false;
+            if (!TryDeserializeHeader(ref reader)) return false;
             if (!reader.TryReadVariant(out var count)) return false;
 
             Transactions = new TransactionList();
@@ -87,9 +115,17 @@ namespace CafeLib.BsvSharp.Chain
             return VerifyMerkleRoot();
         }
 
-        private UInt256 ComputeMerkleRoot() => Transactions.ComputeMerkleRoot();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private bool TrySerializeBlock()
+        {
+            
 
-        private bool VerifyMerkleRoot() => ComputeMerkleRoot() == MerkleRoot;
+
+            return true;
+        }
 
         //private IEnumerable<(Transaction tx, TransactionOutput o, int i)> GetOutputsSendingToAddresses(UInt160[] addresses)
         //{
