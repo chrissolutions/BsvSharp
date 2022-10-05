@@ -119,13 +119,33 @@ namespace CafeLib.BsvSharp.Chain
         //    return true;
         //}
 
+        ///// Returns current difficulty target or calculates a specific difficulty target.
+        /////
+        ///// [targetBits] - The difficulty target to calculate. If this is *null* the currently set target in the header is returned.
+        /////
+        ///// Returns the difficulty target
+        //BigInt getTargetDifficulty({ int targetBits = null}) {
+        //    if (targetBits == null) {
+        //        targetBits = _bits;
+        //    }
+
+        //    BigInt target = BigInt.from(targetBits & 0xffffff);
+        //    var mov = 8 * ((targetBits >> 24) - 3);
+        //    while (mov-- > 0) {
+        //        target = target* BigInt.from(2);
+        //    }
+        //    return target;
+        //}
+
+
         /// <summary>
         /// Check for valid timestamp.
         /// </summary>
         /// <returns>Returns *true* if the timestamp is smaller than or equal to the [BlockHeader.MAX_TIME_OFFSET], *false* otherwise</returns>
         public bool HasValidTimestamp()
         {
-            int currentTime = (int)Math.Round((double)((DateTime.Now - DateTime.UnixEpoch).Milliseconds / 1000));
+            // ReSharper disable once PossibleLossOfFraction
+            var currentTime = (int)Math.Round((double)((DateTime.Now - DateTime.UnixEpoch).Milliseconds / 1000));
             return Timestamp <= currentTime + MaxTimeOffset;
         }
 
