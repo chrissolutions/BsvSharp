@@ -62,13 +62,13 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             Assert.Equal(UInt256.Zero.ToString(), RootService.Network.Consensus.Genesis.PrevHash.ToString());
         }
 
-        //[Fact]
-        //public void DeserializeBlockTest()
-        //{
-        //    var bytes = GetRawBlock("blk86756-testnet");
-        //    var block = Block.FromBytes(bytes);
-        //    Assert.NotNull(block);
-        //}
+        [Fact]
+        public void DeserializeBlockTest()
+        {
+            var bytes = GetRawBlock("blk86756-testnet");
+            var block = Block.FromBytes(bytes[8..]);
+            Assert.NotNull(block);
+        }
 
 
         #region Helpers
