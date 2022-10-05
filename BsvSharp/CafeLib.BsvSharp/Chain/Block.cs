@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using CafeLib.BsvSharp.Exceptions;
+using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Transactions;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Numerics;
@@ -54,6 +55,13 @@ namespace CafeLib.BsvSharp.Chain
             if (!TryReadBlock(ref reader)) return false;
             sequence = sequence.Data.Slice(reader.Data.Consumed);
             return true;
+        }
+
+        public ReadOnlyByteSequence Serialize()
+        {
+            var buffer = new ByteDataWriter();
+            var ros = new ReadOnlyByteSequence(buffer.Span);
+            return ros;
         }
 
         #region Helpers
