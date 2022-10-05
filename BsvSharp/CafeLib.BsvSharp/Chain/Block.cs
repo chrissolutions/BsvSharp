@@ -2,23 +2,20 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
-using System;
-using System.Buffers;
 using System.Collections.Generic;
-using CafeLib.BsvSharp.Scripting;
+using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Transactions;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Chain
 {
-    /// <summary>
-    /// Closely mirrors the data and layout of a serialized Bitcoin block.
-    /// Focus is on efficiency when processing large blocks.
-    /// In particular, script data is stored as <see cref="ReadOnlySequence{Byte}"/> allowing large scripts to
-    /// remain in whatever buffers were originally used. No script parsing data is maintained. 
-    /// Not intended for making dynamic changes to a block (mining).
-    /// </summary>
+    /// A block is the largest of the blockchain's building blocks.
+    ///
+    /// This is the data structure that miners assemble from transactions,
+    /// and over which they calculate a sha256 hash
+    /// as part of their proof-of-work to win the right to extend the blockchain.
+    ///
     public class Block : BlockHeader
     {
         public TransactionList Transactions { get; private set; }
@@ -43,6 +40,14 @@ namespace CafeLib.BsvSharp.Chain
             Transactions = new TransactionList(txs);
         }
 
+        public new static Block FromBytes(byte[] bytes)
+        {
+            var block = new Block();
+            var ros = new ReadOnlyByteSequence(bytes);
+            var ok = block.TryReadBlock(ref ros);
+            return ok ? block : throw new BlockException(nameof(bytes));
+        }
+
         public bool TryReadBlock(ref ReadOnlyByteSequence sequence)
         {
             var reader = new ByteSequenceReader(sequence);
@@ -51,6 +56,13 @@ namespace CafeLib.BsvSharp.Chain
             return true;
         }
 
+        #region Helpers
+
+        /// <summary>
+        /// Read data from the byte sequence into the block.
+        /// </summary>
+        /// <param name="reader">byte sequence reader</param>
+        /// <returns>true if successful; false otherwise</returns>
         private bool TryReadBlock(ref ByteSequenceReader reader)
         {
             if (!TryReadBlockHeader(ref reader)) return false;
@@ -71,27 +83,29 @@ namespace CafeLib.BsvSharp.Chain
 
         private bool VerifyMerkleRoot() => ComputeMerkleRoot() == MerkleRoot;
 
-        public IEnumerable<(Transaction tx, TransactionOutput o, int i)> GetOutputsSendingToAddresses(UInt160[] addresses)
-        {
-            var v = new UInt160();
-            foreach (var tx in Transactions)
-            {
-                foreach (var output in tx.Outputs)
-                {
-                    foreach (var op in output.Script.Decode())
-                    {
-                        if (op.Code == Opcode.OP_PUSH20) 
-                        {
-                            op.Data.CopyTo(v.Span);
-                            var i = Array.BinarySearch(addresses, v);
-                            if (i >= 0) 
-                            {
-                                yield return (tx, output, i);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //private IEnumerable<(Transaction tx, TransactionOutput o, int i)> GetOutputsSendingToAddresses(UInt160[] addresses)
+        //{
+        //    var v = new UInt160();
+        //    foreach (var tx in Transactions)
+        //    {
+        //        foreach (var output in tx.Outputs)
+        //        {
+        //            foreach (var op in output.Script.Decode())
+        //            {
+        //                if (op.Code == Opcode.OP_PUSH20) 
+        //                {
+        //                    op.Data.CopyTo(v.Span);
+        //                    var i = Array.BinarySearch(addresses, v);
+        //                    if (i >= 0) 
+        //                    {
+        //                        yield return (tx, output, i);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        #endregion
     }
 }

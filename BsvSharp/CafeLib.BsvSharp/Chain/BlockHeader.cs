@@ -5,6 +5,7 @@
 using System;
 using System.Buffers;
 using CafeLib.BsvSharp.Encoding;
+using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Numerics;
@@ -91,7 +92,7 @@ namespace CafeLib.BsvSharp.Chain
         {
             var blockHeader = new BlockHeader();
             var reader = new ByteSequenceReader(bytes);
-            return blockHeader.TryReadBlockHeader(ref reader) ? blockHeader : throw new FormatException(nameof(bytes));
+            return blockHeader.TryReadBlockHeader(ref reader) ? blockHeader : throw new BlockException(nameof(bytes));
         }
 
         public bool TryReadBlockHeader(ref ByteSequenceReader reader)

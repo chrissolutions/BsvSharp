@@ -5,51 +5,18 @@
 
 using System.IO;
 using CafeLib.BsvSharp.Chain;
-using CafeLib.Core.Buffers;
+using CafeLib.BsvSharp.Services;
+using CafeLib.Core.Numerics;
 using Xunit;
 
 namespace CafeLib.BsvSharp.UnitTests.Chain
 {
     public class KzBlockTests
     {
+        private const string genesisHash = "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f";
+        private const string genesisMerkleRoot = "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b";
         private const string RawBlocksFolder = @"..\..\..\data\RawBlocks";
 
-        private static string GetBlockFilename(int height)
-        {
-            var filename = Path.Combine(RawBlocksFolder, $"RawBlock{height/1000:D3}\\RawBlock{height:D6}.dat");
-            return filename;
-        }
-
-        private static byte[] GetBlockBytes(int height)
-        {
-            var filename = GetBlockFilename(height);
-
-            return File.ReadAllBytes(filename);
-        }
-
-        private static Block GetBlock(int height)
-        {
-            var bytes = GetBlockBytes(height);
-
-            var kzb = new Block();
-            var ros = new ReadOnlyByteSequence(bytes);
-            var ok = kzb.TryReadBlock(ref ros);
-
-            Assert.True(ros.Length == 0);
-            Assert.True(ok);
-
-            return kzb;
-        }
-
-        //private static Block FetchBlock(int height)
-        //{
-        //    var fileName = GetBlockFilename(height);
-        //    var block = new Block {Height = height};
-        //    using var stream = File.OpenRead(fileName);
-        //    block.TryReadBlock(stream);
-        //    Assert.Equal(10, block.Txs.LongLength);
-        //}
-        
         [Fact]
         public void Block0()
         {
@@ -58,8 +25,8 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             Assert.True(kzb.Bits == 486604799U);
             Assert.True(kzb.Nonce == 2083236893U);
             Assert.True(kzb.Timestamp == 1231006505U);
-            Assert.True(kzb.Hash.ToString() == "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
-            Assert.True(kzb.MerkleRoot.ToString() == "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b");
+            Assert.True(kzb.Hash.ToString() == genesisHash);
+            Assert.True(kzb.MerkleRoot.ToString() == genesisMerkleRoot);
             Assert.True(kzb.PrevHash.ToString() == "0000000000000000000000000000000000000000000000000000000000000000");
             Assert.True(kzb.Transactions.Length == 1);
             var tx = kzb.Transactions[0];
@@ -75,5 +42,46 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             Assert.True(tx.Outputs[0].Amount == 5000000000L);
             Assert.True(tx.Outputs[0].Script.ToHexString() == "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac");
         }
+
+        [Fact]
+        public void GenesisBlockTest()
+        {
+            var genesis = GetBlock(0);
+
+            Assert.Equal(genesisHash, RootService.Network.Consensus.Genesis.Hash.ToString());
+            Assert.Equal(genesis.Hash, RootService.Network.Consensus.Genesis.Hash);
+
+            Assert.Equal(genesisMerkleRoot, RootService.Network.Consensus.Genesis.MerkleRoot.ToString());
+            Assert.Equal(genesis.MerkleRoot, RootService.Network.Consensus.Genesis.MerkleRoot);
+
+            Assert.Equal(UInt256.Zero, RootService.Network.Consensus.Genesis.PrevHash);
+            Assert.Equal(UInt256.Zero.ToString(), RootService.Network.Consensus.Genesis.PrevHash.ToString());
+        }
+        #region Helpers
+
+        private static string GetBlockFilename(int height)
+        {
+            var filename = Path.Combine(RawBlocksFolder, $"RawBlock{height / 1000:D3}\\RawBlock{height:D6}.dat");
+            return filename;
+        }
+
+        private static byte[] GetBlockBytes(int height)
+        {
+            var filename = GetBlockFilename(height);
+
+            return File.ReadAllBytes(filename);
+        }
+
+        private static Block GetBlock(int height)
+        {
+            var bytes = GetBlockBytes(height);
+
+            var kzb = Block.FromBytes(bytes);
+            Assert.NotNull(bytes);
+
+            return kzb;
+        }
+
+        #endregion
     }
 }
