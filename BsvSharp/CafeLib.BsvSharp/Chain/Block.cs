@@ -2,12 +2,16 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Transactions;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Numerics;
+using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Chain
 {
@@ -126,6 +130,8 @@ namespace CafeLib.BsvSharp.Chain
                 Transactions.Add(tx);
             }
 
+            MerkleRootValidation();
+
             return VerifyMerkleRoot();
         }
 
@@ -143,6 +149,33 @@ namespace CafeLib.BsvSharp.Chain
             }
 
             return true;
+        }
+
+        private bool MerkleRootValidation()
+        {
+            List<UInt256> tree = GetMerkleTree();
+            var merkleRoot = tree[^1];
+
+            return true;
+        }
+
+        private List<UInt256> GetMerkleTree()
+        {
+            var tree = Transactions.Select(x => x.TxHash).ToList();
+
+            var j = 0;
+            for (var size = Transactions.Length; size > 1; size = (int)Math.Floor((decimal)(size + 1) / 2))
+            {
+                for (var i = 0; i < size; i += 2)
+                {
+                    var i2 = Math.Min(i + 1, size - 1);
+                    var buf = tree[j + i].ToArray().Concat(tree[j + i2].ToArray()).ToArray();
+                    tree.Add(Hashes.Hash256(buf.AsSpan()));
+                }
+                j += size;
+            }
+
+            return tree;
         }
 
         #endregion
