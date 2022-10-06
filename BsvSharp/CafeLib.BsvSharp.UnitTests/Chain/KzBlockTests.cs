@@ -71,19 +71,9 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         }
 
 
-        #region Helpers
-
         private static byte[] GetRawBlock(string filename)
         {
             return File.ReadAllBytes(Path.Combine(RawBlocksFolder, $"{filename}.dat"));
         }
-
-        private static string GetBlockFilename(int height)
-        {
-            var filename = Path.Combine(RawBlocksFolder, $"RawBlock{height / 1000:D3}\\RawBlock{height:D6}.dat");
-            return filename;
-        }
-
-        #endregion
     }
 }

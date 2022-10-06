@@ -61,7 +61,7 @@ namespace CafeLib.BsvSharp.Chain
         /// <param name="bytes"></param>
         /// <returns></returns>
         /// <exception cref="BlockException"></exception>
-        public new static Block FromBytes(byte[] bytes)
+        public new static Block FromBytes(ReadOnlyByteSpan bytes)
         {
             var block = new Block();
             var ros = new ReadOnlyByteSequence(bytes);

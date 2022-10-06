@@ -89,7 +89,7 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         /// <param name="bytes">array of bytes</param>
         /// <returns></returns>
-        public static BlockHeader FromBytes(byte[] bytes)
+        public static BlockHeader FromBytes(ReadOnlyByteSpan bytes)
         {
             var blockHeader = new BlockHeader();
             var reader = new ByteSequenceReader(bytes);
