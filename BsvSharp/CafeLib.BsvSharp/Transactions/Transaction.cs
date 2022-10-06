@@ -383,7 +383,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <returns>transaction string representation</returns>
         public override string ToString()
         {
-            return ToHex();
+            return TxId;
         }
 
         /// <summary>
