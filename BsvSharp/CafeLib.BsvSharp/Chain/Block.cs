@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Persistence;
@@ -101,16 +100,15 @@ namespace CafeLib.BsvSharp.Chain
         #region Helpers
 
         /// <summary>
-        /// Compute the merkle tree root.
-        /// </summary>
-        /// <returns></returns>
-        private UInt256 ComputeMerkleRoot() => Transactions.ComputeMerkleRoot();
-
-        /// <summary>
         /// Verify merkle tree root.
         /// </summary>
         /// <returns></returns>
-        private bool VerifyMerkleRoot() => ComputeMerkleRoot() == MerkleRoot;
+        private bool VerifyMerkleRoot()
+        {
+            var tree = GetMerkleTree();
+            var merkleRoot = tree[^1];
+            return merkleRoot == MerkleRoot;
+        }
 
         /// <summary>
         /// Read data from the byte sequence into the block.
@@ -129,8 +127,6 @@ namespace CafeLib.BsvSharp.Chain
                 if (!tx.TryReadTransaction(ref reader)) return false;
                 Transactions.Add(tx);
             }
-
-            MerkleRootValidation();
 
             return VerifyMerkleRoot();
         }
@@ -151,17 +147,10 @@ namespace CafeLib.BsvSharp.Chain
             return true;
         }
 
-        private bool MerkleRootValidation()
-        {
-            List<UInt256> tree = GetMerkleTree();
-            var merkleRoot = tree[^1];
-
-            return true;
-        }
-
         private List<UInt256> GetMerkleTree()
         {
             var tree = Transactions.Select(x => x.TxHash).ToList();
+            if (!tree.Any()) return new List<UInt256>();
 
             var j = 0;
             for (var size = Transactions.Length; size > 1; size = (int)Math.Floor((decimal)(size + 1) / 2))
@@ -169,9 +158,10 @@ namespace CafeLib.BsvSharp.Chain
                 for (var i = 0; i < size; i += 2)
                 {
                     var i2 = Math.Min(i + 1, size - 1);
-                    var buf = tree[j + i].ToArray().Concat(tree[j + i2].ToArray()).ToArray();
-                    tree.Add(Hashes.Hash256(buf.AsSpan()));
+                    var buf = new ByteSpan(tree[j + i].Span) + tree[j + i2].Span;
+                    tree.Add(Hashes.Hash256(buf));
                 }
+
                 j += size;
             }
 
