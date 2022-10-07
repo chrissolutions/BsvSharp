@@ -3,7 +3,6 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
-using System;
 using System.IO;
 using CafeLib.BsvSharp.Chain;
 using CafeLib.BsvSharp.Services;
@@ -69,6 +68,8 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             var bytes = GetRawBlock("blk86756-testnet");
             var block = Block.FromBytes(bytes[8..]);
             Assert.NotNull(block);
+            Assert.Equal(22, block.Transactions.Length);
+            Assert.Equal(2, block.Version);
         }
 
         [Fact]
@@ -84,9 +85,39 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             Assert.Equal(blockBytes[..(int)sequence.Data.Length], sequence.ToArray());
         }
 
+        [Fact]
+        public void DeserializeBlockHeaderTest()
+        {
+            var raw = GetRawBlock("blk86756-testnet");
+            var header = BlockHeader.FromBytes(raw[8..88]);
+            Assert.NotNull(header);
+            Assert.Equal(2, header.Version);
+        }
+
+        [Fact]
+        public void SerializeBlockHeaderTest()
+        {
+            var header = new BlockHeader(
+                version: 2,
+                prevBlockHash: UInt256.FromHex("000000003c35b5e70b13d5b938fef4e998a977c17bea978390273b7c50a9aa4b"),
+                merkleRootHash: UInt256.FromHex("58e6d52d1eb00470ae1ab4d5a3375c0f51382c6f249fff84e9888286974cfc97"),
+                timestamp: 1371410638,
+                bits: 473956288,
+                nonce: 3594009557);
+
+            var headerBytes= header.Serialize();
+            var blockHeader = BlockHeader.FromBytes(headerBytes);
+            Assert.NotNull(blockHeader);
+            Assert.Equal(header, blockHeader);
+        }
+
+        #region Helpers
+
         private static byte[] GetRawBlock(string filename)
         {
             return File.ReadAllBytes(Path.Combine(RawBlocksFolder, $"{filename}.dat"));
         }
+
+        #endregion
     }
 }

@@ -3,7 +3,6 @@
 #endregion
 
 using System;
-using System.Buffers;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Extensions;
@@ -24,13 +23,11 @@ namespace CafeLib.BsvSharp.Chain
     /// <item><term>Height</term><description>The chain height associated with this block.</description></item>
     /// </list>
     /// </summary>
-    public class BlockHeader
+    public class BlockHeader: IEquatable<BlockHeader>
     {
         public const int BlockHeaderSize = 80;
         private const long MaxTimeOffset = 2 * 60 * 60;
 
-        /// Essential fields of a Bitcoin SV block header.
-        private readonly UInt256 _hash;
         private int _version;
         private UInt256 _prevHash;
         private UInt256 _merkleRootHash;
@@ -38,7 +35,8 @@ namespace CafeLib.BsvSharp.Chain
         private uint _bits;
         private uint _nonce;
 
-        public UInt256 Hash => _hash;
+        /// Essential fields of a Bitcoin SV block header.
+        public UInt256 Hash { get; private set; }
 
         /// Public access to essential header fields.
         public int Version => _version;
@@ -50,7 +48,7 @@ namespace CafeLib.BsvSharp.Chain
 
         public BlockHeader()
         {
-            _hash = new UInt256();
+            Hash = new UInt256();
         }
 
         /// <summary>
@@ -71,6 +69,7 @@ namespace CafeLib.BsvSharp.Chain
             _timestamp = timestamp;
             _bits = bits;
             _nonce = nonce;
+            Hash = CalculateHash(Serialize());
         }
 
         /// <summary>
@@ -107,12 +106,12 @@ namespace CafeLib.BsvSharp.Chain
         }
 
         /// <summary>
-        /// Determine wheterh the block header has valid proof of work.
+        /// Determine whether the block header has valid proof of work.
         /// </summary>
         /// <returns>true if has valid proof of work; otherwise false</returns>
         public bool HasValidProofOfWork()
         {
-            return _hash > GetTargetDifficulty();
+            return Hash > GetTargetDifficulty();
         }
 
         /// <summary>
@@ -145,6 +144,20 @@ namespace CafeLib.BsvSharp.Chain
             return Timestamp <= currentTime + MaxTimeOffset;
         }
 
+        public override int GetHashCode() => Serialize().GetHashCode();
+        public override bool Equals(object obj) => obj is BlockHeader header && this == header;
+        public bool Equals(BlockHeader other)
+        {
+            return other is not null
+                   && Hash == other.Hash
+                   && Version == other.Version
+                   && PrevHash == other.PrevHash
+                   && MerkleRoot == other.MerkleRoot
+                   && Timestamp == other.Timestamp
+                   && Bits == other.Bits
+                   && Nonce == other.Nonce;
+        }
+
         #region Protected Methods
 
         /// <summary>
@@ -167,11 +180,12 @@ namespace CafeLib.BsvSharp.Chain
             if (!reader.TryReadLittleEndian(out _nonce)) return false;
 
             var end = reader.Data.Position;
+            Hash = CalculateHash(reader.Data.Sequence.Slice(start, end).FirstSpan);
 
-            var blockBytes = reader.Data.Sequence.Slice(start, end).ToArray();
-            var hash1 = Hashes.ComputeSha256(blockBytes);
-            var hash2 = Hashes.ComputeSha256(hash1);
-            hash2.CopyTo(_hash.Span);
+            //var blockBytes = reader.Data.Sequence.Slice(start, end).ToArray();
+            //var hash1 = Hashes.ComputeSha256(blockBytes);
+            //var hash2 = Hashes.ComputeSha256(hash1);
+            //hash2.CopyTo(_hash.Span);
             return true;
         }
 
@@ -188,6 +202,18 @@ namespace CafeLib.BsvSharp.Chain
             writer.Write(_bits);
             writer.Write(_nonce);
             return true;
+        }
+
+        /// <summary>
+        /// Calculate the block hash
+        /// </summary>
+        /// <param name="bytes">bytes</param>
+        /// <returns>calculated block hash</returns>
+        protected static UInt256 CalculateHash(ReadOnlyByteSpan bytes)
+        {
+            var hash1 = Hashes.ComputeSha256(bytes);
+            var hash2 = Hashes.ComputeSha256(hash1);
+            return new UInt256(hash2);
         }
 
         #endregion
