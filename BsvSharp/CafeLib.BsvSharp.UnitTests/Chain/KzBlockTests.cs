@@ -75,13 +75,13 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         public void SerializeBlockTest()
         {
             var bytes = GetRawBlock("blk86756-testnet");
-            var blockBytes = bytes[8..].AsSpan();
+            var blockBytes = bytes[8..];
             var block = Block.FromBytes(blockBytes);
             Assert.NotNull(block);
 
             var sequence = block.Serialize();
             Assert.NotNull(block);
-            Assert.Equal(blockBytes.ToArray()[..(int)sequence.Data.Length], sequence.ToArray());
+            Assert.Equal(blockBytes[..(int)sequence.Data.Length], sequence.ToArray());
         }
 
         private static byte[] GetRawBlock(string filename)

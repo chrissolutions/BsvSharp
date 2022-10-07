@@ -106,6 +106,10 @@ namespace CafeLib.BsvSharp.Chain
             return TrySerializeHeader(writer) ? writer.ToArray() : null;
         }
 
+        /// <summary>
+        /// Determine wheterh the block header has valid proof of work.
+        /// </summary>
+        /// <returns>true if has valid proof of work; otherwise false</returns>
         public bool HasValidProofOfWork()
         {
             return _hash > GetTargetDifficulty();
