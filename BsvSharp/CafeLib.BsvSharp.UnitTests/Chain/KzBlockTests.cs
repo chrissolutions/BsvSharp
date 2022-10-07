@@ -3,7 +3,9 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
+using System;
 using System.IO;
+using System.Linq;
 using CafeLib.BsvSharp.Chain;
 using CafeLib.BsvSharp.Services;
 using CafeLib.Core.Numerics;
@@ -70,6 +72,18 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             Assert.NotNull(block);
         }
 
+        [Fact]
+        public void SerializeBlockTest()
+        {
+            var bytes = GetRawBlock("blk86756-testnet");
+            var blockBytes = bytes[8..].AsSpan();
+            var block = Block.FromBytes(blockBytes);
+            Assert.NotNull(block);
+
+            var sequence = block.Serialize();
+            Assert.NotNull(block);
+            Assert.Equal(blockBytes.ToArray()[..(int)sequence.Data.Length], sequence.ToArray());
+        }
 
         private static byte[] GetRawBlock(string filename)
         {

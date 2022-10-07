@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CafeLib.BsvSharp.Exceptions;
+using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Transactions;
 using CafeLib.Core.Buffers;
@@ -132,13 +133,14 @@ namespace CafeLib.BsvSharp.Chain
         }
 
         /// <summary>
-        /// 
+        /// Write data from the block.
         /// </summary>
         /// <returns></returns>
         private bool TrySerializeBlock(IDataWriter writer)
         {
             if (!TrySerializeHeader(writer)) return false;
 
+            writer.Write(new VarInt(Transactions.Length));
             foreach (var tx in Transactions)
             {
                 tx.WriteTo(writer);
