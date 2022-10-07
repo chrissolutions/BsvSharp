@@ -5,7 +5,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using CafeLib.BsvSharp.Chain;
 using CafeLib.BsvSharp.Services;
 using CafeLib.Core.Numerics;
