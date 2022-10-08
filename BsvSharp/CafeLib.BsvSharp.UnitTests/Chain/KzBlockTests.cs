@@ -5,6 +5,7 @@
 
 using System.IO;
 using CafeLib.BsvSharp.Chain;
+using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Services;
 using CafeLib.Core.Numerics;
 using Xunit;
@@ -139,6 +140,25 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
 
             var valid = header.HasValidTimestamp();
             Assert.True(valid);
+        }
+
+        [Fact]
+        public void BlockHeader_String_Test()
+        {
+            var header = new BlockHeader(
+                version: 2,
+                prevBlockHash: UInt256.FromHex("000000003c35b5e70b13d5b938fef4e998a977c17bea978390273b7c50a9aa4b"),
+                merkleRootHash: UInt256.FromHex("58e6d52d1eb00470ae1ab4d5a3375c0f51382c6f249fff84e9888286974cfc97"),
+                timestamp: 1371410638,
+                bits: 473956288,
+                nonce: 3594009557);
+
+            var headerBytes = header.Serialize();
+            var headerString = Encoders.Hex.Encode(headerBytes);
+            Assert.Equal(header.ToString(), headerString);
+
+            var header2 = BlockHeader.FromHex(headerString);
+            Assert.Equal(header, header2);
         }
 
         #region Helpers
