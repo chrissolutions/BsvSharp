@@ -188,15 +188,9 @@ namespace CafeLib.BsvSharp.Chain
         protected UInt256 GetTargetDifficulty(ulong? targetBits = null)
         {
             targetBits ??= _bits;
-
-            var target = new UInt256(targetBits.Value);
+            var target = new UInt256(targetBits.Value & 0xFFFFFF);
             var mov = 8 * ((targetBits >> 24) - 3);
-            while (mov-- > 0)
-            {
-                target <<= 1;
-            }
-
-            return target;
+            return target << (int)mov;
         }
 
         #endregion
