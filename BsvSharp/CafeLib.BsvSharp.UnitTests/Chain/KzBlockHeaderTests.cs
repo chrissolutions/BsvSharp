@@ -8,7 +8,6 @@ using System.IO;
 using CafeLib.BsvSharp.Chain;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.Core.Numerics;
-using CafeLib.Cryptography.BouncyCastle.Util.Encoders;
 using Xunit;
 
 namespace CafeLib.BsvSharp.UnitTests.Chain
