@@ -5,7 +5,6 @@
 
 using System.IO;
 using CafeLib.BsvSharp.Chain;
-using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Services;
 using CafeLib.Core.Numerics;
 using Xunit;
