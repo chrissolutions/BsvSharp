@@ -14,7 +14,6 @@ using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Chain
 {
-
     /// <summary>
     /// Closely mirrors the data and layout of a serialized Bitcoin block header.
     /// Focus is on efficiency when processing large blocks.
@@ -149,6 +148,10 @@ namespace CafeLib.BsvSharp.Chain
             return Timestamp <= DateTime.UtcNow.ToUnixTime() + MaxTimeOffset;
         }
 
+        /// <summary>
+        /// Block header string representation.
+        /// </summary>
+        /// <returns>string representation of block header</returns>
         public override string ToString() => Encoders.Hex.Encode(Serialize());
 
         #region Protected Methods
