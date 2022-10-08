@@ -86,15 +86,6 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             Assert.Equal(blockBytes[..(int)sequence.Data.Length], sequence.ToArray());
         }
 
-        [Fact]
-        public void DeserializeBlockHeader_Test()
-        {
-            var raw = GetRawBlock("blk86756-testnet");
-            var header = BlockHeader.FromBytes(raw[8..(8+BlockHeader.BlockHeaderSize)]);
-            Assert.NotNull(header);
-            Assert.Equal(2, header.Version);
-        }
-
         #region Helpers
 
         private static byte[] GetRawBlock(string filename)

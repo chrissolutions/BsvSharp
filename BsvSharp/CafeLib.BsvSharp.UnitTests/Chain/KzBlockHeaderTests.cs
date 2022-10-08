@@ -36,7 +36,7 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         public void DeserializeBlockHeader_Test()
         {
             var raw = GetRawBlock("blk86756-testnet");
-            var header = BlockHeader.FromBytes(raw[8..88]);
+            var header = BlockHeader.FromBytes(raw[8..(8 + BlockHeader.BlockHeaderSize)]);
             Assert.NotNull(header);
             Assert.Equal(2, header.Version);
         }
@@ -103,14 +103,19 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         }
 
         [Fact]
+        public void BlockHeader_Hex_String_Test()
+        {
+            var hexString = TestNet_86756.ToHex();
+            var header = BlockHeader.FromHex(hexString);
+            Assert.Equal(TestNet_86756, header);
+        }
+
+        [Fact]
         public void BlockHeader_String_Test()
         {
             var headerBytes = TestNet_86756.Serialize();
             var headerString = Encoders.Hex.Encode(headerBytes);
             Assert.Equal(TestNet_86756.ToString(), headerString);
-
-            var header2 = BlockHeader.FromHex(headerString);
-            Assert.Equal(TestNet_86756, header2);
         }
 
         #region Helpers

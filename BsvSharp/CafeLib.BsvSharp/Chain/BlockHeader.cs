@@ -149,10 +149,16 @@ namespace CafeLib.BsvSharp.Chain
         }
 
         /// <summary>
+        /// Block header hex string representation.
+        /// </summary>
+        /// <returns>hex string representation of block header</returns>
+        public string ToHex() => Encoders.Hex.Encode(Serialize());
+
+        /// <summary>
         /// Block header string representation.
         /// </summary>
         /// <returns>string representation of block header</returns>
-        public override string ToString() => Encoders.Hex.Encode(Serialize());
+        public override string ToString() => ToHex();
 
         #region Protected Methods
 
