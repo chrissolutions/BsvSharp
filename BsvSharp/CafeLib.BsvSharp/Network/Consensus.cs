@@ -5,21 +5,20 @@
 
 using System;
 using CafeLib.BsvSharp.Chain;
-using CafeLib.BsvSharp.Scripting;
-using CafeLib.BsvSharp.Transactions;
-using CafeLib.BsvSharp.Units;
+using CafeLib.BsvSharp.Encoding;
 using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Network
 {
     public class Consensus
     {
+        private Block _genesis;
+
         public Consensus()
         {
+            _genesis = CreateGenesisBlock();
             Deployments = new Bip9Deployment[(int)DeploymentPos.MaxVersionBitsDeployments];
         }
-
-        public UInt256 HashGenesisBlock;
 
         public int SubsidyHalvingInterval { get; internal set; }
 
@@ -70,14 +69,13 @@ namespace CafeLib.BsvSharp.Network
         public Bip9Deployment[] Deployments;
 
         /** Proof of work parameters */
-        public UInt256 ProofOfWorkLimit;
-        public bool AllowMinDifficultyBlocks;
-        public bool NoRetargeting;
-        public long ProofOfWorkTargetSpacing;
-        public long ProofOfWorkTargetTimespan;
-        public UInt256 MinimumChainWork;
-        public UInt256 DefaultAssumeValid;
-
+        public UInt256 ProofOfWorkLimit { get; internal set; }
+        public bool AllowMinDifficultyBlocks { get; internal set; }
+        public bool NoRetargeting { get; internal set; }
+        public long ProofOfWorkTargetSpacing { get; internal set; }
+        public long ProofOfWorkTargetTimespan { get; internal set; }
+        public UInt256 MinimumChainWork { get; internal set; }
+        public UInt256 DefaultAssumeValid { get; internal set; }
 
         public Int64 DifficultyAdjustmentInterval => ProofOfWorkTargetTimespan / ProofOfWorkTargetSpacing;
 
@@ -135,7 +133,10 @@ namespace CafeLib.BsvSharp.Network
         /// </summary>
         public int RewardHalvingInterval => SubsidyHalvingInterval;
 
-        public string GenesisBlockHash => "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f";
+        /// <summary>
+        /// Genesis block header.
+        /// </summary>
+        public BlockHeader Genesis => _genesis;
 
         /// <summary>
         /// Block height at which Back-to-Genesis becomes active.
@@ -216,64 +217,13 @@ namespace CafeLib.BsvSharp.Network
 
             KzUInt256 defaultAssumeValid;
 #endif
-        private Block CreateGenesisBlock
-        (
-            string pszTimestamp,
-            Script genesisOutputScript,
-            uint nTime, 
-            uint nNonce,
-            uint nBits, 
-            int nVersion,
-            long genesisReward)
+        private Block CreateGenesisBlock()
         {
-            var txs = new Transaction[] 
-            {
-                new Transaction
-                (
-                    version: 1,
-                    vin: new TransactionInputList(new[] { new TransactionInput(UInt256.Zero, -1, Amount.Zero, 0) }),
-                    vout: new TransactionOutputList(new[] { new TransactionOutput(UInt256.Zero, -1, Amount.Zero, Script.None) }),
-                    lockTime: 0
-                )
-            };
+            const string genesisHex =
+                "0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c0101000000010000000000000000000000000000000000000000000000000000000000000000ffffffff4d04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73ffffffff0100f2052a01000000434104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac00000000";
 
-            var hashMerkleRoot = txs.ComputeMerkleRoot();
-            var genesis = new Block(
-                txs: txs,
-                version: 1,
-                hashPrevBlock: UInt256.Zero,
-                hashMerkleRoot: hashMerkleRoot,
-                time: 1231006506,
-                bits: 0x1d00ffff,
-                nonce: 2083236893
-                );
-            return genesis;
+            var bytes = Encoders.Hex.Decode(genesisHex);
+            return Block.FromBytes(bytes);
         }
-
-#if false
-        CMutableTransaction txNew;
-        txNew.nVersion = 1;
-    txNew.vin.resize(1);
-    txNew.vout.resize(1);
-    txNew.vin[0].scriptSig =
-        CScript() << 486604799 << CScriptNum(4)
-                  << std::vector<uint8_t>((const uint8_t*)pszTimestamp,
-                                          (const uint8_t*)pszTimestamp +
-                                              strlen(pszTimestamp));
-    txNew.vout[0].nValue = genesisReward;
-    txNew.vout[0].scriptPubKey = genesisOutputScript;
-
-    CBlock genesis;
-        genesis.nTime = nTime;
-    genesis.nBits = nBits;
-    genesis.nNonce = nNonce;
-    genesis.nVersion = nVersion;
-    genesis.vtx.push_back(MakeTransactionRef(std::move(txNew)));
-    genesis.hashPrevBlock.SetNull();
-    genesis.hashMerkleRoot = BlockMerkleRoot(genesis);
-    return genesis;
-54 68 65 20 54 69 6D 65 73 20 30 33 2F 4A 61 6E 2F 32 30 30 39 20 43 68 61 6E 63 65 6C 6C 6F 72 20 6F 6E 20 62 72 69 6E 6B 20 6F 66 20 73 65 63 6F 6E 64 20 62 61 69 6C 6F 75 74 20 66 6F 72 20 62 61 6E 6B 73  
-#endif
     }
-
 }

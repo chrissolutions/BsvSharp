@@ -130,7 +130,7 @@ namespace CafeLib.BsvSharp.UnitTests.Transactions
                 .SendChangeTo(new Address("1BoUFgA8ZnSFxARg9BgrXgmtZLj2ssrYuw"))
                 .WithFeePerKb(500);
 
-            Assert.Equal(txHex, tx.ToString());
+            Assert.Equal(txHex, tx.ToHex());
         }
 
         [Fact]

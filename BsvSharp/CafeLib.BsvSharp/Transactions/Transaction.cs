@@ -383,7 +383,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <returns>transaction string representation</returns>
         public override string ToString()
         {
-            return ToHex();
+            return TxId;
         }
 
         /// <summary>
@@ -846,7 +846,7 @@ namespace CafeLib.BsvSharp.Transactions
             // write the inputs
             Inputs.ForEach(x => x.WriteTo(writer));
 
-            //set the number of outputs to come
+            //set the number of outputs
             writer.Write(new VarInt(Outputs.Count));
 
             // write the outputs
@@ -855,6 +855,7 @@ namespace CafeLib.BsvSharp.Transactions
             // write the locktime
             writer.Write(LockTime);
 
+            // return writer.
             return writer;
         }
 
