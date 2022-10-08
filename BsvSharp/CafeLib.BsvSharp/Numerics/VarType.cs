@@ -25,7 +25,6 @@ namespace CafeLib.BsvSharp.Numerics
         }
 
         public static readonly VarType Empty = new();
-        public static readonly VarType Zero = Empty;
         public static readonly VarType False = Empty;
         public static readonly VarType True = new(new byte[] { 1 });
 
@@ -45,8 +44,6 @@ namespace CafeLib.BsvSharp.Numerics
         /// </summary>
         /// <param name="range"></param>
         public VarType this[Range range] => new(Span[range]);
-
-        public VarType Slice(int start, int length) => new(Span[start..length]);
 
         public override string ToString() => Encoders.Hex.EncodeSpan(Buffer.Span);
 

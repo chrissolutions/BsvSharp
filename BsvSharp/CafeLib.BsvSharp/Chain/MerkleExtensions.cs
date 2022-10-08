@@ -3,7 +3,6 @@
 #endregion
 
 using System.Collections.Generic;
-using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Transactions;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
