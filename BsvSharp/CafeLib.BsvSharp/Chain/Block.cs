@@ -81,7 +81,7 @@ namespace CafeLib.BsvSharp.Chain
         public bool Deserialize(ref ReadOnlyByteSequence sequence)
         {
             var reader = new ByteSequenceReader(sequence);
-            if (!TryDeserialzeBlock(ref reader)) return false;
+            if (!TryDeserializeBlock(ref reader)) return false;
             sequence = sequence.Data.Slice(reader.Data.Consumed);
             return true;
         }
@@ -116,7 +116,7 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         /// <param name="reader">byte sequence reader</param>
         /// <returns>true if successful; false otherwise</returns>
-        private bool TryDeserialzeBlock(ref ByteSequenceReader reader)
+        private bool TryDeserializeBlock(ref ByteSequenceReader reader)
         {
             if (!TryDeserializeHeader(ref reader)) return false;
             if (!reader.TryReadVariant(out var count)) return false;
