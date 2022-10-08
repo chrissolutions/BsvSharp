@@ -128,7 +128,7 @@ namespace CafeLib.BsvSharp.Chain
             var mov = 8 * ((targetBits >> 24) - 3);
             while (mov-- > 0)
             {
-                target >>= 1;
+                target <<= 1;
             }
 
             return target;
