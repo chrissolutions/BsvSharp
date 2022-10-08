@@ -8,6 +8,7 @@ using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
+using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
 
@@ -139,9 +140,7 @@ namespace CafeLib.BsvSharp.Chain
         /// <returns>Returns *true* if the timestamp is smaller than or equal to the [BlockHeader.MAX_TIME_OFFSET], *false* otherwise</returns>
         public bool HasValidTimestamp()
         {
-            // ReSharper disable once PossibleLossOfFraction
-            var currentTime = (int)Math.Round((double)((DateTime.Now - DateTime.UnixEpoch).Milliseconds / 1000));
-            return Timestamp <= currentTime + MaxTimeOffset;
+            return Timestamp <= DateTime.UtcNow.ToUnixTime() + MaxTimeOffset;
         }
 
         public override int GetHashCode() => Serialize().GetHashCode();

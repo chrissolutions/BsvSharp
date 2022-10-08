@@ -46,7 +46,7 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         }
 
         [Fact]
-        public void GenesisBlockTest()
+        public void GenesisBlock_Test()
         {
             var bytes = GetRawBlock("RawBlock000000");
             var genesis = Block.FromBytes(bytes);
@@ -63,7 +63,7 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         }
 
         [Fact]
-        public void DeserializeBlockTest()
+        public void DeserializeBlock_Test()
         {
             var bytes = GetRawBlock("blk86756-testnet");
             var block = Block.FromBytes(bytes[8..]);
@@ -73,7 +73,7 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         }
 
         [Fact]
-        public void SerializeBlockTest()
+        public void SerializeBlock_Test()
         {
             var bytes = GetRawBlock("blk86756-testnet");
             var blockBytes = bytes[8..];
@@ -86,7 +86,7 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         }
 
         [Fact]
-        public void DeserializeBlockHeaderTest()
+        public void DeserializeBlockHeader_Test()
         {
             var raw = GetRawBlock("blk86756-testnet");
             var header = BlockHeader.FromBytes(raw[8..88]);
@@ -95,7 +95,7 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         }
 
         [Fact]
-        public void SerializeBlockHeaderTest()
+        public void SerializeBlockHeader_Test()
         {
             var header = new BlockHeader(
                 version: 2,
@@ -109,6 +109,21 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             var blockHeader = BlockHeader.FromBytes(headerBytes);
             Assert.NotNull(blockHeader);
             Assert.Equal(header, blockHeader);
+        }
+
+        [Fact]
+        public void HasValidTimestamp_Test()
+        {
+            var header = new BlockHeader(
+                version: 2,
+                prevBlockHash: UInt256.FromHex("000000003c35b5e70b13d5b938fef4e998a977c17bea978390273b7c50a9aa4b"),
+                merkleRootHash: UInt256.FromHex("58e6d52d1eb00470ae1ab4d5a3375c0f51382c6f249fff84e9888286974cfc97"),
+                timestamp: 1371410638,
+                bits: 473956288,
+                nonce: 3594009557);
+
+            var valid = header.HasValidTimestamp();
+            Assert.True(valid);
         }
 
         #region Helpers
