@@ -58,15 +58,15 @@ namespace CafeLib.BsvSharp.Chain
         /// Constructs a new block header
         /// </summary>
         /// <param name="version">block version number</param>
-        /// <param name="prevBlockHash">sha256 hash of the previous block header</param>
+        /// <param name="prevHash">sha256 hash of the previous block header</param>
         /// <param name="merkleRootHash">Sha256 hash at the root of the transaction merkle tree</param>
         /// <param name="timestamp">current block timestamp as seconds since the unix epoch</param>
         /// <param name="bits">the current difficulty target in compact format</param>
         /// <param name="nonce">the nonce field that miners use to find a sha256 hash value that matches the difficulty target</param>
-        public BlockHeader(int version, UInt256 prevBlockHash, UInt256 merkleRootHash, uint timestamp, uint bits, uint nonce)
+        public BlockHeader(int version, UInt256 prevHash, UInt256 merkleRootHash, uint timestamp, uint bits, uint nonce)
         {
             _version = version;
-            _prevHash = prevBlockHash;
+            _prevHash = prevHash;
             _merkleRootHash = merkleRootHash;
             _timestamp = timestamp;
             _bits = bits;
@@ -128,7 +128,7 @@ namespace CafeLib.BsvSharp.Chain
                 nShift--;
             }
 
-            return dDiff;
+            return double.Parse(dDiff.ToString("F8"));
         }
 
         /// <summary>
