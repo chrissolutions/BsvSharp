@@ -47,9 +47,11 @@ namespace CafeLib.BsvSharp.Chain
         public uint Bits => _bits;
         public uint Nonce => _nonce;
 
-        public BlockHeader()
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        protected BlockHeader()
         {
-            Hash = new UInt256();
         }
 
         /// <summary>
@@ -62,7 +64,6 @@ namespace CafeLib.BsvSharp.Chain
         /// <param name="bits">the current difficulty target in compact format</param>
         /// <param name="nonce">the nonce field that miners use to find a sha256 hash value that matches the difficulty target</param>
         public BlockHeader(int version, UInt256 prevBlockHash, UInt256 merkleRootHash, uint timestamp, uint bits, uint nonce)
-            : this()
         {
             _version = version;
             _prevHash = prevBlockHash;
@@ -97,7 +98,7 @@ namespace CafeLib.BsvSharp.Chain
         }
 
         /// <summary>
-        /// Serialize block header/
+        /// Serialize block header
         /// </summary>
         /// <returns></returns>
         public byte[] Serialize()
@@ -112,26 +113,7 @@ namespace CafeLib.BsvSharp.Chain
         /// <returns>true if has valid proof of work; otherwise false</returns>
         public bool HasValidProofOfWork()
         {
-            return Hash > GetTargetDifficulty();
-        }
-
-        /// <summary>
-        /// Returns current difficulty target or calculates a specific difficulty target.
-        /// </summary>
-        /// <param name="targetBits">The difficulty target to calculate. If this is *null* the currently set target in the header is used</param>
-        /// <returns></returns>
-        public UInt256 GetTargetDifficulty(ulong? targetBits = null)
-        {
-            targetBits ??= _bits;
-
-            var target = new UInt256(targetBits.Value);
-            var mov = 8 * ((targetBits >> 24) - 3);
-            while (mov-- > 0)
-            {
-                target <<= 1;
-            }
-
-            return target;
+            return Hash <= GetTargetDifficulty();
         }
 
         /// <summary>
@@ -146,6 +128,18 @@ namespace CafeLib.BsvSharp.Chain
         public override string ToString() => Encoders.Hex.Encode(Serialize());
 
         #region Protected Methods
+
+        /// <summary>
+        /// Calculate the block hash
+        /// </summary>
+        /// <param name="bytes">bytes</param>
+        /// <returns>calculated block hash</returns>
+        protected static UInt256 CalculateHash(ReadOnlyByteSpan bytes)
+        {
+            var hash1 = Hashes.ComputeSha256(bytes);
+            var hash2 = Hashes.ComputeSha256(hash1);
+            return new UInt256(hash2);
+        }
 
         /// <summary>
         /// Deserialize the block header from the sequence reader.
@@ -187,15 +181,22 @@ namespace CafeLib.BsvSharp.Chain
         }
 
         /// <summary>
-        /// Calculate the block hash
+        /// Returns current difficulty target or calculates a specific difficulty target.
         /// </summary>
-        /// <param name="bytes">bytes</param>
-        /// <returns>calculated block hash</returns>
-        protected static UInt256 CalculateHash(ReadOnlyByteSpan bytes)
+        /// <param name="targetBits">The difficulty target to calculate.</param>
+        /// <returns>the difficulty target</returns>
+        protected UInt256 GetTargetDifficulty(ulong? targetBits = null)
         {
-            var hash1 = Hashes.ComputeSha256(bytes);
-            var hash2 = Hashes.ComputeSha256(hash1);
-            return new UInt256(hash2);
+            targetBits ??= _bits;
+
+            var target = new UInt256(targetBits.Value);
+            var mov = 8 * ((targetBits >> 24) - 3);
+            while (mov-- > 0)
+            {
+                target <<= 1;
+            }
+
+            return target;
         }
 
         #endregion
