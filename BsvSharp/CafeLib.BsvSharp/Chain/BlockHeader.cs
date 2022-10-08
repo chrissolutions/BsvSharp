@@ -108,6 +108,30 @@ namespace CafeLib.BsvSharp.Chain
         }
 
         /// <summary>
+        /// Returns the difficulty target of this block header
+        /// </summary>
+        /// <returns>block header difficulty</returns>
+        public double GetDifficulty()
+        {
+            var nShift = (_bits >> 24) & 255;
+            var dDiff = (double)65535 / (_bits & 16777215);
+
+            while (nShift < 29)
+            {
+                dDiff *= 256.0;
+                nShift++;
+            }
+
+            while (nShift > 29)
+            {
+                dDiff /= 256.0;
+                nShift--;
+            }
+
+            return dDiff;
+        }
+
+        /// <summary>
         /// Determine whether the block header has valid proof of work.
         /// </summary>
         /// <returns>true if has valid proof of work; otherwise false</returns>
