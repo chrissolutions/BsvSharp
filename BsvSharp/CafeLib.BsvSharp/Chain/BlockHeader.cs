@@ -24,7 +24,7 @@ namespace CafeLib.BsvSharp.Chain
     /// <item><term>Height</term><description>The chain height associated with this block.</description></item>
     /// </list>
     /// </summary>
-    public class BlockHeader: IEquatable<BlockHeader>
+    public record BlockHeader
     {
         public const int BlockHeaderSize = 80;
         private const long MaxTimeOffset = 2 * 60 * 60;
@@ -143,19 +143,7 @@ namespace CafeLib.BsvSharp.Chain
             return Timestamp <= DateTime.UtcNow.ToUnixTime() + MaxTimeOffset;
         }
 
-        public override int GetHashCode() => Serialize().GetHashCode();
-        public override bool Equals(object obj) => obj is BlockHeader header && this == header;
-        public bool Equals(BlockHeader other)
-        {
-            return other is not null
-                   && Hash == other.Hash
-                   && Version == other.Version
-                   && PrevHash == other.PrevHash
-                   && MerkleRoot == other.MerkleRoot
-                   && Timestamp == other.Timestamp
-                   && Bits == other.Bits
-                   && Nonce == other.Nonce;
-        }
+        public override string ToString() => Encoders.Hex.Encode(Serialize());
 
         #region Protected Methods
 
@@ -170,21 +158,15 @@ namespace CafeLib.BsvSharp.Chain
                 return false;
 
             var start = reader.Data.Position;
-
             if (!reader.TryReadLittleEndian(out _version)) return false;
             if (!reader.TryReadUInt256(ref _prevHash)) return false;
             if (!reader.TryReadUInt256(ref _merkleRootHash)) return false;
             if (!reader.TryReadLittleEndian(out _timestamp)) return false;
             if (!reader.TryReadLittleEndian(out _bits)) return false;
             if (!reader.TryReadLittleEndian(out _nonce)) return false;
-
             var end = reader.Data.Position;
-            Hash = CalculateHash(reader.Data.Sequence.Slice(start, end).FirstSpan);
 
-            //var blockBytes = reader.Data.Sequence.Slice(start, end).ToArray();
-            //var hash1 = Hashes.ComputeSha256(blockBytes);
-            //var hash2 = Hashes.ComputeSha256(hash1);
-            //hash2.CopyTo(_hash.Span);
+            Hash = CalculateHash(reader.Data.Sequence.Slice(start, end).FirstSpan);
             return true;
         }
 
@@ -194,12 +176,13 @@ namespace CafeLib.BsvSharp.Chain
         /// <returns></returns>
         protected bool TrySerializeHeader(IDataWriter writer)
         {
-            writer.Write(_version);
-            writer.Write(_prevHash);
-            writer.Write(_merkleRootHash);
-            writer.Write(_timestamp);
-            writer.Write(_bits);
-            writer.Write(_nonce);
+            writer
+                .Write(_version)
+                .Write(_prevHash)
+                .Write(_merkleRootHash)
+                .Write(_timestamp)
+                .Write(_bits)
+                .Write(_nonce);
             return true;
         }
 

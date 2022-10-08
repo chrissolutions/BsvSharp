@@ -21,7 +21,7 @@ namespace CafeLib.BsvSharp.Chain
     /// and over which they calculate a sha256 hash
     /// as part of their proof-of-work to win the right to extend the blockchain.
     ///
-    public class Block : BlockHeader
+    public record Block : BlockHeader
     {
         public TransactionList Transactions { get; private set; }
 
