@@ -110,16 +110,22 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 
         private void BuildCore(MerkleNode node, BitWriter flags)
         {
-            if (node == null)
-                return;
-            flags.Write(node.IsMarked);
-            if (node.IsLeaf || !node.IsMarked)
-                Hashes.Add(node.Hash);
-
-            if (node.IsMarked)
+            while (true)
             {
-                BuildCore(node.Left, flags);
-                BuildCore(node.Right, flags);
+                if (node == null) return;
+
+                flags.Write(node.IsMarked);
+
+                if (node.IsLeaf || !node.IsMarked) Hashes.Add(node.Hash);
+
+                if (node.IsMarked)
+                {
+                    BuildCore(node.Left, flags);
+                    node = node.Right;
+                    continue;
+                }
+
+                break;
             }
         }
 
