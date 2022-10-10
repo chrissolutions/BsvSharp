@@ -10,6 +10,11 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 {
     public class MerkleNode
     {
+        public static MerkleNode GetRoot(int leafCount)
+        {
+            return GetRoot(Enumerable.Range(0, leafCount).Select(i => UInt256.Zero));
+        }
+
         public static MerkleNode GetRoot(IEnumerable<UInt256> leafs)
         {
             var row = leafs.Select(l => new MerkleNode(l)).ToList();
