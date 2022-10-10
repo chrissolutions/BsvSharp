@@ -565,7 +565,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <returns>readonly byte span</returns>
         public byte[] Serialize(bool performChecks = false)
         {
-            var writer = (ByteDataWriter) WriteTo(new ByteDataWriter(), new {performChecks});
+            var writer = (ByteDataWriter) WriteTo(new ByteDataWriter(), performChecks);
             return writer.ToArray();
         }
 
@@ -600,18 +600,17 @@ namespace CafeLib.BsvSharp.Transactions
         /// </summary>
         /// <param name="writer">data writer</param>
         /// <returns>data writer</returns>
-        public IDataWriter WriteTo(IDataWriter writer) => WriteTo(writer, new { performChecks = false });
+        public IDataWriter WriteTo(IDataWriter writer) => WriteTo(writer, false);
 
         /// <summary>
         /// Serialize Script to data writer
         /// </summary>
         /// <param name="writer">data writer</param>
-        /// <param name="parameters">performCheck parameter</param>
+        /// <param name="performChecks">performCheck parameter</param>
         /// <returns></returns>
-        public IDataWriter WriteTo(IDataWriter writer, object parameters)
+        public IDataWriter WriteTo(IDataWriter writer, bool performChecks)
         {
-            dynamic args = parameters;
-            if (args.performChecks)
+            if (performChecks)
             {
                 DoSerializationChecks();
             }
