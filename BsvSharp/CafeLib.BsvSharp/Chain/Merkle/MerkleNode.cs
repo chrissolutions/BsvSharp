@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CafeLib.Core.Buffers;
@@ -8,11 +7,11 @@ using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Chain.Merkle
 {
-    public class MerkleNode
+    internal class MerkleNode
     {
         public static MerkleNode GetRoot(int leafCount)
         {
-            return GetRoot(Enumerable.Range(0, leafCount).Select(i => UInt256.Zero));
+            return GetRoot(Enumerable.Range(0, leafCount).Select(_ => UInt256.Zero));
         }
 
         public static MerkleNode GetRoot(IEnumerable<UInt256> leafs)
@@ -38,7 +37,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         }
         public MerkleNode(UInt256 hash)
         {
-            _Hash = hash;
+            Hash = hash;
             IsLeaf = true;
         }
 
@@ -53,23 +52,13 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             UpdateHash();
         }
 
-        public UInt256 Hash
-        {
-            get
-            {
-                return _Hash;
-            }
-            set
-            {
-                _Hash = value;
-            }
-        }
+        public UInt256 Hash { get; set; }
 
         public void UpdateHash()
         {
             var right = Right ?? Left;
-            if (Left != null && Left.Hash != null && right.Hash != null)
-                _Hash = Hashes.Hash256(ByteSpan.Concat(Left.Hash.Span, right.Hash.Span).ToArray());
+            if (Left != null)
+                Hash = Hashes.Hash256(ByteSpan.Concat(Left.Hash.Span, right.Hash.Span).ToArray());
         }
 
         public bool IsLeaf
@@ -77,7 +66,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             get;
             private set;
         }
-        UInt256 _Hash;
+
         public MerkleNode Parent
         {
             get;
@@ -96,11 +85,14 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 
         public IEnumerable<MerkleNode> EnumerateDescendants()
         {
-            IEnumerable<MerkleNode> result = new MerkleNode[] { this };
+            IEnumerable<MerkleNode> result = new[] { this };
+
             if (Right != null)
                 result = Right.EnumerateDescendants().Concat(result);
+
             if (Left != null)
                 result = Left.EnumerateDescendants().Concat(result);
+
             return result;
         }
 
@@ -132,7 +124,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 
         public override string ToString()
         {
-            return Hash == null ? "???" : Hash.ToString();
+            return Hash.ToString();
         }
 
         public string ToString(bool hierachy)
@@ -149,10 +141,8 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             var tabs = new string(Enumerable.Range(0, indent).Select(_ => '\t').ToArray());
             builder.Append(tabs);
             builder.AppendLine(ToString());
-            if (Left != null)
-                Left.ToString(builder, indent + 1);
-            if (Right != null)
-                Right.ToString(builder, indent + 1);
+            Left?.ToString(builder, indent + 1);
+            Right?.ToString(builder, indent + 1);
         }
     }
 }

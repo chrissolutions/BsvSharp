@@ -162,7 +162,8 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         private IEnumerable<UInt256> GetMatchedTransactionsCore(MerkleNode node, BitReader flags, IEnumerator<UInt256> hashes, bool calculateHash)
         {
             if (node == null)
-                return new UInt256[0];
+                return Array.Empty<UInt256>();
+
             node.IsMarked = flags.Read();
 
             if (node.IsLeaf || !node.IsMarked)
@@ -171,13 +172,17 @@ namespace CafeLib.BsvSharp.Chain.Merkle
                 node.Hash = hashes.Current;
             }
             if (!node.IsMarked)
-                return new UInt256[0];
+                return Array.Empty<UInt256>();
+
             if (node.IsLeaf)
-                return new UInt256[] { node.Hash };
+                return new[] { node.Hash };
+
             var left = GetMatchedTransactionsCore(node.Left, flags, hashes, calculateHash);
             var right = GetMatchedTransactionsCore(node.Right, flags, hashes, calculateHash);
+
             if (calculateHash)
                 node.UpdateHash();
+
             return left.Concat(right);
         }
 
