@@ -12,40 +12,12 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         {
 
         }
-        uint _TransactionCount;
-        public uint TransactionCount
-        {
-            get
-            {
-                return _TransactionCount;
-            }
-            set
-            {
-                _TransactionCount = value;
-            }
-        }
 
-        List<UInt256> _Hashes = new List<UInt256>();
-        public List<UInt256> Hashes
-        {
-            get
-            {
-                return _Hashes;
-            }
-        }
+        public uint TransactionCount { get; set; }
 
-        BitArray _Flags = new BitArray(0);
-        public BitArray Flags
-        {
-            get
-            {
-                return _Flags;
-            }
-            set
-            {
-                _Flags = value;
-            }
-        }
+        public List<UInt256> Hashes { get; } = new();
+
+        public BitArray Flags { get; set; } = new(0);
 
         // serialization implementation
         //#region IBitcoinSerializable Members

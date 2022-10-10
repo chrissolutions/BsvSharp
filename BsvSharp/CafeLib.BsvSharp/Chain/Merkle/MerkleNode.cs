@@ -7,7 +7,7 @@ using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Chain.Merkle
 {
-    internal class MerkleNode
+    public class MerkleNode
     {
         public static MerkleNode GetRoot(int leafCount)
         {
@@ -45,10 +45,13 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         {
             Left = left;
             Right = right;
+
             if (left != null)
                 left.Parent = this;
+
             if (right != null)
                 right.Parent = this;
+
             UpdateHash();
         }
 
@@ -127,11 +130,11 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             return Hash.ToString();
         }
 
-        public string ToString(bool hierachy)
+        public string ToString(bool hierarchy)
         {
-            if (!hierachy)
+            if (!hierarchy)
                 return ToString();
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             ToString(builder, 0);
             return builder.ToString();
         }
