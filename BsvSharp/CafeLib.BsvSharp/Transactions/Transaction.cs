@@ -522,8 +522,6 @@ namespace CafeLib.BsvSharp.Transactions
         /// <returns></returns>
         internal bool TryReadTransaction(ref ByteSequenceReader r)
         {
-            var start = r.Data.Position;
-
             if (!r.TryReadLittleEndian(out int version)) return false;
             Version = version;
 
@@ -548,13 +546,6 @@ namespace CafeLib.BsvSharp.Transactions
             if (!r.TryReadLittleEndian(out uint lockTime)) return false;
             LockTime = lockTime;
 
-            var end = r.Data.Position;
-
-            //// Compute the transaction hash.
-            //var txBytes = r.Data.Sequence.Slice(start, end).ToArray();
-            //var hash1 = Hashes.ComputeSha256(txBytes);
-            //var hash2 = Hashes.ComputeSha256(hash1);
-            //TxHash = new UInt256(hash2);
             return true;
         }
 
