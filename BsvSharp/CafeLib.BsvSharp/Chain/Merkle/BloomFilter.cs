@@ -159,8 +159,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
                         {
 
                             var template = StandardScripts.GetTemplateFromScriptPubKey(x.Script);
-                            if (template != null &&
-                                (template.Type == TxOutType.TX_PUBKEY || template.Type == TxOutType.TX_MULTISIG))
+                            if (template is { Type: TxOutType.TX_PUBKEY or TxOutType.TX_MULTISIG })
                                 Insert(new OutPoint(hash, i));
 
                             break;
@@ -169,54 +168,17 @@ namespace CafeLib.BsvSharp.Chain.Merkle
                 }
             });
 
-            for (var i = 0; i < tx.Outputs.Count; i++)
-            {
-                var txout = tx.Outputs[i];
-
-                // Match if the filter contains any arbitrary script data element in any scriptPubKey in tx
-                // If this matches, also add the specific output that was matched.
-                // This means clients don't have to update the filter themselves when a new relevant tx 
-                // is discovered in order to find spending transactions, which avoids round-tripping and race conditions.
-                foreach (var op in txout.Script.Decode())
-                {
-                    if (op.PushData != null && op.PushData.Length != 0 && Contains(op.PushData))
-                    {
-                        fFound = true;
-
-                        if ((nFlags & (byte)BloomFlags.UPDATE_MASK) == (byte)BloomFlags.UPDATE_ALL)
-                            Insert(new OutPoint(hash, i));
-
-                        else if ((nFlags & (byte)BloomFlags.UPDATE_MASK) == (byte)BloomFlags.UPDATE_P2PUBKEY_ONLY)
-                        {
-                            var template = StandardScripts.GetTemplateFromScriptPubKey(txout.ScriptPubKey);
-                            if (template != null &&
-                                (template.Type == TxOutType.TX_PUBKEY || template.Type == TxOutType.TX_MULTISIG))
-                                Insert(new OutPoint(hash, i));
-                        }
-
-                        break;
-                    }
-                }
-            }
-
             if (fFound)
                 return true;
 
-            foreach (var txIn in tx.Inputs)
+            fFound = tx.Inputs.Any(x =>
             {
-                // Match if the filter contains an outpoint tx spends
-                if (Contains(txIn.PrevOut))
-                    return true;
-
+                // Match if the filter contains an outpoint tx spends or 
                 // Match if the filter contains any arbitrary script data element in any scriptSig in tx
-                foreach (var op in txIn.ScriptSig.Decode())
-                {
-                    if (op.PushData != null && op.PushData.Length != 0 && Contains(op.PushData))
-                        return true;
-                }
-            }
+                return Contains(x.PrevOut) || x.ScriptSig.Decode().Any(op => op.Length != 0 && Contains(op.Data));
+            });
 
-            return false;
+            return fFound;
         }
     }
 }
