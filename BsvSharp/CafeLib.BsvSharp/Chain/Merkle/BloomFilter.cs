@@ -146,24 +146,22 @@ namespace CafeLib.BsvSharp.Chain.Merkle
                 // If this matches, also add the specific output that was matched.
                 // This means clients don't have to update the filter themselves when a new relevant tx 
                 // is discovered in order to find spending transactions, which avoids round-tripping and race conditions.
-                if (((ScriptBuilder)x.Script).Operands.Any(op => op.Length != 0 && Contains(op.Operand.Data)))
+                if (!x.Script.Decode().Any(op => op.Length != 0 && Contains(op.Data))) return;
+
+                fFound = true;
+                switch (nFlags & (byte)BloomFlags.UPDATE_MASK)
                 {
-                    fFound = true;
-                    switch (nFlags & (byte)BloomFlags.UPDATE_MASK)
+                    case (byte)BloomFlags.UPDATE_ALL:
+                        Insert(new OutPoint(hash, i));
+                        break;
+
+                    case (byte)BloomFlags.UPDATE_P2PUBKEY_ONLY:
                     {
-                        case (byte)BloomFlags.UPDATE_ALL:
+                        var template = StandardScripts.GetTemplateFromScriptPubKey(x.Script);
+                        if (template is { Type: TxOutType.TX_PUBKEY or TxOutType.TX_MULTISIG })
                             Insert(new OutPoint(hash, i));
-                            break;
 
-                        case (byte)BloomFlags.UPDATE_P2PUBKEY_ONLY:
-                        {
-
-                            var template = StandardScripts.GetTemplateFromScriptPubKey(x.Script);
-                            if (template is { Type: TxOutType.TX_PUBKEY or TxOutType.TX_MULTISIG })
-                                Insert(new OutPoint(hash, i));
-
-                            break;
-                        }
+                        break;
                     }
                 }
             });
