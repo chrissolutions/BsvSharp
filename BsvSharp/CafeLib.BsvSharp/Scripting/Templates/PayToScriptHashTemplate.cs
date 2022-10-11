@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Scripting.Templates;
 
-//https://github.com/bitcoin/bips/blob/master/bip-0016.mediawiki
 public class PayToScriptHashTemplate : ScriptTemplate
 {
     private static readonly PayToScriptHashTemplate _Instance = new PayToScriptHashTemplate();

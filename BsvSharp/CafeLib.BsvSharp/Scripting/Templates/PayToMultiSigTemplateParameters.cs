@@ -1,25 +1,21 @@
-﻿using CafeLib.BsvSharp.Keys;
+﻿namespace CafeLib.BsvSharp.Scripting.Templates;
 
-namespace CafeLib.BsvSharp.Scripting.Templates
+public class PayToMultiSigTemplateParameters
 {
-    public class PayToMultiSigTemplateParameters
+    public int SignatureCount
     {
-        public int SignatureCount
-        {
-            get;
-            set;
-        }
-        public PublicKey[] PubKeys
-        {
-            get;
-            set;
-        }
+        get;
+        set;
+    }
+    public PubKey[] PubKeys
+    {
+        get;
+        set;
+    }
 
-        public byte[][] InvalidPubKeys
-        {
-            get;
-            set;
-        }
+    public byte[][] InvalidPubKeys
+    {
+        get;
+        set;
     }
 }
-

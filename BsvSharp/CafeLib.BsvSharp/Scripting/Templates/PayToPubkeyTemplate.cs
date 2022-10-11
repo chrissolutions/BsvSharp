@@ -1,5 +1,4 @@
 ﻿using System;
-using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Scripting.Templates;
 

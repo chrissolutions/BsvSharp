@@ -7,7 +7,6 @@ namespace CafeLib.BsvSharp.Scripting.Templates;
 public class PayToMultiSigTemplate : ScriptTemplate
 {
     private static readonly PayToMultiSigTemplate _Instance = new PayToMultiSigTemplate();
-
     public static PayToMultiSigTemplate Instance
     {
         get
@@ -15,7 +14,6 @@ public class PayToMultiSigTemplate : ScriptTemplate
             return _Instance;
         }
     }
-
     public Script GenerateScriptPubKey(int sigCount, params PubKey[] keys)
     {
         List<Op> ops = new List<Op>();

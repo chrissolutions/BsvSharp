@@ -1,42 +1,47 @@
 ﻿using System;
 
-namespace CafeLib.BsvSharp.Scripting.Templates;
-
-public abstract class ScriptTemplate
+namespace CafeLib.BsvSharp.Scripting.Templates
 {
-    public bool CheckScriptPubKey(Script scriptPubKey)
-    {
-        if (scriptPubKey == null)
-            throw new ArgumentNullException("scriptPubKey");
-        if (!FastCheckScriptPubKey(scriptPubKey))
-            return false;
-        return CheckScriptPubKeyCore(scriptPubKey, scriptPubKey.ToOps().ToArray());
-    }
+    //TODO : Is*Conform can be used to parses the script
 
-    protected virtual bool FastCheckScriptPubKey(Script scriptPubKey)
-    {
-        return true;
-    }
+    //https://github.com/bitcoin/bips/blob/master/bip-0016.mediawiki
 
-    protected abstract bool CheckScriptPubKeyCore(Script scriptPubKey, Op[] scriptPubKeyOps);
-    public bool CheckScriptSig(Script scriptSig, Script scriptPubKey)
+    public abstract class ScriptTemplate
     {
-        if (scriptSig == null)
-            throw new ArgumentNullException("scriptSig");
+        public bool CheckScriptPubKey(Script scriptPubKey)
+        {
+            if (scriptPubKey == null)
+                throw new ArgumentNullException("scriptPubKey");
+            if (!FastCheckScriptPubKey(scriptPubKey))
+                return false;
+            return CheckScriptPubKeyCore(scriptPubKey, scriptPubKey.ToOps().ToArray());
+        }
 
-        if (!FastCheckScriptSig(scriptSig, scriptPubKey))
-            return false;
-        return CheckScriptSigCore(scriptSig, scriptSig.ToOps().ToArray(), scriptPubKey, scriptPubKey == null ? null : scriptPubKey.ToOps().ToArray());
-    }
+        protected virtual bool FastCheckScriptPubKey(Script scriptPubKey)
+        {
+            return true;
+        }
 
-    protected virtual bool FastCheckScriptSig(Script scriptSig, Script scriptPubKey)
-    {
-        return true;
-    }
+        protected abstract bool CheckScriptPubKeyCore(Script scriptPubKey, Op[] scriptPubKeyOps);
+        public bool CheckScriptSig(Script scriptSig, Script scriptPubKey)
+        {
+            if (scriptSig == null)
+                throw new ArgumentNullException("scriptSig");
 
-    protected abstract bool CheckScriptSigCore(Script scriptSig, Op[] scriptSigOps, Script scriptPubKey, Op[] scriptPubKeyOps);
-    public abstract TxOutType Type
-    {
-        get;
+            if (!FastCheckScriptSig(scriptSig, scriptPubKey))
+                return false;
+            return CheckScriptSigCore(scriptSig, scriptSig.ToOps().ToArray(), scriptPubKey, scriptPubKey == null ? null : scriptPubKey.ToOps().ToArray());
+        }
+
+        protected virtual bool FastCheckScriptSig(Script scriptSig, Script scriptPubKey)
+        {
+            return true;
+        }
+
+        protected abstract bool CheckScriptSigCore(Script scriptSig, Op[] scriptSigOps, Script scriptPubKey, Op[] scriptPubKeyOps);
+        public abstract TxOutType Type
+        {
+            get;
+        }
     }
 }
