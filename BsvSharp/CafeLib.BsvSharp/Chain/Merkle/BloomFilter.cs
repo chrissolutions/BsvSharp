@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Scripting.Templates;
