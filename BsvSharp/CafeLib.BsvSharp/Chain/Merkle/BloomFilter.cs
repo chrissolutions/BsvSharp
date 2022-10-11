@@ -30,19 +30,24 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 
         }
 
-        public BloomFilter(int nElements, double nFPRate, BloomFlags nFlagsIn = BloomFlags.UPDATE_ALL)
-            : this(nElements, nFPRate, RandomUtils.GetUInt32(), nFlagsIn)
+        public BloomFilter(int nElements, double falsePositiveRate, BloomFlags nFlagsIn = BloomFlags.UPDATE_ALL)
+            : this(nElements, falsePositiveRate, Randomizer.GetUInt32(), nFlagsIn)
         {
         }
 
-
-        public BloomFilter(int nElements, double nFPRate, uint nTweakIn, BloomFlags nFlagsIn = BloomFlags.UPDATE_ALL)
+        public BloomFilter(int nElements, double falsePositiveRate, uint nTweakIn, BloomFlags nFlagsIn = BloomFlags.UPDATE_ALL)
         {
+            if (falsePositiveRate is <= 0 or > 1.18)
+            {
+                throw new ArgumentException($"Error: Invalid Parameter nFPRate passed to CBloomFilter {falsePositiveRate}!");
+            }
+
             // The ideal size for a bloom filter with a given number of elements and false positive rate is:
             // - nElements * log(fp rate) / ln(2)^2
             // We ignore filter parameters which will create a bloom filter larger than the protocol limits
-            vData = new byte[Math.Min((uint)(-1 / Ln2Squared * nElements * (decimal)Math.Log(nFPRate)),
+            vData = new byte[Math.Min((uint)(-1 / Ln2Squared * nElements * (decimal)Math.Log(falsePositiveRate)),
                 MaxBloomFilterSize) / 8];
+
             //vData(min((unsigned int)(-1  / LN2SQUARED * nElements * log(nFPRate)), MAX_BLOOM_FILTER_SIZE * 8) / 8),
             // The ideal number of hash functions is filter size * ln(2) / number of elements
             // Again, we ignore filter parameters which will create a bloom filter with more hash functions than the protocol limits
@@ -51,11 +56,9 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             this.nHashFuncs = Math.Min((uint)(vData.Length * 8 / nElements * Ln2), MaxHashFunctions);
             this.nTweak = nTweakIn;
             this.nFlags = (byte)nFlagsIn;
-
-
         }
 
-        uint Hash(uint nHashNum, byte[] vDataToHash)
+        private uint Hash(uint nHashNum, byte[] vDataToHash)
         {
             // 0xFBA4C795 chosen as it guarantees a reasonable bit difference between nHashNum values.
             return (uint)(Hashes.MurmurHash3(nHashNum * 0xFBA4C795 + nTweak, vDataToHash) % (vData.Length * 8));
@@ -97,7 +100,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             return Contains(outPoint.ToBytes());
         }
 
-        public bool Contains(uint256 hash)
+        public bool Contains(UInt256 hash)
         {
             return Contains(hash.ToBytes());
         }
@@ -107,7 +110,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             Insert(outPoint.ToBytes());
         }
 
-        public void Insert(uint256 value)
+        public void Insert(UInt256 value)
         {
             Insert(value.ToBytes());
         }
@@ -117,19 +120,17 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             return vData.Length <= MaxBloomFilterSize && nHashFuncs <= MaxHashFunctions;
         }
 
-        #region IBitcoinSerializable Members
+        //#region IBitcoinSerializable Members
 
-        public void ReadWrite(BitcoinStream stream)
-        {
-            stream.ReadWriteAsVarString(ref vData);
-            stream.ReadWrite(ref nHashFuncs);
-            stream.ReadWrite(ref nTweak);
-            stream.ReadWrite(ref nFlags);
-        }
+        //public void ReadWrite(BitcoinStream stream)
+        //{
+        //    stream.ReadWriteAsVarString(ref vData);
+        //    stream.ReadWrite(ref nHashFuncs);
+        //    stream.ReadWrite(ref nTweak);
+        //    stream.ReadWrite(ref nFlags);
+        //}
 
-        #endregion
-
-
+        //#endregion
 
         public bool IsRelevantAndUpdate(Transaction tx)
         {

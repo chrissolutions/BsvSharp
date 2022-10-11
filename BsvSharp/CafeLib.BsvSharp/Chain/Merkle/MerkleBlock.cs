@@ -41,29 +41,30 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             PartialMerkleTree = new PartialMerkleTree(vHashes.ToArray(), vMatch.ToArray());
         }
 
-        public MerkleBlock(Block block, uint256[] txIds)
+        public MerkleBlock(Block block, UInt256[] txIds)
         {
-            header = block.Header;
+            Header = block;
 
             List<bool> vMatch = new List<bool>();
-            List<uint256> vHashes = new List<uint256>();
+            List<UInt256> vHashes = new List<UInt256>();
             for (int i = 0; i < block.Transactions.Count; i++)
             {
-                var hash = block.Transactions[i].GetHash();
+                var hash = block.Transactions[i].TxHash;
                 vHashes.Add(hash);
                 vMatch.Add(txIds.Contains(hash));
             }
-            _PartialMerkleTree = new PartialMerkleTree(vHashes.ToArray(), vMatch.ToArray());
+
+            PartialMerkleTree = new PartialMerkleTree(vHashes.ToArray(), vMatch.ToArray());
         }
 
-        #region IBitcoinSerializable Members
+        //#region IBitcoinSerializable Members
 
-        public void ReadWrite(BitcoinStream stream)
-        {
-            stream.ReadWrite(ref header);
-            stream.ReadWrite(ref _PartialMerkleTree);
-        }
+        //public void ReadWrite(BitcoinStream stream)
+        //{
+        //    stream.ReadWrite(ref header);
+        //    stream.ReadWrite(ref _PartialMerkleTree);
+        //}
 
-        #endregion
+        //#endregion
     }
 }
