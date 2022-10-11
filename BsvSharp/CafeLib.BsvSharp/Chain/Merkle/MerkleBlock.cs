@@ -45,8 +45,8 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         {
             Header = block;
 
-            List<bool> vMatch = new List<bool>();
-            List<UInt256> vHashes = new List<UInt256>();
+            var vMatch = new List<bool>();
+            var vHashes = new List<UInt256>();
             for (int i = 0; i < block.Transactions.Count; i++)
             {
                 var hash = block.Transactions[i].TxHash;
