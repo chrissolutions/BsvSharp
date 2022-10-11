@@ -57,7 +57,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <param name="vTxid"></param>
         /// <param name="vMatch"></param>
         /// <exception cref="ArgumentException"></exception>
-        public PartialMerkleTree(IReadOnlyCollection<UInt256> vTxid, bool[] vMatch)
+        public PartialMerkleTree(UInt256[] vTxid, bool[] vMatch)
         {
             if (vMatch.Length != vTxid.Count)
                 throw new ArgumentException("The size of the array of txid and matches is different");

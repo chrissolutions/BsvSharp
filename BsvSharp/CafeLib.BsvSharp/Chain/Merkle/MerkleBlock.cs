@@ -1,61 +1,44 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CafeLib.Core.Extensions;
+using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Chain.Merkle
 {
     public class MerkleBlock // : IBitcoinSerializable
     {
+        public BlockHeader Header { get; private set; }
+
+        public PartialMerkleTree PartialMerkleTree { get; private set; }
+
+        /// <summary>
+        /// MerkleBlock default constructor.
+        /// </summary>
         public MerkleBlock()
         {
-
-        }
-        // Public only for unit testing
-        BlockHeader header;
-
-        public BlockHeader Header
-        {
-            get
-            {
-                return header;
-            }
-            set
-            {
-                header = value;
-            }
-        }
-        PartialMerkleTree _PartialMerkleTree;
-
-        public PartialMerkleTree PartialMerkleTree
-        {
-            get
-            {
-                return _PartialMerkleTree;
-            }
-            set
-            {
-                _PartialMerkleTree = value;
-            }
         }
 
-        // Create from a CBlock, filtering transactions according to filter
-        // Note that this will call IsRelevantAndUpdate on the filter for each transaction,
-        // thus the filter will likely be modified.
+        /// <summary>
+        /// Create from a Block, filtering transactions according to bloom filter
+        /// Note that this will call IsRelevantAndUpdate on the filter for each transaction,
+        /// thus the filter will likely be modified.
+        /// </summary>
+        /// <param name="block">block</param>
+        /// <param name="filter">bloom filter</param>
         public MerkleBlock(Block block, BloomFilter filter)
         {
-            header = block.Header;
+            Header = block;
 
-            List<bool> vMatch = new List<bool>();
-            List<uint256> vHashes = new List<uint256>();
+            var vMatch = new List<bool>();
+            var vHashes = new List<UInt256>();
 
-
-            for (uint i = 0; i < block.Transactions.Count; i++)
+            block.Transactions.ForEach((x, i) =>
             {
-                uint256 hash = block.Transactions[(int)i].GetHash();
-                vMatch.Add(filter.IsRelevantAndUpdate(block.Transactions[(int)i]));
-                vHashes.Add(hash);
-            }
+                vMatch.Add(filter.IsRelevantAndUpdate(block.Transactions[i]));
+                vHashes.Add(x.TxHash);
+            });
 
-            _PartialMerkleTree = new PartialMerkleTree(vHashes.ToArray(), vMatch.ToArray());
+            PartialMerkleTree = new PartialMerkleTree(vHashes.ToArray(), vMatch.ToArray());
         }
 
         public MerkleBlock(Block block, uint256[] txIds)

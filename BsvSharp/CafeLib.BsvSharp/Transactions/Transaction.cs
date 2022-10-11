@@ -614,8 +614,6 @@ namespace CafeLib.BsvSharp.Transactions
 
         private Consensus Consensus => _consensus.Value;
 
-        private UInt256 GetHash() => Hashes.Hash256(Serialize());
-
 
         //The hash is the double-sha256 of the serialized transaction (reversed)
         //private UInt256 GetHash() => 
