@@ -55,7 +55,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             // Again, we ignore filter parameters which will create a bloom filter with more hash functions than the protocol limits
             // See http://en.wikipedia.org/wiki/Bloom_filter for an explanation of these formulas
 
-            this.nHashFuncs = Math.Min((uint)(vData.Length * 8 / nElements * Ln2), MaxHashFunctions);
+            this.nHashFuncs = Math.Min((uint)(vData.Length * 8M / nElements * Ln2), MaxHashFunctions);
             this.nTweak = nTweakIn;
             this.nFlags = (byte)nFlagsIn;
         }
@@ -169,20 +169,23 @@ namespace CafeLib.BsvSharp.Chain.Merkle
                 }
             });
 
-            for (uint i = 0; i < tx.Outputs.Count; i++)
+            for (var i = 0; i < tx.Outputs.Count; i++)
             {
-                var txout = tx.Outputs[(int)i];
+                var txout = tx.Outputs[i];
+
                 // Match if the filter contains any arbitrary script data element in any scriptPubKey in tx
                 // If this matches, also add the specific output that was matched.
                 // This means clients don't have to update the filter themselves when a new relevant tx 
                 // is discovered in order to find spending transactions, which avoids round-tripping and race conditions.
-                foreach (Op op in txout.ScriptPubKey.ToOps())
+                foreach (var op in txout.Script.Decode())
                 {
                     if (op.PushData != null && op.PushData.Length != 0 && Contains(op.PushData))
                     {
                         fFound = true;
+
                         if ((nFlags & (byte)BloomFlags.UPDATE_MASK) == (byte)BloomFlags.UPDATE_ALL)
                             Insert(new OutPoint(hash, i));
+
                         else if ((nFlags & (byte)BloomFlags.UPDATE_MASK) == (byte)BloomFlags.UPDATE_P2PUBKEY_ONLY)
                         {
                             var template = StandardScripts.GetTemplateFromScriptPubKey(txout.ScriptPubKey);
@@ -199,14 +202,14 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             if (fFound)
                 return true;
 
-            foreach (TxIn txin in tx.Inputs)
+            foreach (var txIn in tx.Inputs)
             {
                 // Match if the filter contains an outpoint tx spends
-                if (Contains(txin.PrevOut))
+                if (Contains(txIn.PrevOut))
                     return true;
 
                 // Match if the filter contains any arbitrary script data element in any scriptSig in tx
-                foreach (Op op in txin.ScriptSig.ToOps())
+                foreach (var op in txIn.ScriptSig.Decode())
                 {
                     if (op.PushData != null && op.PushData.Length != 0 && Contains(op.PushData))
                         return true;
