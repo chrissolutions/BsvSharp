@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
 using CafeLib.BsvSharp.Builders;
+using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Scripting.Templates;
 using CafeLib.BsvSharp.Transactions;
+using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
@@ -78,12 +80,14 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             isEmpty = false;
         }
 
-        public bool Contains(byte[] vKey)
+        public bool Contains(ReadOnlyByteSpan vKey)
         {
             if (isFull)
                 return true;
+
             if (isEmpty)
                 return false;
+
             for (uint i = 0; i < nHashFuncs; i++)
             {
                 uint nIndex = Hash(i, vKey);
@@ -95,25 +99,13 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             return true;
         }
 
-        public bool Contains(OutPoint outPoint)
-        {
-            return Contains(outPoint.ToBytes());
-        }
+        public bool Contains(OutPoint outPoint) => Contains(outPoint.TxHash.Span + outPoint.Index.AsReadOnlySpan());
 
-        public bool Contains(UInt256 hash)
-        {
-            return Contains(hash.ToBytes());
-        }
+        public bool Contains(UInt256 hash) => Contains(hash.Span);
 
-        public void Insert(OutPoint outPoint)
-        {
-            Insert(outPoint.ToBytes());
-        }
+        public void Insert(OutPoint outPoint) => Insert(outPoint.TxHash.Span + outPoint.Index.AsReadOnlySpan());
 
-        public void Insert(UInt256 value)
-        {
-            Insert(value.ToBytes());
-        }
+        public void Insert(UInt256 value) => Insert(value.Span);
 
         public bool IsWithinSizeConstraints()
         {
