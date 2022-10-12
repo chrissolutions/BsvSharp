@@ -1,4 +1,6 @@
-﻿namespace CafeLib.BsvSharp.Scripting.Templates;
+﻿using CafeLib.BsvSharp.Keys;
+
+namespace CafeLib.BsvSharp.Scripting.Templates;
 
 public class PayToMultiSigTemplateParameters
 {
@@ -7,7 +9,7 @@ public class PayToMultiSigTemplateParameters
         get;
         set;
     }
-    public PubKey[] PubKeys
+    public PublicKey[] PublicKeys
     {
         get;
         set;
