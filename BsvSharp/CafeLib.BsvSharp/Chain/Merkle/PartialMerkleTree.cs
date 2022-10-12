@@ -99,7 +99,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             MerkleNode node = MerkleNode.GetRoot((int)TransactionCount);
             BitReader flags = new BitReader(Flags);
             var hashes = Hashes.GetEnumerator();
-            GetMatchedTransactionsCore(node, flags, hashes, true).AsEnumerable();
+            var _ = GetMatchedTransactionsCore(node, flags, hashes, true).AsEnumerable();
             return node;
         }
 
