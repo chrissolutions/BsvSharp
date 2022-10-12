@@ -1,45 +1,41 @@
 ﻿using System;
 using System.Linq;
+using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Scripting.Templates;
+using CafeLib.BsvSharp.Services;
 using CafeLib.BsvSharp.Transactions;
+using CafeLib.Core.Numerics;
+
 namespace CafeLib.BsvSharp.Scripting
 {
 
     public static class StandardScripts
     {
         private static readonly Lazy<PayToPubkeyHashTemplate> LazyPayToPubkeyHashTemplate = new(() => new PayToPubkeyHashTemplate());
-        private static readonly Lazy<PayToPubkeyTemplate> LazyHexReverse = new(() => new PayToPubkeyTemplate());
-        private static readonly Lazy<PayToMultiSigTemplate> LazyBase58 = new(() => new PayToMultiSigTemplate());
-        private static readonly Lazy<TxNullDataTemplate> LazyBase58Check = new(() => new TxNullDataTemplate());
+        private static readonly Lazy<PayToPubkeyTemplate> LazyPayToPubkeyTemplate = new(() => new PayToPubkeyTemplate());
+        private static readonly Lazy<PayToMultiSigTemplate> LazyPayToMultiSigTemplate = new(() => new PayToMultiSigTemplate());
+        private static readonly Lazy<TxNullDataTemplate> LazyTxNullDataTemplate = new(() => new TxNullDataTemplate());
 
+        private static PayToPubkeyHashTemplate PayToPubkeyHashTemplate => LazyPayToPubkeyHashTemplate.Value;
+        private static PayToPubkeyTemplate PayToPubkeyTemplate => LazyPayToPubkeyTemplate.Value;
+        private static PayToMultiSigTemplate PayToMultiSigTemplate => LazyPayToMultiSigTemplate.Value;
+        private static TxNullDataTemplate TxNullDataTemplate => LazyTxNullDataTemplate.Value;
 
         private static readonly ScriptTemplate[] StandardTemplates = 
         {
-            PayToPubkeyHashTemplate.Instance,
-            PayToPubkeyTemplate.Instance,
-            PayToScriptHashTemplate.Instance,
-            PayToMultiSigTemplate.Instance,
-            TxNullDataTemplate.Instance
+            LazyPayToPubkeyHashTemplate.Value,
+            LazyPayToPubkeyTemplate.Value,
+            LazyPayToMultiSigTemplate.Value,
+            LazyTxNullDataTemplate.Value
         };
 
-        public static Script PayToAddress(BitcoinAddress address)
-        {
-            return PayToPubkeyHash((KeyId)address.Hash);
-        }
+        public static Script PayToAddress(Address address) => PayToPubkeyHashTemplate.GenerateScriptPubKey(address);
 
-        private static Script PayToPubkeyHash(KeyId pubkeyHash)
-        {
-            return PayToPubkeyHashTemplate.Instance.GenerateScriptPubKey(pubkeyHash);
-        }
-
-        public static Script PayToPubkey(PubKey pubkey)
-        {
-            return PayToPubkeyTemplate.Instance.GenerateScriptPubKey(pubkey);
-        }
+        public static Script PayToPublicKey(PublicKey publicKey) => PayToPubkeyTemplate.GenerateScriptPubKey(publicKey);
 
         public static bool IsStandardTransaction(Transaction tx)
         {
-            if (tx.Version > Transaction.CURRENT_VERSION || tx.Version < 1)
+            if (tx.Version > RootService.Network.Consensus.TransactionCurrentVersion || tx.Version < 1)
             {
                 return false;
             }
@@ -126,12 +122,12 @@ namespace CafeLib.BsvSharp.Scripting
 
         public static ScriptTemplate GetTemplateFromScriptPubKey(Script script)
         {
-            return StandardTemplates.FirstOrDefault(t => t.CheckScriptPubKey(script));
+            return StandardTemplates.FirstOrDefault(t => t.CheckScriptPubkey(script));
         }
 
         public static bool IsStandardScriptPubKey(Script scriptPubKey)
         {
-            return StandardTemplates.Any(template => template.CheckScriptPubKey(scriptPubKey));
+            return StandardTemplates.Any(template => template.CheckScriptPubkey(scriptPubKey));
         }
         private static bool IsStandardScriptSig(Script scriptSig, Script scriptPubKey)
         {
