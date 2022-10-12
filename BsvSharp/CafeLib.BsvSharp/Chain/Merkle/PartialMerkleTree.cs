@@ -184,9 +184,9 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         }
 
         /// <summary>
-        /// Remove superflous branches
+        /// Remove superfluous branches
         /// </summary>
-        /// <param name="transaction"></param>
+        /// <param name="matchedTransactions"></param>
         /// <returns></returns>
         public PartialMerkleTree Trim(params UInt256[] matchedTransactions)
         {
