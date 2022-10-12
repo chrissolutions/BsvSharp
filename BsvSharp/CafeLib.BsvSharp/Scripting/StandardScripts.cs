@@ -1,12 +1,18 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using CafeLib.BsvSharp.Scripting.Templates;
 using CafeLib.BsvSharp.Transactions;
-
 namespace CafeLib.BsvSharp.Scripting
 {
 
     public static class StandardScripts
     {
+        private static readonly Lazy<PayToPubkeyHashTemplate> LazyPayToPubkeyHashTemplate = new(() => new PayToPubkeyHashTemplate());
+        private static readonly Lazy<PayToPubkeyTemplate> LazyHexReverse = new(() => new PayToPubkeyTemplate());
+        private static readonly Lazy<PayToMultiSigTemplate> LazyBase58 = new(() => new PayToMultiSigTemplate());
+        private static readonly Lazy<TxNullDataTemplate> LazyBase58Check = new(() => new TxNullDataTemplate());
+
+
         private static readonly ScriptTemplate[] StandardTemplates = 
         {
             PayToPubkeyHashTemplate.Instance,
