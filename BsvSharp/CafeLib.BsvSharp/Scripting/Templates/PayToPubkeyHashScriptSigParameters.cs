@@ -1,13 +1,16 @@
-﻿namespace CafeLib.BsvSharp.Scripting.Templates;
+﻿using CafeLib.BsvSharp.Keys;
+using CafeLib.BsvSharp.Signatures;
+
+namespace CafeLib.BsvSharp.Scripting.Templates;
 
 public class PayToPubkeyHashScriptSigParameters
 {
-    public TransactionSignature TransactionSignature
+    public Signature TransactionSignature
     {
         get;
         set;
     }
-    public PubKey PublicKey
+    public PublicKey PublicKey
     {
         get;
         set;

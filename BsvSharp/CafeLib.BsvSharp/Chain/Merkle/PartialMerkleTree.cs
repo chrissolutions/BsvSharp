@@ -59,10 +59,10 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <exception cref="ArgumentException"></exception>
         public PartialMerkleTree(UInt256[] vTxid, bool[] vMatch)
         {
-            if (vMatch.Length != vTxid.Count)
+            if (vMatch.Length != vTxid.Length)
                 throw new ArgumentException("The size of the array of txid and matches is different");
 
-            TransactionCount = (uint)vTxid.Count;
+            TransactionCount = (uint)vTxid.Length;
 
             MerkleNode root = MerkleNode.GetRoot(vTxid);
             BitWriter flags = new BitWriter();
