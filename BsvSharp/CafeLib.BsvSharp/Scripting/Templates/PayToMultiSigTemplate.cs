@@ -57,7 +57,7 @@ public class PayToMultiSigTemplate : ScriptTemplate
 
     public PayToMultiSigTemplateParameters ExtractScriptPubKeyParameters(Script scriptPubKey)
     {
-        if (!FastCheckScriptPubKey(scriptPubKey))
+        if (!FastCheckScriptPubkey(scriptPubKey))
             return null;
         var ops = scriptPubKey.ToOps().ToArray();
         if (!CheckScriptPubKeyCore(scriptPubKey, ops))

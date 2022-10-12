@@ -26,7 +26,7 @@ public class PayToScriptHashTemplate : ScriptTemplate
         return GenerateScriptPubKey(scriptPubKey.Hash);
     }
 
-    protected override bool FastCheckScriptPubKey(Script scriptPubKey)
+    protected override bool FastCheckScriptPubkey(Script scriptPubKey)
     {
         var bytes = scriptPubKey.ToBytes(true);
         return
@@ -83,7 +83,7 @@ public class PayToScriptHashTemplate : ScriptTemplate
     {
         List<Op> ops = new List<Op>();
         PayToMultiSigTemplate multiSigTemplate = new PayToMultiSigTemplate();
-        bool multiSig = multiSigTemplate.CheckScriptPubKey(redeemScript);
+        bool multiSig = multiSigTemplate.CheckScriptPubkey(redeemScript);
         if (multiSig)
             ops.Add(OpcodeType.OP_0);
         foreach (var sig in signatures)
@@ -131,7 +131,7 @@ public class PayToScriptHashTemplate : ScriptTemplate
 
     public ScriptId ExtractScriptPubKeyParameters(Script scriptPubKey)
     {
-        if (!FastCheckScriptPubKey(scriptPubKey))
+        if (!FastCheckScriptPubkey(scriptPubKey))
             return null;
         var ops = scriptPubKey.ToOps().ToArray();
         if (!CheckScriptPubKeyCore(scriptPubKey, ops))

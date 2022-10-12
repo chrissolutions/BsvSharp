@@ -30,7 +30,7 @@ namespace CafeLib.BsvSharp.Scripting.Templates
         //    );
         //}
 
-        protected override bool FastCheckScriptPubKey(Script scriptPubKey)
+        protected override bool FastCheckScriptPubkey(Script scriptPubKey)
         {
             return scriptPubKey.Data.Length >= 3 &&
                    scriptPubKey.Data[0] == (byte)Opcode.OP_DUP &&
@@ -38,7 +38,7 @@ namespace CafeLib.BsvSharp.Scripting.Templates
                    scriptPubKey.Data[2] == 0x14;
         }
 
-        protected override bool CheckScriptPubKeyCore(Script scriptPubKey, Operand[] scriptPubKeyOps)
+        protected override bool CheckScriptPubkeyCore(Script scriptPubKey, Operand[] scriptPubKeyOps)
         {
             var ops = scriptPubKeyOps;
             if (ops.Length != 5)

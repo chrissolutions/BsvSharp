@@ -4,22 +4,20 @@ namespace CafeLib.BsvSharp.Scripting.Templates;
 
 public class TxNullDataTemplate : ScriptTemplate
 {
-    private static readonly TxNullDataTemplate _Instance = new TxNullDataTemplate();
-    public static TxNullDataTemplate Instance
+    protected override bool FastCheckScriptPubkey(Script scriptPubkey)
     {
-        get
-        {
-            return _Instance;
-        }
-    }
-    protected override bool FastCheckScriptPubKey(Script scriptPubKey)
-    {
-        var bytes = scriptPubKey.ToBytes(true);
+        var bytes = scriptPubkey.ToBytes(true);
         return bytes.Length >= 1 && bytes[0] == (byte)OpcodeType.OP_RETURN;
     }
-    protected override bool CheckScriptPubKeyCore(Script scriptPubKey, Op[] scriptPubKeyOps)
+
+    protected override bool CheckScriptPubkeyCore(Script scriptPubkey, Operand[] scriptPubKeyOps)
     {
-        var ops = scriptPubKeyOps;
+        throw new NotImplementedException();
+    }
+
+    protected override bool CheckScriptPubkeyCore(Script scriptPubkey, Op[] scriptPubkeyOps)
+    {
+        var ops = scriptPubkeyOps;
         if (ops.Length < 1)
             return false;
         if (ops[0].Code != OpcodeType.OP_RETURN)
@@ -31,11 +29,11 @@ public class TxNullDataTemplate : ScriptTemplate
         }
         return true;
     }
-    public byte[] ExtractScriptPubKeyParameters(Script scriptPubKey)
+    public byte[] ExtractScriptPubkeyParameters(Script scriptPubkey)
     {
-        if (!FastCheckScriptPubKey(scriptPubKey))
+        if (!FastCheckScriptPubkey(scriptPubkey))
             return null;
-        var ops = scriptPubKey.ToOps().ToArray();
+        var ops = scriptPubkey.ToOps().ToArray();
         if (ops.Length != 2)
             return null;
         if (ops[1].PushData == null || ops[1].PushData.Length > MAX_OPRETURN_SIZE)
@@ -43,13 +41,13 @@ public class TxNullDataTemplate : ScriptTemplate
         return ops[1].PushData;
     }
 
-    protected override bool CheckScriptSigCore(Script scriptSig, Op[] scriptSigOps, Script scriptPubKey, Op[] scriptPubKeyOps)
+    protected override bool CheckScriptSigCore(Script scriptSig, Op[] scriptSigOps, Script scriptPubkey, Op[] scriptPubkeyOps)
     {
         return false;
     }
 
     public const int MAX_OPRETURN_SIZE = 40;
-    public Script GenerateScriptPubKey(byte[] data)
+    public Script GenerateScriptPubkey(byte[] data)
     {
         if (data == null)
             throw new ArgumentNullException("data");
@@ -58,6 +56,11 @@ public class TxNullDataTemplate : ScriptTemplate
 
         return new Script(OpcodeType.OP_RETURN,
             Op.GetPushOp(data));
+    }
+
+    protected override bool CheckScriptSigCore(Script scriptSig, Operand[] scriptSigOps, Script scriptPubKey, Operand[] scriptPubKeyOps)
+    {
+        throw new NotImplementedException();
     }
 
     public override TxOutType Type

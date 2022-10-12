@@ -8,20 +8,20 @@ namespace CafeLib.BsvSharp.Scripting.Templates
 
     public abstract class ScriptTemplate
     {
-        public bool CheckScriptPubKey(Script scriptPubKey)
+        public bool CheckScriptPubkey(Script scriptPubKey)
         {
-            if (!FastCheckScriptPubKey(scriptPubKey))
+            if (!FastCheckScriptPubkey(scriptPubKey))
                 return false;
 
-            return CheckScriptPubKeyCore(scriptPubKey, scriptPubKey.Decode().ToArray());
+            return CheckScriptPubkeyCore(scriptPubKey, scriptPubKey.Decode().ToArray());
         }
 
-        protected virtual bool FastCheckScriptPubKey(Script scriptPubKey)
+        protected virtual bool FastCheckScriptPubkey(Script scriptPubKey)
         {
             return true;
         }
 
-        protected abstract bool CheckScriptPubKeyCore(Script scriptPubKey, Operand[] scriptPubKeyOps);
+        protected abstract bool CheckScriptPubkeyCore(Script scriptPubkey, Operand[] scriptPubKeyOps);
 
         public bool CheckScriptSig(Script scriptSig, Script scriptPubKey)
         {
