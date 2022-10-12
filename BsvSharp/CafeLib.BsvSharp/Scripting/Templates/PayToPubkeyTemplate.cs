@@ -1,7 +1,7 @@
-﻿using System;
-using CafeLib.BsvSharp.Builders;
+﻿using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Keys;
-using CafeLib.Cryptography;
+using CafeLib.BsvSharp.Numerics;
+using CafeLib.BsvSharp.Signatures;
 
 namespace CafeLib.BsvSharp.Scripting.Templates
 {
@@ -13,86 +13,71 @@ namespace CafeLib.BsvSharp.Scripting.Templates
             return sb.ToScript();
         }
 
-        protected override bool CheckScriptPubKeyCore(Script scriptPubKey, Op[] scriptPubKeyOps)
+        protected override bool CheckScriptPubkeyCore(Script scriptPubkey, Operand[] scriptPubkeyOps)
         {
-            var ops = scriptPubKeyOps;
-            if (ops.Length != 2)
-                return false;
-            return ops[0].PushData != null && PubKey.Check(ops[0].PushData, false) &&
-                   ops[1].Code == OpcodeType.OP_CHECKSIG;
-        }
-
-        public Script GenerateScriptSig(ECDSASignature signature)
-        {
-            return GenerateScriptSig(new TransactionSignature(signature, SigHash.All));
-        }
-        public Script GenerateScriptSig(TransactionSignature signature)
-        {
-            return new Script(
-                Op.GetPushOp(signature.ToBytes())
-            );
-        }
-
-        public TransactionSignature ExtractScriptSigParameters(Script scriptSig)
-        {
-            var ops = scriptSig.ToOps().ToArray();
-            if (!CheckScriptSigCore(scriptSig, ops, null, null))
-                return null;
-
-            var data = ops[0].PushData;
-            if (!TransactionSignature.ValidLength(data.Length))
-                return null;
-            try
-            {
-                return new TransactionSignature(data);
-            }
-            catch (FormatException)
-            {
-                return null;
-            }
-        }
-
-        protected override bool CheckScriptSigCore(Script scriptSig, Op[] scriptSigOps, Script scriptPubKey, Op[] scriptPubKeyOps)
-        {
-            var ops = scriptSigOps;
-            if (ops.Length != 1)
+            if (scriptPubkeyOps.Length != 2)
                 return false;
 
-            return ops[0].PushData != null && PubKey.Check(ops[0].PushData, false);
+            return scriptPubkeyOps[0].Data != VarType.Empty &&
+                   PublicKey.CheckFormat(scriptPubkeyOps[0].Data, false) &&
+                   scriptPubkeyOps[1].Code == Opcode.OP_CHECKSIG;
         }
 
-        protected override bool CheckScriptPubkeyCore(Script scriptPubkey, Operand[] scriptPubKeyOps)
+        protected override bool CheckScriptSigCore(Script scriptSig, Operand[] scriptSigOps, Script scriptPubkey, Operand[] scriptPubkeyOps)
         {
-            throw new NotImplementedException();
+            if (scriptSigOps.Length != 1)
+                return false;
+
+            return scriptSigOps[0].Data != VarType.Empty && PublicKey.CheckFormat(scriptSigOps[0].Data, false);
         }
 
-        protected override bool CheckScriptSigCore(Script scriptSig, Operand[] scriptSigOps, Script scriptPubKey, Operand[] scriptPubKeyOps)
+        //public Script GenerateScriptSig(ECDSASignature signature)
+        //{
+        //    return GenerateScriptSig(new TransactionSignature(signature, SigHash.All));
+        //}
+
+        public Script GenerateScriptSig(Signature signature)
         {
-            throw new NotImplementedException();
+            return new DefaultScriptBuilder()
+                    .AddData(signature.Data)
+                    .ToScript();
         }
 
-        public override TxOutType Type
-        {
-            get
-            {
-                return TxOutType.TX_PUBKEY;
-            }
-        }
+        //public TransactionSignature ExtractScriptSigParameters(Script scriptSig)
+        //{
+        //    var ops = scriptSig.ToOps().ToArray();
+        //    if (!CheckScriptSigCore(scriptSig, ops, null, null))
+        //        return null;
 
-        public PubKey ExtractScriptPubKeyParameters(Script script)
-        {
-            var ops = script.ToOps().ToArray();
-            if (!CheckScriptPubKeyCore(script, ops))
-                return null;
-            try
-            {
-                return new PubKey(ops[0].PushData);
-            }
-            catch (FormatException)
-            {
-                return null;
-            }
-        }
+        //    var data = ops[0].PushData;
+        //    if (!TransactionSignature.ValidLength(data.Length))
+        //        return null;
+        //    try
+        //    {
+        //        return new TransactionSignature(data);
+        //    }
+        //    catch (FormatException)
+        //    {
+        //        return null;
+        //    }
+        //}
+
+        public override TxOutType Type => TxOutType.TX_PUBKEY;
+
+        //public PubKey ExtractScriptPubKeyParameters(Script script)
+        //{
+        //    var ops = script.ToOps().ToArray();
+        //    if (!CheckScriptPubKeyCore(script, ops))
+        //        return null;
+        //    try
+        //    {
+        //        return new PubKey(ops[0].PushData);
+        //    }
+        //    catch (FormatException)
+        //    {
+        //        return null;
+        //    }
+        //}
     }
 }
 
