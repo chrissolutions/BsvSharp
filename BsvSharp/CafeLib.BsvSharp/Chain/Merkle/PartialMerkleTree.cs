@@ -102,6 +102,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             GetMatchedTransactionsCore(node, flags, hashes, true).AsEnumerable();
             return node;
         }
+
         //public bool Check(UInt256 expectedMerkleRootHash = null)
         //{
         //    try
