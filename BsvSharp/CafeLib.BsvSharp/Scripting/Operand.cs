@@ -165,6 +165,10 @@ namespace CafeLib.BsvSharp.Scripting
             return bytes;
         }
 
+        public bool IsSmallUInt => Code == Opcode.OP_0 || Opcode.OP_1 <= Code && Code <= Opcode.OP_16;
+
+        public bool IsSmallInt => IsSmallUInt || Code == Opcode.OP_1NEGATE;
+
         public static (bool ok, Operand op) TryRead(ref ReadOnlyByteSequence ros, out long consumed) {
             var op = new Operand();
             var ok = op.TryReadOperand(ref ros, out consumed);

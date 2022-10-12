@@ -73,6 +73,17 @@ namespace CafeLib.BsvSharp.Signatures
         public static bool IsLowS(ReadOnlyByteSpan signature) => ECDSASignature.FromDER(signature).IsLowS;
 
         /// <summary>
+        /// Determine if the signature length is valid.
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static bool IsValidLength(int length)
+        {
+            return length is >= 67 and <= 80 or 9; //9 = Empty signature
+        }
+
+
+        /// <summary>
         /// Returns the signature data.
         /// </summary>
         /// <returns></returns>
