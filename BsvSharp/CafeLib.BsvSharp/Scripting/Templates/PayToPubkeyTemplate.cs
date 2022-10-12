@@ -9,7 +9,7 @@ namespace CafeLib.BsvSharp.Scripting.Templates
     {
         public Script GenerateScriptPubKey(PublicKey publicKey)
         {
-            var sb = new Pay2PubkeyLockBuilder(publicKey);
+            var sb = new Pay2PubkeyScriptBuilder(publicKey);
             return sb.ToScript();
         }
 

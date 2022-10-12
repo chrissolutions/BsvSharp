@@ -8,12 +8,12 @@ namespace CafeLib.BsvSharp.Scripting.Templates
 
     public abstract class ScriptTemplate
     {
-        public bool CheckScriptPubkey(Script scriptPubKey)
+        public bool CheckScriptPubkey(Script scriptPubkey)
         {
-            if (!FastCheckScriptPubkey(scriptPubKey))
+            if (!FastCheckScriptPubkey(scriptPubkey))
                 return false;
 
-            return CheckScriptPubkeyCore(scriptPubKey, scriptPubKey.Decode().ToArray());
+            return CheckScriptPubkeyCore(scriptPubkey, scriptPubkey.Decode().ToArray());
         }
 
         protected virtual bool FastCheckScriptPubkey(Script scriptPubKey)
@@ -21,22 +21,23 @@ namespace CafeLib.BsvSharp.Scripting.Templates
             return true;
         }
 
-        protected abstract bool CheckScriptPubkeyCore(Script scriptPubkey, Operand[] scriptPubKeyOps);
+        protected abstract bool CheckScriptPubkeyCore(Script scriptPubkey, Operand[] scriptPubkeyOps);
 
-        public bool CheckScriptSig(Script scriptSig, Script scriptPubKey)
+        public bool CheckScriptSig(Script scriptSig, Script scriptPubkey)
         {
-            if (!FastCheckScriptSig(scriptSig, scriptPubKey))
+            if (!FastCheckScriptSig(scriptSig, scriptPubkey))
                 return false;
 
-            return CheckScriptSigCore(scriptSig, scriptSig.Decode().ToArray(), scriptPubKey, scriptPubKey.Decode().ToArray());
+            return CheckScriptSigCore(scriptSig, scriptSig.Decode().ToArray(), scriptPubkey, scriptPubkey.Decode().ToArray());
         }
 
-        protected virtual bool FastCheckScriptSig(Script scriptSig, Script scriptPubKey)
+        protected virtual bool FastCheckScriptSig(Script scriptSig, Script scriptPubkey)
         {
             return true;
         }
 
-        protected abstract bool CheckScriptSigCore(Script scriptSig, Operand[] scriptSigOps, Script scriptPubKey, Operand[] scriptPubKeyOps);
+        protected abstract bool CheckScriptSigCore(Script scriptSig, Operand[] scriptSigOps, Script scriptPubkey, Operand[] scriptPubkeyOps);
+
         public abstract TxOutType Type
         {
             get;
