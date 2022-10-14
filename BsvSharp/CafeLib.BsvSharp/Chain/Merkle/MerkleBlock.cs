@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CafeLib.BsvSharp.Persistence;
+using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 
@@ -38,6 +40,11 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             PartialMerkleTree = new PartialMerkleTree(vHashes.ToArray(), vMatch.ToArray());
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="block"></param>
+        /// <param name="txIds"></param>
         public MerkleBlock(Block block, UInt256[] txIds)
             : base(block)
         {
@@ -51,6 +58,39 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 
             PartialMerkleTree = new PartialMerkleTree(vHashes.ToArray(), vMatch.ToArray());
         }
+
+        /// <summary>
+        /// Serialize block.
+        /// </summary>
+        /// <returns></returns>
+        public new ReadOnlyByteSequence Serialize()
+        {
+            var writer = new ByteDataWriter();
+            //if (!TrySerializeBlock(writer)) return null;
+            var ros = new ReadOnlyByteSequence(writer.Span);
+            return ros;
+        }
+
+        #region Helpers
+
+        /// <summary>
+        /// Write data from the block.
+        /// </summary>
+        /// <returns></returns>
+        private bool TrySerializeBlock(IDataWriter writer)
+        {
+            if (!TrySerializeHeader(writer)) return false;
+
+            //writer.Write(new VarInt(Transactions...Length));
+            //foreach (var tx in Transactions)
+            //{
+            //    tx.WriteTo(writer);
+            //}
+
+            return true;
+        }
+
+        #endregion
 
         //#region IBitcoinSerializable Members
 
