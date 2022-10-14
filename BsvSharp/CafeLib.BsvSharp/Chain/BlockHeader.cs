@@ -53,6 +53,12 @@ namespace CafeLib.BsvSharp.Chain
         {
         }
 
+        protected BlockHeader(BlockHeader header)
+        {
+            Initialize(header._version, header._prevHash, header._merkleRootHash, header._timestamp, header._bits, header._nonce);
+            Hash = CalculateHash(Serialize());
+        }
+
         /// <summary>
         /// Constructs a new block header
         /// </summary>
@@ -64,12 +70,7 @@ namespace CafeLib.BsvSharp.Chain
         /// <param name="nonce">the nonce field that miners use to find a sha256 hash value that matches the difficulty target</param>
         public BlockHeader(int version, UInt256 prevHash, UInt256 merkleRootHash, uint timestamp, uint bits, uint nonce)
         {
-            _version = version;
-            _prevHash = prevHash;
-            _merkleRootHash = merkleRootHash;
-            _timestamp = timestamp;
-            _bits = bits;
-            _nonce = nonce;
+            Initialize(version, prevHash, merkleRootHash, timestamp, bits, nonce);
             Hash = CalculateHash(Serialize());
         }
 
@@ -163,18 +164,6 @@ namespace CafeLib.BsvSharp.Chain
         #region Protected Methods
 
         /// <summary>
-        /// Calculate the block hash
-        /// </summary>
-        /// <param name="bytes">bytes</param>
-        /// <returns>calculated block hash</returns>
-        protected static UInt256 CalculateHash(ReadOnlyByteSpan bytes)
-        {
-            var hash1 = Hashes.ComputeSha256(bytes);
-            var hash2 = Hashes.ComputeSha256(hash1);
-            return new UInt256(hash2);
-        }
-
-        /// <summary>
         /// Deserialize the block header from the sequence reader.
         /// </summary>
         /// <param name="reader">sequence reader</param>
@@ -224,6 +213,32 @@ namespace CafeLib.BsvSharp.Chain
             var target = new UInt256(targetBits.Value & 0xFFFFFF);
             var mov = 8 * ((targetBits >> 24) - 3);
             return target << (int)mov;
+        }
+
+        #endregion
+
+        #region Helpers
+
+        private void Initialize(int version, UInt256 prevHash, UInt256 merkleRootHash, uint timestamp, uint bits, uint nonce)
+        {
+            _version = version;
+            _prevHash = prevHash;
+            _merkleRootHash = merkleRootHash;
+            _timestamp = timestamp;
+            _bits = bits;
+            _nonce = nonce;
+        }
+
+        /// <summary>
+        /// Calculate the block hash
+        /// </summary>
+        /// <param name="bytes">bytes</param>
+        /// <returns>calculated block hash</returns>
+        private static UInt256 CalculateHash(ReadOnlyByteSpan bytes)
+        {
+            var hash1 = Hashes.ComputeSha256(bytes);
+            var hash2 = Hashes.ComputeSha256(hash1);
+            return new UInt256(hash2);
         }
 
         #endregion

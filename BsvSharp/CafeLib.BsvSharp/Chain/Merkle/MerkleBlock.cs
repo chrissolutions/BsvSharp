@@ -5,10 +5,8 @@ using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Chain.Merkle
 {
-    public class MerkleBlock // : IBitcoinSerializable
+    public record MerkleBlock : BlockHeader // : IBitcoinSerializable
     {
-        public BlockHeader Header { get; private set; }
-
         public PartialMerkleTree PartialMerkleTree { get; private set; }
 
         /// <summary>
@@ -26,9 +24,8 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <param name="block">block</param>
         /// <param name="filter">bloom filter</param>
         public MerkleBlock(Block block, BloomFilter filter)
+            : base(block)
         {
-            Header = block;
-
             var vMatch = new List<bool>();
             var vHashes = new List<UInt256>();
 
@@ -43,13 +40,10 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 
         public MerkleBlock(Block block, UInt256[] txIds)
         {
-            Header = block;
-
             var vMatch = new List<bool>();
             var vHashes = new List<UInt256>();
-            for (int i = 0; i < block.Transactions.Count; i++)
+            foreach (var hash in block.Transactions.Select(tx => tx.TxHash))
             {
-                var hash = block.Transactions[i].TxHash;
                 vHashes.Add(hash);
                 vMatch.Add(txIds.Contains(hash));
             }
