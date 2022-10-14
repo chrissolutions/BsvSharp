@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using CafeLib.Core.Buffers;
 using CafeLib.Core.Numerics;
+using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Chain.Merkle
 {
@@ -10,15 +10,16 @@ namespace CafeLib.BsvSharp.Chain.Merkle
     {
         protected uint TransactionCount { get; set; }
 
-        protected List<UInt256> Hashes { get; } = new();
+        protected List<UInt256> TransactionHashes { get; } = new();
 
-        protected BitArray Flags { get; set; } = new(0);
+        protected List<bool> Flags { get; set; } = new();
 
         protected bool IsBad { get; private set; }
 
         public PartialMerkleTree()
         {
-
+            TransactionCount = 0;
+            IsBad = true;
         }
 
         /// <summary>
@@ -27,23 +28,79 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <param name="vTxid"></param>
         /// <param name="vMatch"></param>
         /// <exception cref="ArgumentException"></exception>
-        public PartialMerkleTree(UInt256[] vTxid, bool[] vMatch)
+        public PartialMerkleTree(ReadOnlySpan<UInt256> vTxid, ReadOnlySpan<bool> vMatch)
+            : this()
         {
-            if (vMatch.Length != vTxid.Length)
-                throw new ArgumentException("The size of the array of txid and matches is different");
-
             TransactionCount = (uint)vTxid.Length;
 
-            MerkleNode root = MerkleNode.GetRoot(vTxid);
-            BitWriter flags = new BitWriter();
+            // calculate height of tree
+            var height = 0;
+            while(CalcTreeWidth(height) > 1)
+                ++height;
 
-            MarkNodes(root, vMatch);
-            BuildCore(root, flags);
-
-            Flags = flags.ToBitArray();
+            // traverse the partial tree
+            TraverseAndBuild(height, 0, vTxid, vMatch);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="vMatch"></param>
+        /// <param name="vnIndex"></param>
+        /// <returns></returns>
+        public UInt256 ExtractMatches(List<UInt256> vMatch, List<uint> vnIndex)
+        {
+            vMatch.Clear();
 
+            // An empty set will not work
+            if (TransactionCount == 0)
+            {
+                return UInt256.Zero;
+            }
+
+            // Check for excessively high numbers of transactions.
+            // FIXME: Track the maximum block size we've seen and use it here.
+
+            // There can never be more hashes provided than one for every txid.
+            if (TransactionHashes.Count > TransactionCount)
+            {
+                return UInt256.Zero;
+            }
+
+            // There must be at least one bit per node in the partial tree, and at least
+            // one node per hash.
+            if (Flags.Count < TransactionHashes.Count)
+            {
+                return UInt256.Zero;
+            }
+
+            // calculate height of tree.
+            var nHeight = 0;
+            while (CalcTreeWidth(nHeight) > 1)
+            {
+                nHeight++;
+            }
+
+            // traverse the partial tree.
+            uint bitsUsed = 0, hashUsed = 0;
+            var hashMerkleRoot = TraverseAndExtract(nHeight, 0, ref bitsUsed, ref hashUsed, vMatch, vnIndex);
+
+            // verify that no problems occurred during the tree traversal.
+            if (IsBad)
+            {
+                return UInt256.Zero;
+            }
+
+            // verify that all bits were consumed (except for the padding caused by
+            // serializing it as a byte sequence)
+            if ((bitsUsed + 7) / 8 != (Flags.Count + 7) / 8)
+            {
+                return UInt256.Zero;
+            }
+
+            // verify that all hashes were consumed.
+            return hashUsed != TransactionHashes.Count ? UInt256.Zero : hashMerkleRoot;
+        }
 
 
         // serialization implementation
@@ -71,147 +128,9 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         //    }
         //}
 
-        //private byte ToByte(bool v)
-        //{
-        //    return (byte)(v ? 1 : 0);
-        //}
-
         //#endregion
 
-        private static void MarkNodes(MerkleNode root, bool[] vMatch)
-        {
-            BitReader matches = new BitReader(new BitArray(vMatch));
-            foreach (var leaf in root.GetLeafs())
-            {
-                if (matches.Read())
-                {
-                    MarkToTop(leaf, true);
-                }
-            }
-        }
-
-        private static void MarkToTop(MerkleNode leaf, bool value)
-        {
-            leaf.IsMarked = value;
-            foreach (var ancestor in leaf.Ancestors())
-            {
-                ancestor.IsMarked = value;
-            }
-        }
-
-        public MerkleNode GetMerkleRoot()
-        {
-            MerkleNode node = MerkleNode.GetRoot((int)TransactionCount);
-            BitReader flags = new BitReader(Flags);
-            var hashes = Hashes.GetEnumerator();
-            var _ = GetMatchedTransactionsCore(node, flags, hashes, true).AsEnumerable();
-            return node;
-        }
-
-        //public bool Check(UInt256 expectedMerkleRootHash = null)
-        //{
-        //    try
-        //    {
-        //        var hash = GetMerkleRoot().Hash;
-        //        return expectedMerkleRootHash == null || hash == expectedMerkleRootHash;
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return false;
-        //    }
-        //}
-
-        private void BuildCore(MerkleNode node, BitWriter flags)
-        {
-            while (true)
-            {
-                if (node == null) return;
-
-                flags.Write(node.IsMarked);
-
-                if (node.IsLeaf || !node.IsMarked) Hashes.Add(node.Hash);
-
-                if (node.IsMarked)
-                {
-                    BuildCore(node.Left, flags);
-                    node = node.Right;
-                    continue;
-                }
-
-                break;
-            }
-        }
-
-        public IEnumerable<UInt256> GetMatchedTransactions()
-        {
-            BitReader flags = new BitReader(Flags);
-            MerkleNode root = MerkleNode.GetRoot((int)TransactionCount);
-            var hashes = Hashes.GetEnumerator();
-            return GetMatchedTransactionsCore(root, flags, hashes, false);
-        }
-
-        private IEnumerable<UInt256> GetMatchedTransactionsCore(MerkleNode node, BitReader flags, IEnumerator<UInt256> hashes, bool calculateHash)
-        {
-            if (node == null)
-                return Array.Empty<UInt256>();
-
-            node.IsMarked = flags.Read();
-
-            if (node.IsLeaf || !node.IsMarked)
-            {
-                hashes.MoveNext();
-                node.Hash = hashes.Current;
-            }
-            if (!node.IsMarked)
-                return Array.Empty<UInt256>();
-
-            if (node.IsLeaf)
-                return new[] { node.Hash };
-
-            var left = GetMatchedTransactionsCore(node.Left, flags, hashes, calculateHash);
-            var right = GetMatchedTransactionsCore(node.Right, flags, hashes, calculateHash);
-
-            if (calculateHash)
-                node.UpdateHash();
-
-            return left.Concat(right);
-        }
-
-        public MerkleNode TryGetMerkleRoot()
-        {
-            try
-            {
-                return GetMerkleRoot();
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Remove superfluous branches
-        /// </summary>
-        /// <param name="matchedTransactions"></param>
-        /// <returns></returns>
-        public PartialMerkleTree Trim(params UInt256[] matchedTransactions)
-        {
-            PartialMerkleTree trimmed = new PartialMerkleTree();
-            trimmed.TransactionCount = TransactionCount;
-            var root = GetMerkleRoot();
-            foreach (var leaf in root.GetLeafs())
-            {
-                MarkToTop(leaf, false);
-            }
-            BitWriter flags = new BitWriter();
-            foreach (var leaf in root.GetLeafs().Where(l => matchedTransactions.Contains(l.Hash)))
-            {
-                MarkToTop(leaf, true);
-            }
-            trimmed.BuildCore(root, flags);
-            trimmed.Flags = flags.ToBitArray();
-            return trimmed;
-        }
+        #region Helpers
 
         /// <summary>
         /// Helper function to efficiently calculate the number of nodes at given height in the merkle tree.
@@ -220,8 +139,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <returns></returns>
         private uint CalcTreeWidth(int height)
         {
-            return 0;
-            //return (nTransactions + (1 << height) - 1) >> height;
+            return (uint)(TransactionCount + (1 << height) - 1) >> height;
         }
 
         /// <summary>
@@ -231,10 +149,25 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <param name="pos"></param>
         /// <param name="vTxId"></param>
         /// <returns></returns>
-        private UInt256 CalcHash(int height, uint pos, UInt256[] vTxId)
+        private UInt256 CalcHash(int height, uint pos, ReadOnlySpan<UInt256> vTxId)
         {
-            return UInt256.Zero;
-            //return (nTransactions + (1 << height) - 1) >> height;
+            if (height == 0)
+            {
+                // hash at height 0 is the transaction themselves.
+                return vTxId[(int)pos];
+            }
+
+            // Calculate left hash.
+            var left = CalcHash(height - 1, pos * 2, vTxId);
+
+            // Calculate right hash if not beyond the end of the array - copy left hash
+            // otherwise1.
+            var right = pos * 2 + 1 < CalcTreeWidth(height - 1) 
+                ? CalcHash(height - 1, pos * 2 + 1, vTxId) 
+                : left;
+
+            // Combine sub hashes.
+            return Hashes.Hash256(new ByteSpan(left.Span) + right.Span);
         }
 
         /// <summary>
@@ -244,9 +177,39 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <param name="pos"></param>
         /// <param name="vTxid"></param>
         /// <param name="vMatch"></param>
-        private void TraverseAndBuild(int height, uint pos, UInt256[] vTxid, bool[] vMatch)
+        private void TraverseAndBuild(int height, uint pos, ReadOnlySpan<UInt256> vTxid, ReadOnlySpan<bool> vMatch)
         {
+            while (true)
+            {
+                // Determine whether this node is the parent of at least one matched txid.
+                var fParentOfMatch = false;
+                for (var p = pos << height; p < (pos + 1) << height && p < TransactionCount; p++)
+                {
+                    fParentOfMatch |= vMatch[(int)p];
+                }
 
+                // Store as flag bit.
+                Flags.Add(fParentOfMatch);
+
+                if (height == 0 || !fParentOfMatch)
+                {
+                    // If at height 0, or nothing interesting below, store hash and stop.
+                    TransactionHashes.Add(CalcHash(height, pos, vTxid));
+                }
+                else
+                {
+                    // Otherwise, don't store any hash, but descend into the subtrees.
+                    TraverseAndBuild(height - 1, pos * 2, vTxid, vMatch);
+                    if (pos * 2 + 1 < CalcTreeWidth(height - 1))
+                    {
+                        height--;
+                        pos = pos * 2 + 1;
+                        continue;
+                    }
+                }
+
+                break;
+            }
         }
 
         /// <summary>
@@ -257,12 +220,71 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <param name="pos"></param>
         /// <param name="nBitsUsed"></param>
         /// <param name="nHashUsed"></param>
-        /// <param name="vTxid"></param>
         /// <param name="vMatch"></param>
+        /// <param name="vnIndex"></param>
         /// <returns></returns>
-        private UInt256 TraverseAndExtract(int height, uint pos, uint nBitsUsed, uint nHashUsed, UInt256[] vTxid, bool[] vMatch)
+        private UInt256 TraverseAndExtract
+        (
+            int height, 
+            uint pos, 
+            ref uint nBitsUsed, 
+            ref uint nHashUsed, 
+            List<UInt256> vMatch, 
+            List<uint> vnIndex
+        )
         {
-            return UInt256.Zero;
+            if (nBitsUsed >= vMatch.Count)
+            {
+                // Overflowed the bits array - failure
+                IsBad = true;
+                return UInt256.Zero;
+            }
+
+            bool fParentOfMatch = Flags[(int)nBitsUsed++];
+            if (height == 0 || !fParentOfMatch)
+            {
+                // If at height 0, or nothing interesting below, use stored hash and do
+                // not descend.
+                if (nHashUsed >= TransactionHashes.Count)
+                {
+                    // Overflowed the hash array - failure
+                    IsBad = true;
+                    return UInt256.Zero;
+                }
+
+                var hash = TransactionHashes[(int)nHashUsed++];
+                // In case of height 0, we have a matched txid.
+                if (height == 0 && fParentOfMatch)
+                {
+                    vMatch.Add(hash);
+                    vnIndex.Add(pos);
+                }
+                return hash;
+            }
+
+            // Otherwise, descend into the subtrees to extract matched txids and hashes.
+            var left = TraverseAndExtract(height - 1, pos * 2, ref nBitsUsed, ref nHashUsed, vMatch, vnIndex);
+            UInt256 right;
+
+            if (pos * 2 + 1 < CalcTreeWidth(height - 1))
+            {
+                right = TraverseAndExtract(height - 1, pos * 2 + 1, ref nBitsUsed, ref nHashUsed, vMatch, vnIndex);
+                if (right == left)
+                {
+                    // The left and right branches should never be identical, as the
+                    // transaction hashes covered by them must each be unique.
+                    IsBad = true;
+                }
+            }
+            else
+            {
+                right = left;
+            }
+
+            // and combine them before returning.
+            return Hashes.Hash256(new ByteSpan(left.Span) + right.Span);
         }
+
+        #endregion
     }
 }
