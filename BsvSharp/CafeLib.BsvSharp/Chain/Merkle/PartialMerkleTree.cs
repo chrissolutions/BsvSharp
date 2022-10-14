@@ -8,16 +8,43 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 {
     public class PartialMerkleTree
     {
+        protected uint TransactionCount { get; set; }
+
+        protected List<UInt256> Hashes { get; } = new();
+
+        protected BitArray Flags { get; set; } = new(0);
+
+        protected bool IsBad { get; private set; }
+
         public PartialMerkleTree()
         {
 
         }
 
-        public uint TransactionCount { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="vTxid"></param>
+        /// <param name="vMatch"></param>
+        /// <exception cref="ArgumentException"></exception>
+        public PartialMerkleTree(UInt256[] vTxid, bool[] vMatch)
+        {
+            if (vMatch.Length != vTxid.Length)
+                throw new ArgumentException("The size of the array of txid and matches is different");
 
-        public List<UInt256> Hashes { get; } = new();
+            TransactionCount = (uint)vTxid.Length;
 
-        public BitArray Flags { get; set; } = new(0);
+            MerkleNode root = MerkleNode.GetRoot(vTxid);
+            BitWriter flags = new BitWriter();
+
+            MarkNodes(root, vMatch);
+            BuildCore(root, flags);
+
+            Flags = flags.ToBitArray();
+        }
+
+
+
 
         // serialization implementation
         //#region IBitcoinSerializable Members
@@ -50,28 +77,6 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         //}
 
         //#endregion
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="vTxid"></param>
-        /// <param name="vMatch"></param>
-        /// <exception cref="ArgumentException"></exception>
-        public PartialMerkleTree(UInt256[] vTxid, bool[] vMatch)
-        {
-            if (vMatch.Length != vTxid.Length)
-                throw new ArgumentException("The size of the array of txid and matches is different");
-
-            TransactionCount = (uint)vTxid.Length;
-
-            MerkleNode root = MerkleNode.GetRoot(vTxid);
-            BitWriter flags = new BitWriter();
-
-            MarkNodes(root, vMatch);
-            BuildCore(root, flags);
-
-            Flags = flags.ToBitArray();
-        }
 
         private static void MarkNodes(MerkleNode root, bool[] vMatch)
         {
@@ -206,6 +211,58 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             trimmed.BuildCore(root, flags);
             trimmed.Flags = flags.ToBitArray();
             return trimmed;
+        }
+
+        /// <summary>
+        /// Helper function to efficiently calculate the number of nodes at given height in the merkle tree.
+        /// </summary>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        private uint CalcTreeWidth(int height)
+        {
+            return 0;
+            //return (nTransactions + (1 << height) - 1) >> height;
+        }
+
+        /// <summary>
+        /// Helper function to efficiently calculate the number of nodes at given height in the merkle tree.
+        /// </summary>
+        /// <param name="height"></param>
+        /// <param name="pos"></param>
+        /// <param name="vTxId"></param>
+        /// <returns></returns>
+        private UInt256 CalcHash(int height, uint pos, UInt256[] vTxId)
+        {
+            return UInt256.Zero;
+            //return (nTransactions + (1 << height) - 1) >> height;
+        }
+
+        /// <summary>
+        /// Recursive function that traverses tree nodes, storing the data as bits and hashes.
+        /// </summary>
+        /// <param name="height"></param>
+        /// <param name="pos"></param>
+        /// <param name="vTxid"></param>
+        /// <param name="vMatch"></param>
+        private void TraverseAndBuild(int height, uint pos, UInt256[] vTxid, bool[] vMatch)
+        {
+
+        }
+
+        /// <summary>
+        /// Recursive function that traverses tree nodes, consuming the bits and hashes produced by TraverseAndBuild.
+        /// It returns the hash of the respective node and its respective index.
+        /// </summary>
+        /// <param name="height"></param>
+        /// <param name="pos"></param>
+        /// <param name="nBitsUsed"></param>
+        /// <param name="nHashUsed"></param>
+        /// <param name="vTxid"></param>
+        /// <param name="vMatch"></param>
+        /// <returns></returns>
+        private UInt256 TraverseAndExtract(int height, uint pos, uint nBitsUsed, uint nHashUsed, UInt256[] vTxid, bool[] vMatch)
+        {
+            return UInt256.Zero;
         }
     }
 }
