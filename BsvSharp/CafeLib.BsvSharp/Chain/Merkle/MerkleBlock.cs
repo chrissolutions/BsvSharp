@@ -7,7 +7,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 {
     public record MerkleBlock : BlockHeader // : IBitcoinSerializable
     {
-        public PartialMerkleTree PartialMerkleTree { get; private set; }
+        public PartialMerkleTree PartialMerkleTree { get; }
 
         /// <summary>
         /// MerkleBlock default constructor.
@@ -39,6 +39,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         }
 
         public MerkleBlock(Block block, UInt256[] txIds)
+            : base(block)
         {
             var vMatch = new List<bool>();
             var vHashes = new List<UInt256>();
