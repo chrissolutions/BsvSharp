@@ -9,7 +9,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 {
     public record MerkleBlock : BlockHeader // : IBitcoinSerializable
     {
-        public PartialMerkleTree PartialMerkleTree { get; }
+        internal PartialMerkleTree PartialMerkleTree { get; }
 
         /// <summary>
         /// MerkleBlock default constructor.

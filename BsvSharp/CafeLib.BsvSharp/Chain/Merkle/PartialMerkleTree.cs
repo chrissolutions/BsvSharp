@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
@@ -109,7 +110,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         public ReadOnlyByteSequence Serialize()
         {
             var writer = new ByteDataWriter();
-            if (!TrySerializeBlock(writer)) return null;
+            // if (!TrySerializeBlock(writer)) return null;
             var ros = new ReadOnlyByteSequence(writer.Span);
             return ros;
         }
