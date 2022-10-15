@@ -66,7 +66,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         public new ReadOnlyByteSequence Serialize()
         {
             var writer = new ByteDataWriter();
-            //if (!TrySerializeBlock(writer)) return null;
+            if (!TrySerializeBlock(writer)) return null;
             var ros = new ReadOnlyByteSequence(writer.Span);
             return ros;
         }
@@ -79,15 +79,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <returns></returns>
         private bool TrySerializeBlock(IDataWriter writer)
         {
-            if (!TrySerializeHeader(writer)) return false;
-
-            //writer.Write(new VarInt(Transactions...Length));
-            //foreach (var tx in Transactions)
-            //{
-            //    tx.WriteTo(writer);
-            //}
-
-            return true;
+            return TrySerializeHeader(writer) && PartialMerkleTree.Serialize(writer);
         }
 
         #endregion

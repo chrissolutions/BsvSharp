@@ -107,12 +107,9 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// Serialize block.
         /// </summary>
         /// <returns></returns>
-        public ReadOnlyByteSequence Serialize()
+        public bool Serialize(IDataWriter writer)
         {
-            var writer = new ByteDataWriter();
-            // if (!TrySerializeBlock(writer)) return null;
-            var ros = new ReadOnlyByteSequence(writer.Span);
-            return ros;
+            return true;
         }
 
 
