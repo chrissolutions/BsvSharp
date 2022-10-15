@@ -98,15 +98,17 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             if (!TryDeserializeHeader(ref reader)) return false;
             if (!reader.TryReadVariant(out var count)) return false;
 
-            Transactions = new TransactionList();
-            for (var i = 0; i < count; i++)
-            {
-                var tx = new Transaction();
-                if (!tx.TryReadTransaction(ref reader)) return false;
-                Transactions.Add(tx);
-            }
+            return true;
 
-            return VerifyMerkleRoot();
+            //Transactions = new TransactionList();
+            //for (var i = 0; i < count; i++)
+            //{
+            //    var tx = new Transaction();
+            //    if (!tx.TryReadTransaction(ref reader)) return false;
+            //    Transactions.Add(tx);
+            //}
+
+            //return VerifyMerkleRoot();
         }
 
         /// <summary>
