@@ -6,7 +6,7 @@ using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Chain.Merkle
 {
-    public class PartialMerkleTree
+    internal class PartialMerkleTree
     {
         protected uint TransactionCount { get; set; }
 
@@ -100,6 +100,18 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 
             // verify that all hashes were consumed.
             return hashUsed != TransactionHashes.Count ? UInt256.Zero : hashMerkleRoot;
+        }
+
+        /// <summary>
+        /// Serialize block.
+        /// </summary>
+        /// <returns></returns>
+        public ReadOnlyByteSequence Serialize()
+        {
+            var writer = new ByteDataWriter();
+            if (!TrySerializeBlock(writer)) return null;
+            var ros = new ReadOnlyByteSequence(writer.Span);
+            return ros;
         }
 
 
