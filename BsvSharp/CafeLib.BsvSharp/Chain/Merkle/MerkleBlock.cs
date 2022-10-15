@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using CafeLib.BsvSharp.Persistence;
+using CafeLib.BsvSharp.Transactions;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
@@ -60,6 +61,20 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         }
 
         /// <summary>
+        /// Deserialize block.
+        /// </summary>
+        /// <param name="sequence">byte sequence</param>
+        /// <returns>true if successful; false otherwise</returns>
+        public bool Deserialize(ref ReadOnlyByteSequence sequence)
+        {
+            var reader = new ByteSequenceReader(sequence);
+            if (!TryDeserializeBlock(ref reader)) return false;
+            sequence = sequence.Data.Slice(reader.Data.Consumed);
+            return true;
+        }
+
+
+        /// <summary>
         /// Serialize block.
         /// </summary>
         /// <returns></returns>
@@ -72,6 +87,27 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         }
 
         #region Helpers
+
+        /// <summary>
+        /// Read data from the byte sequence into the block.
+        /// </summary>
+        /// <param name="reader">byte sequence reader</param>
+        /// <returns>true if successful; false otherwise</returns>
+        private bool TryDeserializeBlock(ref ByteSequenceReader reader)
+        {
+            if (!TryDeserializeHeader(ref reader)) return false;
+            if (!reader.TryReadVariant(out var count)) return false;
+
+            Transactions = new TransactionList();
+            for (var i = 0; i < count; i++)
+            {
+                var tx = new Transaction();
+                if (!tx.TryReadTransaction(ref reader)) return false;
+                Transactions.Add(tx);
+            }
+
+            return VerifyMerkleRoot();
+        }
 
         /// <summary>
         /// Write data from the block.

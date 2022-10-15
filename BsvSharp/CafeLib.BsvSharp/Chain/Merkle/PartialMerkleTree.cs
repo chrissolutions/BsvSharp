@@ -105,7 +105,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         }
 
         /// <summary>
-        /// Serialize block.
+        /// Serialize PartialMerkleTree.
         /// </summary>
         /// <returns></returns>
         public bool Serialize(IDataWriter writer)
