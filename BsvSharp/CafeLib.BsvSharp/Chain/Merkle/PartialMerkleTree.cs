@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Numerics;
@@ -109,6 +110,17 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <returns></returns>
         public bool Serialize(IDataWriter writer)
         {
+            writer.Write(TransactionCount);
+            writer.Write(new VarInt(TransactionHashes.Count));
+            foreach (var t in TransactionHashes)
+            {
+                writer.Write(t);
+            }
+
+            var vBytes = new byte[(Flags.Count + 7) / 8];
+            for (var p = 0; p < Flags.Count; p++)
+                vBytes[p / 8] |= (byte)(Convert.ToByte(Flags[p]) << (p % 8));
+            writer.Write(new VarType(vBytes));
             return true;
         }
 
