@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using CafeLib.BsvSharp.Persistence;
-using CafeLib.BsvSharp.Transactions;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
@@ -73,7 +72,6 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             return true;
         }
 
-
         /// <summary>
         /// Serialize block.
         /// </summary>
@@ -96,19 +94,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         private bool TryDeserializeBlock(ref ByteSequenceReader reader)
         {
             if (!TryDeserializeHeader(ref reader)) return false;
-            if (!reader.TryReadVariant(out var count)) return false;
-
-            return true;
-
-            //Transactions = new TransactionList();
-            //for (var i = 0; i < count; i++)
-            //{
-            //    var tx = new Transaction();
-            //    if (!tx.TryReadTransaction(ref reader)) return false;
-            //    Transactions.Add(tx);
-            //}
-
-            //return VerifyMerkleRoot();
+            return PartialMerkleTree.Deserialize(ref reader);
         }
 
         /// <summary>

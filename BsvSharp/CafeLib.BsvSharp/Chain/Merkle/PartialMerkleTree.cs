@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
@@ -10,7 +11,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 {
     internal class PartialMerkleTree
     {
-        protected uint TransactionCount { get; set; }
+        protected uint TransactionCount { get; private set; }
 
         protected List<UInt256> TransactionHashes { get; } = new();
 
@@ -105,13 +106,43 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         }
 
         /// <summary>
+        /// Deserialize block.
+        /// </summary>
+        /// <param name="reader">byte sequence reader</param>
+        /// <returns>true if successful; false otherwise</returns>
+        ///
+        public bool Deserialize(ref ByteSequenceReader reader)
+        {
+            if (!reader.TryReadVariant(out var count)) return false;
+            TransactionCount = (uint)count;
+
+            for (var i = 0; i < TransactionCount; i++)
+            {
+                var hash = UInt256.Zero;
+                if (reader.TryReadUInt256(ref hash)) return false;
+                TransactionHashes.Add(hash);
+            }
+
+            if (!reader.TryReadVariant(out count)) return false;
+            var vBytes = new byte[count];
+            reader.TryCopyTo(vBytes);
+            Flags = new List<bool>();
+            for (var i = 0; i < count*8; i++)
+            {
+                Flags.Add((vBytes[i / 8] & (1 << (i % 8))) != 0);
+            }
+
+            IsBad = false;
+            return !IsBad;
+        }
+
+        /// <summary>
         /// Serialize PartialMerkleTree.
         /// </summary>
         /// <returns></returns>
         public bool Serialize(IDataWriter writer)
         {
-            writer.Write(TransactionCount);
-            writer.Write(new VarInt(TransactionHashes.Count));
+            writer.Write(new VarInt(TransactionCount));
             foreach (var t in TransactionHashes)
             {
                 writer.Write(t);
@@ -120,6 +151,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             var vBytes = new byte[(Flags.Count + 7) / 8];
             for (var p = 0; p < Flags.Count; p++)
                 vBytes[p / 8] |= (byte)(Convert.ToByte(Flags[p]) << (p % 8));
+            writer.Write(new VarInt(vBytes.Length));
             writer.Write(new VarType(vBytes));
             return true;
         }
