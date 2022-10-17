@@ -1,17 +1,20 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
+using CafeLib.Cryptography;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CafeLib.BsvSharp.Chain.Merkle
 {
     public record MerkleBlock : BlockHeader 
     {
-        internal PartialMerkleTree PartialMerkleTree { get; }
+        internal PartialMerkleTree PartialMerkleTree { get; private set; }
 
         /// <summary>
         /// MerkleBlock default constructor.
@@ -75,6 +78,9 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             var version = Convert.ToInt32(block.header.version.ToString());
             var prevHash = UInt256.FromHex(block.header.prevHash.ToString());
 
+            //var t = Convert.ToInt32(block.numTransactions.ToString());
+            //var u = ((JArray)block.hashes).Select(x => UInt256.FromHex(x.ToString()));
+
             var header = new BlockHeader(
                 Convert.ToInt32(block.header.version.ToString()),
                 UInt256.FromHex(block.header.hash.ToString()),
@@ -84,9 +90,37 @@ namespace CafeLib.BsvSharp.Chain.Merkle
                 Convert.ToUInt32(block.header.bits.ToString()),
                 Convert.ToUInt32(block.header.nonce.ToString()));
 
-            Console.WriteLine();
 
-            return null;
+            var v = block.flags is JArray jarr
+                ? jarr.Select(x => Convert.ToByte(x.ToString())).ToArray()
+                : new byte[] { Convert.ToByte(block.flags.ToString()) }.ToArray();
+
+            var vBytes = new BitArray(v.ToArray());
+            List<bool> flags = new();
+
+            for (var i = 0; i < vBytes.Length; i++)
+            {
+                flags.Add(((vBytes.Get(i / 8) ? 1 : 0) & (1 << i % 8)) != 0);
+            }
+
+            var merkleBlock = new MerkleBlock
+            {
+                _version = header.Version,
+                _hash = header.Hash,
+                _prevHash = header.PrevHash,
+                _merkleRoot = header.MerkleRoot,
+                _timestamp = header.Timestamp,
+                _bits = header.Bits,
+                _nonce = header.Nonce,
+
+                PartialMerkleTree = new PartialMerkleTree
+                    (
+                        ((JArray)block.hashes).Select(x => UInt256.FromHex(x.Value<string>())).ToArray(),
+                        flags
+                    )
+            };
+
+            return merkleBlock;
         }
 
         /// <summary>

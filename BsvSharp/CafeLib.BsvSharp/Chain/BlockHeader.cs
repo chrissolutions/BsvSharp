@@ -28,20 +28,21 @@ namespace CafeLib.BsvSharp.Chain
         public const int BlockHeaderSize = 80;
         private const long MaxTimeOffset = 2 * 60 * 60;
 
-        private int _version;
-        private UInt256 _prevHash;
-        private UInt256 _merkleRootHash;
-        private uint _timestamp;
-        private uint _bits;
-        private uint _nonce;
+        protected int _version;
+        protected UInt256 _hash;
+        protected UInt256 _prevHash;
+        protected UInt256 _merkleRoot;
+        protected uint _timestamp;
+        protected uint _bits;
+        protected uint _nonce;
 
         /// Essential fields of a Bitcoin SV block header.
-        public UInt256 Hash { get; private set; }
+        public UInt256 Hash => _hash;
 
         /// Public access to essential header fields.
         public int Version => _version;
         public UInt256 PrevHash => _prevHash;
-        public UInt256 MerkleRoot => _merkleRootHash;
+        public UInt256 MerkleRoot => _merkleRoot;
         public uint Timestamp => _timestamp;
         public uint Bits => _bits;
         public uint Nonce => _nonce;
@@ -55,9 +56,9 @@ namespace CafeLib.BsvSharp.Chain
 
         protected BlockHeader(BlockHeader header)
         {
-            Initialize(header._version, header._prevHash, header._merkleRootHash, header._timestamp, header._bits, header._nonce);
-            Hash = CalculateHash(Serialize());
-            if (header.Hash != UInt256.Zero && header.Hash != Hash) 
+            Initialize(header._version, header._prevHash, header._merkleRoot, header._timestamp, header._bits, header._nonce);
+            _hash = CalculateHash(Serialize());
+            if (header._hash != UInt256.Zero && header.Hash != Hash) 
                 throw new BlockException("incoming has not equal to serialized header hash value");
         }
 
@@ -88,8 +89,8 @@ namespace CafeLib.BsvSharp.Chain
         internal BlockHeader(int version, UInt256 hash, UInt256 prevHash, UInt256 merkleRootHash, uint timestamp, uint bits, uint nonce)
         {
             Initialize(version, prevHash, merkleRootHash, timestamp, bits, nonce);
-            Hash = CalculateHash(Serialize());
-            if (hash != UInt256.Zero && hash != Hash)
+            _hash = CalculateHash(Serialize());
+            if (_hash != UInt256.Zero && _hash != hash)
                 throw new BlockException("incoming has not equal to serialized header hash value");
         }
 
@@ -195,13 +196,13 @@ namespace CafeLib.BsvSharp.Chain
             var start = reader.Data.Position;
             if (!reader.TryReadLittleEndian(out _version)) return false;
             if (!reader.TryReadUInt256(ref _prevHash)) return false;
-            if (!reader.TryReadUInt256(ref _merkleRootHash)) return false;
+            if (!reader.TryReadUInt256(ref _merkleRoot)) return false;
             if (!reader.TryReadLittleEndian(out _timestamp)) return false;
             if (!reader.TryReadLittleEndian(out _bits)) return false;
             if (!reader.TryReadLittleEndian(out _nonce)) return false;
             var end = reader.Data.Position;
 
-            Hash = CalculateHash(reader.Data.Sequence.Slice(start, end).FirstSpan);
+            _hash = CalculateHash(reader.Data.Sequence.Slice(start, end).FirstSpan);
             return true;
         }
 
@@ -214,7 +215,7 @@ namespace CafeLib.BsvSharp.Chain
             writer
                 .Write(_version)
                 .Write(_prevHash)
-                .Write(_merkleRootHash)
+                .Write(_merkleRoot)
                 .Write(_timestamp)
                 .Write(_bits)
                 .Write(_nonce);
@@ -242,7 +243,7 @@ namespace CafeLib.BsvSharp.Chain
         {
             _version = version;
             _prevHash = prevHash;
-            _merkleRootHash = merkleRootHash;
+            _merkleRoot = merkleRootHash;
             _timestamp = timestamp;
             _bits = bits;
             _nonce = nonce;

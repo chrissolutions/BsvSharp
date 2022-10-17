@@ -33,10 +33,10 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <param name="vTxid"></param>
         /// <param name="vMatch"></param>
         /// <exception cref="ArgumentException"></exception>
-        public PartialMerkleTree(ReadOnlySpan<UInt256> vTxid, ReadOnlySpan<bool> vMatch)
+        public PartialMerkleTree(IEnumerable<UInt256> vTxid, IEnumerable<bool> vMatch)
             : this()
         {
-            TransactionCount = (uint)vTxid.Length;
+            TransactionCount = (uint)vTxid.Count();
 
             // calculate height of tree
             var height = 0;
@@ -219,12 +219,12 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <param name="pos"></param>
         /// <param name="vTxId"></param>
         /// <returns></returns>
-        private UInt256 CalcHash(int height, uint pos, ReadOnlySpan<UInt256> vTxId)
+        private UInt256 CalcHash(int height, uint pos, IEnumerable<UInt256> vTxId)
         {
             if (height == 0)
             {
                 // hash at height 0 is the transaction themselves.
-                return vTxId[(int)pos];
+                return vTxId.ElementAt((int)pos);
             }
 
             // Calculate left hash.
@@ -247,7 +247,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <param name="pos"></param>
         /// <param name="vTxid"></param>
         /// <param name="vMatch"></param>
-        private void TraverseAndBuild(int height, uint pos, ReadOnlySpan<UInt256> vTxid, ReadOnlySpan<bool> vMatch)
+        private void TraverseAndBuild(int height, uint pos, IEnumerable<UInt256> vTxid, IEnumerable<bool> vMatch)
         {
             while (true)
             {
@@ -255,7 +255,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
                 var fParentOfMatch = false;
                 for (var p = pos << height; p < (pos + 1) << height && p < TransactionCount; p++)
                 {
-                    fParentOfMatch |= vMatch[(int)p];
+                    fParentOfMatch |= vMatch.ElementAt((int)p);
                 }
 
                 // Store as flag bit.
