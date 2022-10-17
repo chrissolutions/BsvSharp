@@ -80,11 +80,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             }
 
             // calculate height of tree.
-            var nHeight = 0;
-            while (CalcTreeWidth(nHeight) > 1)
-            {
-                nHeight++;
-            }
+            var nHeight = CalcTreeHeight();
 
             // traverse the partial tree.
             uint bitsUsed = 0, hashUsed = 0;
@@ -126,7 +122,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             {
                 return Array.Empty<UInt256>().ToList();
             }
-            ;
+
             var hashes = new List<UInt256>();
             var indexes = new List<uint>();
             var result = ExtractMatches(hashes, indexes);
