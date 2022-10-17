@@ -49,7 +49,7 @@ namespace CafeLib.BsvSharp.Chain
         /// <summary>
         /// Default constructor.
         /// </summary>
-        protected BlockHeader()
+        internal BlockHeader()
         {
         }
 
@@ -71,9 +71,26 @@ namespace CafeLib.BsvSharp.Chain
         /// <param name="bits">the current difficulty target in compact format</param>
         /// <param name="nonce">the nonce field that miners use to find a sha256 hash value that matches the difficulty target</param>
         public BlockHeader(int version, UInt256 prevHash, UInt256 merkleRootHash, uint timestamp, uint bits, uint nonce)
+            : this(version, UInt256.Zero, prevHash, merkleRootHash, timestamp, bits, nonce)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new block header
+        /// </summary>
+        /// <param name="version">block version number</param>
+        /// <param name="hash"></param>
+        /// <param name="prevHash">sha256 hash of the previous block header</param>
+        /// <param name="merkleRootHash">Sha256 hash at the root of the transaction merkle tree</param>
+        /// <param name="timestamp">current block timestamp as seconds since the unix epoch</param>
+        /// <param name="bits">the current difficulty target in compact format</param>
+        /// <param name="nonce">the nonce field that miners use to find a sha256 hash value that matches the difficulty target</param>
+        internal BlockHeader(int version, UInt256 hash, UInt256 prevHash, UInt256 merkleRootHash, uint timestamp, uint bits, uint nonce)
         {
             Initialize(version, prevHash, merkleRootHash, timestamp, bits, nonce);
             Hash = CalculateHash(Serialize());
+            if (hash != UInt256.Zero && hash != Hash)
+                throw new BlockException("incoming has not equal to serialized header hash value");
         }
 
         /// <summary>

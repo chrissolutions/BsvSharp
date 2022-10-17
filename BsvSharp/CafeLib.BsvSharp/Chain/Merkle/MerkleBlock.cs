@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
+using Newtonsoft.Json;
 
 namespace CafeLib.BsvSharp.Chain.Merkle
 {
@@ -57,6 +59,34 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             }
 
             PartialMerkleTree = new PartialMerkleTree(vHashes.ToArray(), vMatch.ToArray());
+        }
+
+        public MerkleBlock(string json)
+        {
+            var block = JsonConvert.DeserializeObject<dynamic>(json);
+            Console.WriteLine();
+        }
+
+        public static MerkleBlock FromJson(string json)
+        {
+            var block = JsonConvert.DeserializeObject<dynamic>(json);
+            if (block == null) return null;
+
+            var version = Convert.ToInt32(block.header.version.ToString());
+            var prevHash = UInt256.FromHex(block.header.prevHash.ToString());
+
+            var header = new BlockHeader(
+                Convert.ToInt32(block.header.version.ToString()),
+                UInt256.FromHex(block.header.hash.ToString()),
+                UInt256.FromHex(block.header.prevHash.ToString()),
+                UInt256.FromHex(block.header.merkleRoot.ToString()),
+                Convert.ToUInt32(block.header.time.ToString()),
+                Convert.ToUInt32(block.header.bits.ToString()),
+                Convert.ToUInt32(block.header.nonce.ToString()));
+
+            Console.WriteLine();
+
+            return null;
         }
 
         /// <summary>
