@@ -96,11 +96,11 @@ namespace CafeLib.BsvSharp.Chain.Merkle
                 : new byte[] { Convert.ToByte(block.flags.ToString()) }.ToArray();
 
             var vBytes = new BitArray(v.ToArray());
-            List<bool> flags = new();
+            var flags = new bool[vBytes.Length];
 
             for (var i = 0; i < vBytes.Length; i++)
             {
-                flags.Add(((vBytes[i / 8] ? 1 : 0) & (1 << i % 8)) != 0);
+                flags[i] = ((vBytes[i / 8] ? 1 : 0) & (1 << i % 8)) != 0;
             }
 
             var merkleBlock = new MerkleBlock
