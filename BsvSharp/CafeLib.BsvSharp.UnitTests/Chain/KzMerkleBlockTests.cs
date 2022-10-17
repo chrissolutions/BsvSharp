@@ -11,7 +11,7 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
     public class KzMerkleBlockTests
     {
         [Fact]
-        public void MerkleBlock_Test()
+        public void MerkleBlock_FromJson_Test()
         {
             const string json = @"
             {
@@ -34,9 +34,8 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
                 ""flags"": [ 29]
             }";
 
-            var block = MerkleBlock.FromJson(json);
-
-            Assert.True(true);
+            var merkleBlock = MerkleBlock.FromJson(json);
+            Assert.Equal("000000000000b731f2eef9e8c63173adfb07e41bd53eb0ef0a6b720d6cb6dea4", merkleBlock.Hash.ToString());
         }
     }
 }
