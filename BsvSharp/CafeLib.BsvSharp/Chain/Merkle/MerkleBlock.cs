@@ -100,7 +100,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 
             for (var i = 0; i < vBytes.Length; i++)
             {
-                flags.Add(((vBytes.Get(i / 8) ? 1 : 0) & (1 << i % 8)) != 0);
+                flags.Add(((vBytes[i / 8] ? 1 : 0) & (1 << i % 8)) != 0);
             }
 
             var merkleBlock = new MerkleBlock
