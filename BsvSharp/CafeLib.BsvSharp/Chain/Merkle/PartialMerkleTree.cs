@@ -30,13 +30,14 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="vTxid"></param>
+        /// <param name="vTxId"></param>
         /// <param name="vMatch"></param>
         /// <exception cref="ArgumentException"></exception>
-        public PartialMerkleTree(IEnumerable<UInt256> vTxid, IEnumerable<bool> vMatch)
+        public PartialMerkleTree(IEnumerable<UInt256> vTxId, IEnumerable<bool> vMatch)
             : this()
         {
-            TransactionCount = (uint)vTxid.Count();
+            var ids = vTxId as UInt256[] ?? vTxId.ToArray();
+            TransactionCount = (uint)ids.Length;
 
             // calculate height of tree
             var height = 0;
@@ -44,7 +45,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
                 ++height;
 
             // traverse the partial tree
-            TraverseAndBuild(height, 0, vTxid, vMatch);
+            TraverseAndBuild(height, 0, ids, vMatch);
         }
 
         /// <summary>
