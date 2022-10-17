@@ -93,8 +93,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <returns>true if successful; false otherwise</returns>
         private bool TryDeserializeBlock(ref ByteSequenceReader reader)
         {
-            if (!TryDeserializeHeader(ref reader)) return false;
-            return PartialMerkleTree.Deserialize(ref reader);
+            return TryDeserializeHeader(ref reader) && PartialMerkleTree.Deserialize(ref reader);
         }
 
         /// <summary>
@@ -107,15 +106,5 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         }
 
         #endregion
-
-        //#region IBitcoinSerializable Members
-
-        //public void ReadWrite(BitcoinStream stream)
-        //{
-        //    stream.ReadWrite(ref header);
-        //    stream.ReadWrite(ref _PartialMerkleTree);
-        //}
-
-        //#endregion
     }
 }
