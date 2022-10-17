@@ -57,6 +57,8 @@ namespace CafeLib.BsvSharp.Chain
         {
             Initialize(header._version, header._prevHash, header._merkleRootHash, header._timestamp, header._bits, header._nonce);
             Hash = CalculateHash(Serialize());
+            if (header.Hash != UInt256.Zero && header.Hash != Hash) 
+                throw new BlockException("incoming has not equal to serialized header hash value");
         }
 
         /// <summary>
