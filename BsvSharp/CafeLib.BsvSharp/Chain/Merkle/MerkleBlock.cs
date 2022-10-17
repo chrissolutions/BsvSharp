@@ -6,7 +6,6 @@ using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
-using CafeLib.Cryptography;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -64,22 +63,10 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             PartialMerkleTree = new PartialMerkleTree(vHashes.ToArray(), vMatch.ToArray());
         }
 
-        public MerkleBlock(string json)
-        {
-            var block = JsonConvert.DeserializeObject<dynamic>(json);
-            Console.WriteLine();
-        }
-
         public static MerkleBlock FromJson(string json)
         {
             var block = JsonConvert.DeserializeObject<dynamic>(json);
             if (block == null) return null;
-
-            var version = Convert.ToInt32(block.header.version.ToString());
-            var prevHash = UInt256.FromHex(block.header.prevHash.ToString());
-
-            //var t = Convert.ToInt32(block.numTransactions.ToString());
-            //var u = ((JArray)block.hashes).Select(x => UInt256.FromHex(x.ToString()));
 
             var header = new BlockHeader(
                 Convert.ToInt32(block.header.version.ToString()),
@@ -90,9 +77,8 @@ namespace CafeLib.BsvSharp.Chain.Merkle
                 Convert.ToUInt32(block.header.bits.ToString()),
                 Convert.ToUInt32(block.header.nonce.ToString()));
 
-
-            var v = block.flags is JArray jarr
-                ? jarr.Select(x => Convert.ToByte(x.ToString())).ToArray()
+            var v = block.flags is JArray jarray
+                ? jarray.Select(x => Convert.ToByte(x.ToString())).ToArray()
                 : new byte[] { Convert.ToByte(block.flags.ToString()) }.ToArray();
 
             var vBytes = new BitArray(v.ToArray());
