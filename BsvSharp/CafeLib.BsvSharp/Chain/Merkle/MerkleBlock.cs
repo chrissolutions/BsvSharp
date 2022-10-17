@@ -7,7 +7,7 @@ using CafeLib.Core.Numerics;
 
 namespace CafeLib.BsvSharp.Chain.Merkle
 {
-    public record MerkleBlock : BlockHeader // : IBitcoinSerializable
+    public record MerkleBlock : BlockHeader 
     {
         internal PartialMerkleTree PartialMerkleTree { get; }
 
@@ -57,6 +57,15 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             }
 
             PartialMerkleTree = new PartialMerkleTree(vHashes.ToArray(), vMatch.ToArray());
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public List<UInt256> FilteredTransactionHashes()
+        {
+            return PartialMerkleTree.FilteredHashes();
         }
 
         /// <summary>

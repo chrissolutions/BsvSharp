@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Persistence;
@@ -105,6 +108,38 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             return hashUsed != TransactionHashes.Count ? UInt256.Zero : hashMerkleRoot;
         }
 
+        public List<UInt256> FilteredHashes()
+        {
+            // Can't have more hashes than numTransactions
+            if (TransactionHashes.Count > TransactionCount)
+            {
+                throw new MerkleTreeException("Invalid merkle tree - more hashes than transactions");
+            }
+
+            // Can't have more flag bits than num hashes
+            if (Flags.Count * 8 < TransactionHashes.Count)
+            {
+                throw new MerkleTreeException("Invalid merkle tree - more flag bits than hashes");
+            }
+
+            // If there is only one hash the filter do not match any txs in the block
+            if (TransactionHashes.Count == 1)
+            {
+                return Array.Empty<UInt256>().ToList();
+            }
+            ;
+            var hashes = new List<UInt256>();
+            var indexes = new List<uint>();
+            var result = ExtractMatches(hashes, indexes);
+
+            if (result == UInt256.Zero)
+            {
+                throw new MerkleTreeException("Invalid merkle tree");
+            }
+
+            return hashes;
+        }
+
         /// <summary>
         /// Deserialize block.
         /// </summary>
@@ -156,35 +191,21 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             return true;
         }
 
-
-        // serialization implementation
-        //#region IBitcoinSerializable Members
-
-        //public void ReadWrite(BitcoinStream stream)
-        //{
-        //    stream.ReadWrite(ref _TransactionCount);
-        //    stream.ReadWrite(ref _Hashes);
-        //    byte[] vBytes = null;
-        //    if (!stream.Serializing)
-        //    {
-        //        stream.ReadWriteAsVarString(ref vBytes);
-        //        BitWriter writer = new BitWriter();
-        //        for (int p = 0; p < vBytes.Length * 8; p++)
-        //            writer.Write((vBytes[p / 8] & (1 << (p % 8))) != 0);
-        //        _Flags = writer.ToBitArray();
-        //    }
-        //    else
-        //    {
-        //        vBytes = new byte[(_Flags.Length + 7) / 8];
-        //        for (int p = 0; p < _Flags.Length; p++)
-        //            vBytes[p / 8] |= (byte)(ToByte(_Flags.Get(p)) << (p % 8));
-        //        stream.ReadWriteAsVarString(ref vBytes);
-        //    }
-        //}
-
-        //#endregion
-
         #region Helpers
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private int CalcTreeHeight()
+        {
+            var height = 0;
+            while (CalcTreeWidth(height) > 1)
+            {
+                height++;
+            }
+            return height;
+        }
 
         /// <summary>
         /// Helper function to efficiently calculate the number of nodes at given height in the merkle tree.
