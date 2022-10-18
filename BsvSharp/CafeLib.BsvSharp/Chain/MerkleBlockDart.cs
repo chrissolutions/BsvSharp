@@ -6,19 +6,24 @@ using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
+using CafeLib.Cryptography;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace CafeLib.BsvSharp.Chain
 {
-    public record MerkleBlock : BlockHeader
+    public record MerkleBlockDart : BlockHeader
     {
+        private int _numTransactions;
+        private IList<UInt256> _hashes;
+        private IList<byte> _flags;
+
         private PartialMerkleTree PartialMerkleTree { get; init; }
 
         /// <summary>
         /// MerkleBlock default constructor.
         /// </summary>
-        public MerkleBlock()
+        public MerkleBlockDart()
         {
         }
 
@@ -29,7 +34,7 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         /// <param name="block">block</param>
         /// <param name="filter">bloom filter</param>
-        public MerkleBlock(Block block, BloomFilter filter)
+        public MerkleBlockDart(Block block, BloomFilter filter)
             : base(block)
         {
             var vMatch = new List<bool>();
@@ -49,7 +54,7 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         /// <param name="block"></param>
         /// <param name="txIds"></param>
-        public MerkleBlock(Block block, UInt256[] txIds)
+        public MerkleBlockDart(Block block, UInt256[] txIds)
             : base(block)
         {
             var vMatch = new List<bool>();
@@ -69,16 +74,17 @@ namespace CafeLib.BsvSharp.Chain
         /// <param name="header"></param>
         /// <param name="hashes"></param>
         /// <param name="flags"></param>
-        public MerkleBlock
+        public MerkleBlockDart
         (
             BlockHeader header,
             IEnumerable<UInt256> hashes,
-            IEnumerable<bool> flags
+            IEnumerable<byte> flags
         )
             : base(header)
         {
-            var vHashes = hashes.ToArray();
-            PartialMerkleTree = new PartialMerkleTree(vHashes.Length, vHashes, flags.ToArray());
+            _hashes = hashes.ToArray();
+            _numTransactions = _hashes.Count;
+            _flags = flags.ToArray();
         }
 
         /// <summary>
@@ -86,18 +92,20 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         /// <param name="header"></param>
         /// <param name="transactionCount"></param>
-        /// <param name="txHashes"></param>
+        /// <param name="hashes"></param>
         /// <param name="flags"></param>
-        public MerkleBlock
+        public MerkleBlockDart
         (
             BlockHeader header,
             int transactionCount,
-            IEnumerable<UInt256> txHashes,
-            IEnumerable<bool> flags
+            IEnumerable<UInt256> hashes,
+            IEnumerable<byte> flags
         )
             : base(header)
         {
-            PartialMerkleTree = new PartialMerkleTree(transactionCount, txHashes.ToArray(), flags.ToArray());
+            _numTransactions = transactionCount;
+            _hashes = hashes.ToArray();
+            _flags = flags.ToArray();
         }
 
         /// <summary>
@@ -195,6 +203,92 @@ namespace CafeLib.BsvSharp.Chain
         private bool TrySerializeBlock(IDataWriter writer)
         {
             return TrySerializeHeader(writer) && PartialMerkleTree.Serialize(writer);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private int CalcTreeHeight()
+        {
+            var height = 0;
+            while (CalcTreeWidth(height) > 1)
+            {
+                height++;
+            }
+            return height;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        private int CalcTreeWidth(int height)
+        {
+            return (_numTransactions + (1 << height) - 1) >> height;
+        }
+
+        /// <summary>
+        /// Returns *true* if the Merkle tree remains consistent in spite of missing transactions.
+        /// </summary>
+        /// <returns></returns>
+        private bool ValidMerkleTree()
+        {
+            // Can't have more hashes than numTransactions
+            if (_hashes.Count > _numTransactions)
+            {
+                return false;
+            }
+
+            // Can't have more flag bits than num hashes
+            if (_flags.Count * 8 < _hashes.Count)
+            {
+                return false;
+            }
+
+            var height = CalcTreeHeight();
+
+            //Map<String, dynamic> resultMap = TraverseMerkleTree(height, 0, flagBitsUsed: 0);
+            uint flagBitsUsed = 0, hashesUsed = 0;
+            object resultMap = TraverseMerkleTree(height, 0, ref hashesUsed, ref flagBitsUsed, null);
+
+            if (resultMap['hashesUsed'] != hashes.length)
+            {
+                return false;
+            }
+
+            return HEX.encode(resultMap['nodeValue']) == HEX.encode(header.merkleRoot);
+        }
+
+        private object TraverseMerkleTree(int depth, int pos, ref uint hashesUsed, ref uint flagBitsUsed, IList<UInt256> hashes, bool checkForTxs = false)
+        {
+            hashes ??= new List<UInt256>();
+            if (flagBitsUsed > _flags.Count * 8)
+            {
+                return null;
+            }
+
+            var isParentOfMatch = ((_flags[(int)(flagBitsUsed >> 3)] >> (int)(flagBitsUsed++ & 7)) & 1 ) != 0;
+            if (depth == 0 || !isParentOfMatch)
+            {
+                // If at height 0, or nothing interesting below, use stored hash and do not descend.
+                if (hashesUsed >= _hashes.Count)
+                {
+                    return null;
+                }
+
+                var hash = _hashes[(int)hashesUsed++];
+
+                // In case of height 0, we have a matched txid.
+                if (depth == 0 && isParentOfMatch)
+                {
+                    hashes.Add(hash);
+                }
+                return hash;
+            }
+
+
         }
 
         #endregion
