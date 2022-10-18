@@ -119,6 +119,7 @@ namespace CafeLib.BsvSharp.Chain
                 Convert.ToUInt32(block.header.nonce.ToString()));
 
             var hashes = ((JArray)block.hashes).Select(x => UInt256.FromHex(x.Value<string>())).ToArray();
+            int transactionCount = Convert.ToInt32(block.numTransactions);
 
             var bytes = block.flags is JArray jarray
                 ? jarray.Select(x => Convert.ToByte(x.ToString())).ToArray()
