@@ -27,7 +27,7 @@ namespace CafeLib.BsvSharp.Chain
         }
 
         /// <summary>
-        /// 
+        /// PartialMerkleTree constructor.
         /// </summary>
         /// <param name="vTxId"></param>
         /// <param name="vMatch"></param>
@@ -39,9 +39,7 @@ namespace CafeLib.BsvSharp.Chain
             TransactionCount = (uint)ids.Length;
 
             // calculate height of tree
-            var height = 0;
-            while (CalcTreeWidth(height) > 1)
-                ++height;
+            var height = CalcTreeHeight();
 
             // traverse the partial tree
             TraverseAndBuild(height, 0, ids, vMatch);
