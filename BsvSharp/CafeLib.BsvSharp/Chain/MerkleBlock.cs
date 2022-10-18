@@ -41,11 +41,11 @@ namespace CafeLib.BsvSharp.Chain
                 vHashes.Add(x.TxHash);
             });
 
-            PartialMerkleTree = new PartialMerkleTree(vHashes.ToArray(), vMatch.ToArray());
+            PartialMerkleTree = new PartialMerkleTree(vHashes.Count, vHashes.ToArray(), vMatch.ToArray());
         }
 
         /// <summary>
-        /// 
+        /// MerkleBlock constructor.
         /// </summary>
         /// <param name="block"></param>
         /// <param name="txIds"></param>
@@ -60,7 +60,25 @@ namespace CafeLib.BsvSharp.Chain
                 vMatch.Add(txIds.Contains(hash));
             }
 
-            PartialMerkleTree = new PartialMerkleTree(vHashes.ToArray(), vMatch.ToArray());
+            PartialMerkleTree = new PartialMerkleTree(vHashes.Count, vHashes.ToArray(), vMatch.ToArray());
+        }
+
+        /// <summary>
+        /// MerkleBlock constructor.
+        /// </summary>
+        /// <param name="header"></param>
+        /// <param name="hashes"></param>
+        /// <param name="flags"></param>
+        public MerkleBlock
+        (
+            BlockHeader header,
+            IEnumerable<UInt256> hashes,
+            IEnumerable<bool> flags
+        )
+            : base(header)
+        {
+            var vHashes = hashes.ToArray();
+            PartialMerkleTree = new PartialMerkleTree(vHashes.Length, vHashes, flags.ToArray());
         }
 
         /// <summary>
@@ -72,14 +90,20 @@ namespace CafeLib.BsvSharp.Chain
         public MerkleBlock
         (
             BlockHeader header,
+            int transactionCount,
             IEnumerable<UInt256> txHashes,
             IEnumerable<bool> flags
         )
             : base(header)
         {
-            PartialMerkleTree = new PartialMerkleTree(txHashes.ToArray(), flags.ToArray());
+            PartialMerkleTree = new PartialMerkleTree(transactionCount, txHashes.ToArray(), flags.ToArray());
         }
 
+        /// <summary>
+        /// Create MerkleBlock from JSON layout.
+        /// </summary>
+        /// <param name="json">json layout</param>
+        /// <returns>merkle block</returns>
         public static MerkleBlock FromJson(string json)
         {
             var block = JsonConvert.DeserializeObject<dynamic>(json);
@@ -112,10 +136,10 @@ namespace CafeLib.BsvSharp.Chain
         }
 
         /// <summary>
-        /// 
+        /// Retrieve a collection of filtered transaction hashes.
         /// </summary>
-        /// <returns></returns>
-        public List<UInt256> FilteredTransactionHashes()
+        /// <returns>collection of hashes</returns>
+        public IEnumerable<UInt256> FilteredTransactionHashes()
         {
             return PartialMerkleTree.FilteredHashes();
         }
@@ -146,6 +170,11 @@ namespace CafeLib.BsvSharp.Chain
         }
 
         #region Helpers
+
+        private static PartialMerkleTree CreateTree(int transactionCount, IEnumerable<UInt256> txHashes, IEnumerable<bool> flags)
+        {
+            return new PartialMerkleTree(transactionCount, txHashes.ToArray(), flags.ToArray());
+        }
 
         /// <summary>
         /// Read data from the byte sequence into the block.
