@@ -9,7 +9,7 @@ using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
 
-namespace CafeLib.BsvSharp.Chain.Merkle
+namespace CafeLib.BsvSharp.Chain
 {
     public class BloomFilter // : IBitcoinSerializable
     {
@@ -19,12 +19,12 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         private const decimal Ln2Squared = 0.4804530139182014246671025263266649717305529515945455M;
         private const decimal Ln2 = 0.6931471805599453094172321214581765680755001343602552M;
 
-        byte[] vData;
-        uint nHashFuncs;
-        uint nTweak;
-        byte nFlags;
-        private bool isFull = false;
-        private bool isEmpty;
+        private readonly byte[] _vData;
+        private readonly uint _nHashFuncs;
+        private readonly uint _nTweak;
+        private readonly byte _nFlags;
+        private readonly bool _isFull = false;
+        private bool _isEmpty;
 
         public BloomFilter()
         {
@@ -46,7 +46,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             // The ideal size for a bloom filter with a given number of elements and false positive rate is:
             // - nElements * log(fp rate) / ln(2)^2
             // We ignore filter parameters which will create a bloom filter larger than the protocol limits
-            vData = new byte[Math.Min((uint)(-1 / Ln2Squared * nElements * (decimal)Math.Log(falsePositiveRate)),
+            _vData = new byte[Math.Min((uint)(-1 / Ln2Squared * nElements * (decimal)Math.Log(falsePositiveRate)),
                 MaxBloomFilterSize) / 8];
 
             //vData(min((unsigned int)(-1  / LN2SQUARED * nElements * log(nFPRate)), MAX_BLOOM_FILTER_SIZE * 8) / 8),
@@ -54,44 +54,45 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             // Again, we ignore filter parameters which will create a bloom filter with more hash functions than the protocol limits
             // See http://en.wikipedia.org/wiki/Bloom_filter for an explanation of these formulas
 
-            this.nHashFuncs = Math.Min((uint)(vData.Length * 8M / nElements * Ln2), MaxHashFunctions);
-            this.nTweak = nTweakIn;
-            this.nFlags = (byte)nFlagsIn;
+            _nHashFuncs = Math.Min((uint)(_vData.Length * 8M / nElements * Ln2), MaxHashFunctions);
+            _nTweak = nTweakIn;
+            _nFlags = (byte)nFlagsIn;
         }
 
         private uint Hash(uint nHashNum, byte[] vDataToHash)
         {
             // 0xFBA4C795 chosen as it guarantees a reasonable bit difference between nHashNum values.
-            return (uint)(Hashes.MurmurHash3(nHashNum * 0xFBA4C795 + nTweak, vDataToHash) % (vData.Length * 8));
+            return (uint)(Hashes.MurmurHash3(nHashNum * 0xFBA4C795 + _nTweak, vDataToHash) % (_vData.Length * 8));
         }
 
         public void Insert(byte[] vKey)
         {
-            if (isFull)
+            if (_isFull)
                 return;
-            for (uint i = 0; i < nHashFuncs; i++)
+
+            for (uint i = 0; i < _nHashFuncs; i++)
             {
                 uint nIndex = Hash(i, vKey);
                 // Sets bit nIndex of vData
-                vData[nIndex >> 3] |= (byte)(1 << (7 & (int)nIndex));
+                _vData[nIndex >> 3] |= (byte)(1 << (7 & (int)nIndex));
             }
 
-            isEmpty = false;
+            _isEmpty = false;
         }
 
         public bool Contains(ReadOnlyByteSpan vKey)
         {
-            if (isFull)
+            if (_isFull)
                 return true;
 
-            if (isEmpty)
+            if (_isEmpty)
                 return false;
 
-            for (uint i = 0; i < nHashFuncs; i++)
+            for (uint i = 0; i < _nHashFuncs; i++)
             {
                 uint nIndex = Hash(i, vKey);
                 // Checks bit nIndex of vData
-                if ((vData[nIndex >> 3] & (byte)(1 << (7 & (int)nIndex))) == 0)
+                if ((_vData[nIndex >> 3] & (byte)(1 << (7 & (int)nIndex))) == 0)
                     return false;
             }
 
@@ -108,7 +109,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 
         public bool IsWithinSizeConstraints()
         {
-            return vData.Length <= MaxBloomFilterSize && nHashFuncs <= MaxHashFunctions;
+            return _vData.Length <= MaxBloomFilterSize && _nHashFuncs <= MaxHashFunctions;
         }
 
         //#region IBitcoinSerializable Members
@@ -130,10 +131,10 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 
             // Match if the filter contains the hash of tx
             //  for finding tx when they appear in a block
-            if (isFull)
+            if (_isFull)
                 return true;
 
-            if (isEmpty)
+            if (_isEmpty)
                 return false;
 
             if (Contains(hash))
@@ -148,20 +149,20 @@ namespace CafeLib.BsvSharp.Chain.Merkle
                 if (!x.Script.Decode().Any(op => op.Length != 0 && Contains(op.Data))) return;
 
                 fFound = true;
-                switch (nFlags & (byte)BloomFlags.UPDATE_MASK)
+                switch (_nFlags & (byte)BloomFlags.UPDATE_MASK)
                 {
                     case (byte)BloomFlags.UPDATE_ALL:
                         Insert(new OutPoint(hash, i));
                         break;
 
                     case (byte)BloomFlags.UPDATE_P2PUBKEY_ONLY:
-                    {
-                        var template = StandardScripts.GetTemplateFromScriptPubKey(x.Script);
-                        if (template is { Type: TxOutType.TX_PUBKEY or TxOutType.TX_MULTISIG })
-                            Insert(new OutPoint(hash, i));
+                        {
+                            var template = StandardScripts.GetTemplateFromScriptPubKey(x.Script);
+                            if (template is { Type: TxOutType.TX_PUBKEY or TxOutType.TX_MULTISIG })
+                                Insert(new OutPoint(hash, i));
 
-                        break;
-                    }
+                            break;
+                        }
                 }
             });
 

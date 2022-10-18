@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CafeLib.BsvSharp.Chain.Merkle
+namespace CafeLib.BsvSharp.Chain
 {
     [Flags]
     public enum BloomFlags : byte

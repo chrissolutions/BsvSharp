@@ -9,7 +9,7 @@ using CafeLib.Core.Buffers;
 using CafeLib.Core.Numerics;
 using CafeLib.Cryptography;
 
-namespace CafeLib.BsvSharp.Chain.Merkle
+namespace CafeLib.BsvSharp.Chain
 {
     internal class PartialMerkleTree
     {
@@ -24,7 +24,6 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         public PartialMerkleTree()
         {
             TransactionCount = 0;
-            IsBad = true;
         }
 
         /// <summary>
@@ -41,7 +40,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 
             // calculate height of tree
             var height = 0;
-            while(CalcTreeWidth(height) > 1)
+            while (CalcTreeWidth(height) > 1)
                 ++height;
 
             // traverse the partial tree
@@ -158,9 +157,9 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             var vBytes = new byte[count];
             reader.TryCopyTo(vBytes);
             Flags = new List<bool>();
-            for (var i = 0; i < count*8; i++)
+            for (var i = 0; i < count * 8; i++)
             {
-                Flags.Add((vBytes[i / 8] & (1 << (i % 8))) != 0);
+                Flags.Add((vBytes[i / 8] & 1 << i % 8) != 0);
             }
 
             IsBad = false;
@@ -181,7 +180,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 
             var vBytes = new byte[(Flags.Count + 7) / 8];
             for (var p = 0; p < Flags.Count; p++)
-                vBytes[p / 8] |= (byte)(Convert.ToByte(Flags[p]) << (p % 8));
+                vBytes[p / 8] |= (byte)(Convert.ToByte(Flags[p]) << p % 8);
             writer.Write(new VarInt(vBytes.Length));
             writer.Write(new VarType(vBytes));
             return true;
@@ -233,8 +232,8 @@ namespace CafeLib.BsvSharp.Chain.Merkle
 
             // Calculate right hash if not beyond the end of the array - copy left hash
             // otherwise1.
-            var right = pos * 2 + 1 < CalcTreeWidth(height - 1) 
-                ? CalcHash(height - 1, pos * 2 + 1, vTxId) 
+            var right = pos * 2 + 1 < CalcTreeWidth(height - 1)
+                ? CalcHash(height - 1, pos * 2 + 1, vTxId)
                 : left;
 
             // Combine sub hashes.
@@ -254,7 +253,7 @@ namespace CafeLib.BsvSharp.Chain.Merkle
             {
                 // Determine whether this node is the parent of at least one matched txid.
                 var fParentOfMatch = false;
-                for (var p = pos << height; p < (pos + 1) << height && p < TransactionCount; p++)
+                for (var p = pos << height; p < pos + 1 << height && p < TransactionCount; p++)
                 {
                     fParentOfMatch |= vMatch.ElementAt((int)p);
                 }
@@ -296,15 +295,15 @@ namespace CafeLib.BsvSharp.Chain.Merkle
         /// <returns></returns>
         private UInt256 TraverseAndExtract
         (
-            int height, 
-            uint pos, 
-            ref uint nBitsUsed, 
-            ref uint nHashUsed, 
-            List<UInt256> vMatch, 
+            int height,
+            uint pos,
+            ref uint nBitsUsed,
+            ref uint nHashUsed,
+            List<UInt256> vMatch,
             List<uint> vnIndex
         )
         {
-            if (nBitsUsed >= vMatch.Count)
+            if (nBitsUsed >= Flags.Count)
             {
                 // Overflowed the bits array - failure
                 IsBad = true;

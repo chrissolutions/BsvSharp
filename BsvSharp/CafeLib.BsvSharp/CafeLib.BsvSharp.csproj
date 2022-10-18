@@ -26,6 +26,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Chain\IBlockParser.cs" />
+    <Compile Remove="Chain\MerkleExtensions.cs" />
+    <Compile Remove="Chain\MerkleTree.cs" />
+    <Compile Remove="Chain\MerkleTreeNode.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Mnemonics\Cultures\ChineseSimplified.words" />
     <EmbeddedResource Include="Mnemonics\Cultures\ChineseTraditional.words" />
     <EmbeddedResource Include="Mnemonics\Cultures\English.words" />
