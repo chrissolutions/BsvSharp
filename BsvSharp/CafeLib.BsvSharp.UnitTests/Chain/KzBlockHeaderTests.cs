@@ -19,7 +19,7 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         private static readonly BlockHeader TestNet_86756 = new(
             version: 2,
             prevHash: UInt256.FromHex("000000003c35b5e70b13d5b938fef4e998a977c17bea978390273b7c50a9aa4b"),
-            merkleRootHash: UInt256.FromHex("58e6d52d1eb00470ae1ab4d5a3375c0f51382c6f249fff84e9888286974cfc97"),
+            merkleRoot: UInt256.FromHex("58e6d52d1eb00470ae1ab4d5a3375c0f51382c6f249fff84e9888286974cfc97"),
             timestamp: 1371410638,
             bits: 473956288,
             nonce: 3594009557);
@@ -27,7 +27,7 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         private static readonly BlockHeader TestNet_552065 = new(
             version: 3,
             prevHash: UInt256.FromHex("0000000000001fb81830e9b50a9973b275a843b4158460ac5a5dc53d310c217d"),
-            merkleRootHash: UInt256.FromHex("8dafcc0119abff36c6dcfcbc0520a6395255d08f792b79ce49173c0de6f5ab62"),
+            merkleRoot: UInt256.FromHex("8dafcc0119abff36c6dcfcbc0520a6395255d08f792b79ce49173c0de6f5ab62"),
             timestamp: (uint)DateTime.Parse("2015-09-04 21:26:02").Millisecond,
             bits: 0x1b00c2a8,
             nonce: 163555806);
@@ -86,7 +86,7 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             var header = new BlockHeader(
                 version: 2,
                 prevHash: UInt256.FromHex("000000003c35b5e70b13d5b938fef4e998a977c17bea978390273b7c50a9aa4b"),
-                merkleRootHash: UInt256.FromHex("58e6d52d1eb00470ae1ab4d5a3375c0f51382c6f249fff84e9888286974cfc97"),
+                merkleRoot: UInt256.FromHex("58e6d52d1eb00470ae1ab4d5a3375c0f51382c6f249fff84e9888286974cfc97"),
                 timestamp: 1371410638,
                 bits: 473956288,
                 nonce: 0);

@@ -203,7 +203,7 @@ namespace CafeLib.BsvSharp.Chain
         /// Returns *true* if the Merkle tree remains consistent in spite of missing transactions.
         /// </summary>
         /// <returns></returns>
-        private bool ValidMerkleTree()
+        public bool ValidMerkleTree()
         {
             // Can't have more hashes than numTransactions
             if (_hashes.Count > _numTransactions)
