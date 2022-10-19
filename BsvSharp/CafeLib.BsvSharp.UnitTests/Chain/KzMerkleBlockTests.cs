@@ -5,6 +5,7 @@
 
 using System.Linq;
 using CafeLib.BsvSharp.Chain;
+using CafeLib.Core.Numerics;
 using Xunit;
 
 namespace CafeLib.BsvSharp.UnitTests.Chain
@@ -46,5 +47,17 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             var filteredHashes = merkleBlock.FilteredTransactionHashes();
             Assert.Contains("3612262624047ee87660be1a707519a443b1c1ce3d248cbfc6c15870f6c5daa2", filteredHashes.Select(x => x.ToString()));
         }
+
+        [Fact]
+        public void MerkleBlockDart_FromJson_Test()
+        {
+            var merkleBlock = MerkleBlockDart.FromJson(MainnetBlock100014);
+            Assert.Equal("000000000000b731f2eef9e8c63173adfb07e41bd53eb0ef0a6b720d6cb6dea4", merkleBlock.Hash.ToString());
+
+            var hashOfFilteredTx = UInt256.FromHex("019f5b01d4195ecbc9398fbf3c3b1fa9bb3183301d7a1fb3bd174fcfa40a2b65");
+            var filteredHashes = merkleBlock.FilteredTransactionHashes();
+            Assert.Equal(hashOfFilteredTx, filteredHashes.First());
+        }
+
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
@@ -113,7 +114,7 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         /// <param name="json">json layout</param>
         /// <returns>merkle block</returns>
-        public static MerkleBlock FromJson(string json)
+        public static MerkleBlockDart FromJson(string json)
         {
             var block = JsonConvert.DeserializeObject<dynamic>(json);
             if (block == null) return null;
@@ -130,19 +131,11 @@ namespace CafeLib.BsvSharp.Chain
             var hashes = ((JArray)block.hashes).Select(x => UInt256.FromHex(x.Value<string>())).ToArray();
             int transactionCount = Convert.ToInt32(block.numTransactions);
 
-            var bytes = block.flags is JArray jarray
+            var flags = block.flags is JArray jarray
                 ? jarray.Select(x => Convert.ToByte(x.ToString())).ToArray()
                 : new byte[] { Convert.ToByte(block.flags.ToString()) }.ToArray();
 
-            var bitArray = new BitArray(bytes.ToArray());
-            var flags = new bool[bitArray.Length];
-
-            for (var i = 0; i < bitArray.Length; i++)
-            {
-                flags[i] = ((bitArray[i / 8] ? 1 : 0) & 1 << i % 8) != 0;
-            }
-
-            return new MerkleBlock(header, hashes, flags);
+            return new MerkleBlockDart(header, transactionCount,  hashes, flags);
         }
 
         /// <summary>
@@ -151,7 +144,33 @@ namespace CafeLib.BsvSharp.Chain
         /// <returns>collection of hashes</returns>
         public IEnumerable<UInt256> FilteredTransactionHashes()
         {
-            return PartialMerkleTree.FilteredHashes();
+            // Can't have more hashes than numTransactions
+            if (_hashes.Count > _numTransactions)
+            {
+                throw new MerkleTreeException("Invalid merkle tree - more hashes than transactions");
+            }
+
+            // Can't have more flag bits than num hashes
+            if (_flags.Count * 8 < _hashes.Count)
+            {
+                throw new MerkleTreeException("Invalid merkle tree - more flag bits than hashes");
+            }
+
+            // If there is only one hash the filter do not match any txs in the block
+            if (_hashes.Count == 1)
+            {
+                return Array.Empty<UInt256>();
+            }
+            ;
+            var height = CalcTreeHeight();
+            uint hashesUsed = 0, flagBitsUsed = 0;
+            var result = TraverseMerkleTree(height, 0, ref hashesUsed, ref flagBitsUsed, null, true);
+            if (hashesUsed != _hashes.Count)
+            {
+                throw new MerkleTreeException("Invalid merkle tree");
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -249,19 +268,17 @@ namespace CafeLib.BsvSharp.Chain
 
             var height = CalcTreeHeight();
 
-            //Map<String, dynamic> resultMap = TraverseMerkleTree(height, 0, flagBitsUsed: 0);
             uint flagBitsUsed = 0, hashesUsed = 0;
-            object resultMap = TraverseMerkleTree(height, 0, ref hashesUsed, ref flagBitsUsed, null);
-
-            if (resultMap['hashesUsed'] != hashes.length)
+            var results = TraverseMerkleTree(height, 0, ref hashesUsed, ref flagBitsUsed, null);
+            if (hashesUsed != _hashes.Count)
             {
                 return false;
             }
 
-            return HEX.encode(resultMap['nodeValue']) == HEX.encode(header.merkleRoot);
+            return results.First() == _merkleRoot;
         }
 
-        private object TraverseMerkleTree(int depth, int pos, ref uint hashesUsed, ref uint flagBitsUsed, IList<UInt256> hashes, bool checkForTxs = false)
+        private IList<UInt256> TraverseMerkleTree(int depth, int pos, ref uint hashesUsed, ref uint flagBitsUsed, IList<UInt256> hashes, bool checkForTxs = false)
         {
             hashes ??= new List<UInt256>();
             if (flagBitsUsed > _flags.Count * 8)
@@ -285,10 +302,23 @@ namespace CafeLib.BsvSharp.Chain
                 {
                     hashes.Add(hash);
                 }
-                return hash;
+
+                return new[] { hash };
             }
+            else
+            {
+                var results = TraverseMerkleTree(depth - 1, pos * 2, ref hashesUsed, ref flagBitsUsed, hashes, checkForTxs);
+                var left = results.First();
+                var right = left;
 
+                if (pos * 2 + 1 < CalcTreeWidth(depth - 1))
+                {
+                    results = TraverseMerkleTree(depth - 1, pos * 2 + 1, ref hashesUsed, ref flagBitsUsed, hashes, checkForTxs);
+                    right = results.First();
+                }
 
+                return checkForTxs ? hashes : new[] {Hashes.Hash256(new ByteSpan(left.Span) + right.Span)};
+            }
         }
 
         #endregion
