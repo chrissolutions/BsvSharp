@@ -58,6 +58,5 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             var filteredHashes = merkleBlock.FilteredTransactionHashes();
             Assert.Equal(hashOfFilteredTx, filteredHashes.First());
         }
-
     }
 }

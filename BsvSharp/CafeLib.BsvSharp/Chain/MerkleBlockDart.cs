@@ -21,6 +21,8 @@ namespace CafeLib.BsvSharp.Chain
 
         private PartialMerkleTree PartialMerkleTree { get; init; }
 
+        private PartialMerkleTreeDart PartialMerkleTreeDart { get; init; }
+
         /// <summary>
         /// MerkleBlock default constructor.
         /// </summary>
@@ -73,25 +75,6 @@ namespace CafeLib.BsvSharp.Chain
         /// MerkleBlock constructor.
         /// </summary>
         /// <param name="header"></param>
-        /// <param name="hashes"></param>
-        /// <param name="flags"></param>
-        public MerkleBlockDart
-        (
-            BlockHeader header,
-            IEnumerable<UInt256> hashes,
-            IEnumerable<byte> flags
-        )
-            : base(header)
-        {
-            _hashes = hashes.ToArray();
-            _numTransactions = _hashes.Count;
-            _flags = flags.ToArray();
-        }
-
-        /// <summary>
-        /// MerkleBlock constructor.
-        /// </summary>
-        /// <param name="header"></param>
         /// <param name="transactionCount"></param>
         /// <param name="hashes"></param>
         /// <param name="flags"></param>
@@ -107,6 +90,8 @@ namespace CafeLib.BsvSharp.Chain
             _numTransactions = transactionCount;
             _hashes = hashes.ToArray();
             _flags = flags.ToArray();
+
+            PartialMerkleTreeDart = new PartialMerkleTreeDart(transactionCount, _hashes, _flags);
         }
 
         /// <summary>
@@ -135,43 +120,14 @@ namespace CafeLib.BsvSharp.Chain
                 ? jarray.Select(x => Convert.ToByte(x.ToString())).ToArray()
                 : new byte[] { Convert.ToByte(block.flags.ToString()) }.ToArray();
 
-            return new MerkleBlockDart(header, transactionCount,  hashes, flags);
+            return new MerkleBlockDart(header, transactionCount, hashes, flags);
         }
 
         /// <summary>
         /// Retrieve a collection of filtered transaction hashes.
         /// </summary>
         /// <returns>collection of hashes</returns>
-        public IEnumerable<UInt256> FilteredTransactionHashes()
-        {
-            // Can't have more hashes than numTransactions
-            if (_hashes.Count > _numTransactions)
-            {
-                throw new MerkleTreeException("Invalid merkle tree - more hashes than transactions");
-            }
-
-            // Can't have more flag bits than num hashes
-            if (_flags.Count * 8 < _hashes.Count)
-            {
-                throw new MerkleTreeException("Invalid merkle tree - more flag bits than hashes");
-            }
-
-            // If there is only one hash the filter do not match any txs in the block
-            if (_hashes.Count == 1)
-            {
-                return Array.Empty<UInt256>();
-            }
-            ;
-            var height = CalcTreeHeight();
-            uint hashesUsed = 0, flagBitsUsed = 0;
-            var result = TraverseMerkleTree(height, 0, ref hashesUsed, ref flagBitsUsed, null, true);
-            if (hashesUsed != _hashes.Count)
-            {
-                throw new MerkleTreeException("Invalid merkle tree");
-            }
-
-            return result;
-        }
+        public IEnumerable<UInt256> FilteredTransactionHashes() => PartialMerkleTreeDart.FilteredHashes();
 
         /// <summary>
         /// Deserialize block.
@@ -199,11 +155,6 @@ namespace CafeLib.BsvSharp.Chain
         }
 
         #region Helpers
-
-        private static PartialMerkleTree CreateTree(int transactionCount, IEnumerable<UInt256> txHashes, IEnumerable<bool> flags)
-        {
-            return new PartialMerkleTree(transactionCount, txHashes.ToArray(), flags.ToArray());
-        }
 
         /// <summary>
         /// Read data from the byte sequence into the block.
@@ -286,7 +237,7 @@ namespace CafeLib.BsvSharp.Chain
                 return null;
             }
 
-            var isParentOfMatch = ((_flags[(int)(flagBitsUsed >> 3)] >> (int)(flagBitsUsed++ & 7)) & 1 ) != 0;
+            var isParentOfMatch = ((_flags[(int)(flagBitsUsed >> 3)] >> (int)(flagBitsUsed++ & 7)) & 1) != 0;
             if (depth == 0 || !isParentOfMatch)
             {
                 // If at height 0, or nothing interesting below, use stored hash and do not descend.
@@ -317,7 +268,7 @@ namespace CafeLib.BsvSharp.Chain
                     right = results.First();
                 }
 
-                return checkForTxs ? hashes : new[] {Hashes.Hash256(new ByteSpan(left.Span) + right.Span)};
+                return checkForTxs ? hashes : new[] { Hashes.Hash256(new ByteSpan(left.Span) + right.Span) };
             }
         }
 
