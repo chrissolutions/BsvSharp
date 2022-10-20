@@ -14,7 +14,7 @@ using Newtonsoft.Json.Linq;
 
 namespace CafeLib.BsvSharp.Chain
 {
-    public record MerkleBlockDart : BlockHeader
+    public record MerkleBlock : BlockHeader
     {
         private int _numTransactions;
         private IList<UInt256> _hashes;
@@ -22,12 +22,10 @@ namespace CafeLib.BsvSharp.Chain
 
         private PartialMerkleTree PartialMerkleTree { get; init; }
 
-        private PartialMerkleTreeDart PartialMerkleTreeDart { get; init; }
-
         /// <summary>
         /// MerkleBlock default constructor.
         /// </summary>
-        public MerkleBlockDart()
+        public MerkleBlock()
         {
         }
 
@@ -38,7 +36,7 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         /// <param name="block">block</param>
         /// <param name="filter">bloom filter</param>
-        public MerkleBlockDart(Block block, BloomFilter filter)
+        public MerkleBlock(Block block, BloomFilter filter)
             : base(block)
         {
             var vMatch = new List<bool>();
@@ -57,7 +55,7 @@ namespace CafeLib.BsvSharp.Chain
                 flags[i] = (byte)((bitArray[i / 8] ? 1 : 0) & 1 << i % 8);
             }
 
-            PartialMerkleTreeDart = new PartialMerkleTreeDart(vHashes.Count, vHashes.ToArray(), flags);
+            PartialMerkleTree = new PartialMerkleTree(vHashes.Count, vHashes.ToArray(), flags);
         }
 
         /// <summary>
@@ -65,7 +63,7 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         /// <param name="block"></param>
         /// <param name="txIds"></param>
-        public MerkleBlockDart(Block block, UInt256[] txIds)
+        public MerkleBlock(Block block, UInt256[] txIds)
             : base(block)
         {
             var vMatch = new List<bool>();
@@ -83,7 +81,7 @@ namespace CafeLib.BsvSharp.Chain
                 flags[i] = (byte)((bitArray[i / 8] ? 1 : 0) & 1 << i % 8);
             }
 
-            PartialMerkleTreeDart = new PartialMerkleTreeDart(vHashes.Count, vHashes.ToArray(), flags);
+            PartialMerkleTree = new PartialMerkleTree(vHashes.Count, vHashes.ToArray(), flags);
         }
 
         /// <summary>
@@ -93,7 +91,7 @@ namespace CafeLib.BsvSharp.Chain
         /// <param name="transactionCount"></param>
         /// <param name="hashes"></param>
         /// <param name="flags"></param>
-        public MerkleBlockDart
+        public MerkleBlock
         (
             BlockHeader header,
             int transactionCount,
@@ -106,7 +104,7 @@ namespace CafeLib.BsvSharp.Chain
             _hashes = hashes.ToArray();
             _flags = flags.ToArray();
 
-            PartialMerkleTreeDart = new PartialMerkleTreeDart(transactionCount, _hashes, _flags);
+            PartialMerkleTree = new PartialMerkleTree(transactionCount, _hashes, _flags);
         }
 
         /// <summary>
@@ -114,7 +112,7 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         /// <param name="json">json layout</param>
         /// <returns>merkle block</returns>
-        public static MerkleBlockDart FromJson(string json)
+        public static MerkleBlock FromJson(string json)
         {
             var block = JsonConvert.DeserializeObject<dynamic>(json);
             if (block == null) return null;
@@ -135,14 +133,14 @@ namespace CafeLib.BsvSharp.Chain
                 ? jarray.Select(x => Convert.ToByte(x.ToString())).ToArray()
                 : new byte[] { Convert.ToByte(block.flags.ToString()) }.ToArray();
 
-            return new MerkleBlockDart(header, transactionCount, hashes, flags);
+            return new MerkleBlock(header, transactionCount, hashes, flags);
         }
 
         /// <summary>
         /// Retrieve a collection of filtered transaction hashes.
         /// </summary>
         /// <returns>collection of hashes</returns>
-        public IEnumerable<UInt256> FilteredTransactionHashes() => PartialMerkleTreeDart.FilteredHashes();
+        public IEnumerable<UInt256> FilteredTransactionHashes() => PartialMerkleTree.FilteredHashes();
 
         /// <summary>
         /// Deserialize block.

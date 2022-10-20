@@ -11,7 +11,7 @@ using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Chain
 {
-    internal class PartialMerkleTreeDart
+    internal class PartialMerkleTree
     {
         protected uint TransactionCount { get; private set; }
 
@@ -21,7 +21,7 @@ namespace CafeLib.BsvSharp.Chain
 
         public bool IsBad { get; private set; }
 
-        public PartialMerkleTreeDart()
+        public PartialMerkleTree()
         {
             TransactionCount = 0;
         }
@@ -33,7 +33,7 @@ namespace CafeLib.BsvSharp.Chain
         /// <param name="hashes"></param>
         /// <param name="flags"></param>
         /// <exception cref="ArgumentException"></exception>
-        public PartialMerkleTreeDart(int transactionCount, IList<UInt256> hashes, IList<byte> flags)
+        public PartialMerkleTree(int transactionCount, IList<UInt256> hashes, IList<byte> flags)
             : this()
         {
             TransactionCount = (uint)transactionCount;
