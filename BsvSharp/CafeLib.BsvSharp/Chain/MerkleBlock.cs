@@ -143,6 +143,12 @@ namespace CafeLib.BsvSharp.Chain
         public IEnumerable<UInt256> FilteredTransactionHashes() => PartialMerkleTree.FilteredHashes();
 
         /// <summary>
+        /// Returns *true* if the Merkle tree remains consistent in spite of missing transactions.
+        /// </summary>
+        /// <returns></returns>
+        public bool ValidMerkleTree() => PartialMerkleTree.GetMerkleRoot() == MerkleRoot;
+
+        /// <summary>
         /// Deserialize block.
         /// </summary>
         /// <param name="sequence">byte sequence</param>
@@ -210,36 +216,6 @@ namespace CafeLib.BsvSharp.Chain
         private int CalcTreeWidth(int height)
         {
             return (_numTransactions + (1 << height) - 1) >> height;
-        }
-
-        /// <summary>
-        /// Returns *true* if the Merkle tree remains consistent in spite of missing transactions.
-        /// </summary>
-        /// <returns></returns>
-        public bool ValidMerkleTree()
-        {
-            // Can't have more hashes than numTransactions
-            if (_hashes.Count > _numTransactions)
-            {
-                return false;
-            }
-
-            // Can't have more flag bits than num hashes
-            if (_flags.Count * 8 < _hashes.Count)
-            {
-                return false;
-            }
-
-            var height = CalcTreeHeight();
-
-            uint flagBitsUsed = 0, hashesUsed = 0;
-            var results = TraverseMerkleTree(height, 0, ref hashesUsed, ref flagBitsUsed, null);
-            if (hashesUsed != _hashes.Count)
-            {
-                return false;
-            }
-
-            return results.First().Reverse() == _merkleRoot;
         }
 
         private IList<UInt256> TraverseMerkleTree(int depth, int pos, ref uint hashesUsed, ref uint flagBitsUsed, IList<UInt256> hashes, bool checkForTxs = false)

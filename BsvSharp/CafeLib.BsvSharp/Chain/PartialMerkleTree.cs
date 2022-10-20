@@ -60,7 +60,7 @@ namespace CafeLib.BsvSharp.Chain
             {
                 return Array.Empty<UInt256>().ToList();
             }
-            ;
+
             var height = CalcTreeHeight();
             uint hashesUsed = 0, flagBitsUsed = 0;
             var result = TraverseMerkleTree(height, 0, ref hashesUsed, ref flagBitsUsed, null, true);
@@ -73,10 +73,10 @@ namespace CafeLib.BsvSharp.Chain
         }
 
         /// <summary>
-        /// Returns *true* if the Merkle tree remains consistent in spite of missing transactions.
+        /// Returns the Merkle root hash.
         /// </summary>
         /// <returns></returns>
-        private UInt256 GetMerkleRoot()
+        public UInt256 GetMerkleRoot()
         {
             // Can't have more hashes than numTransactions
             if (TransactionHashes.Count > TransactionCount)
@@ -94,7 +94,7 @@ namespace CafeLib.BsvSharp.Chain
 
             uint flagBitsUsed = 0, hashesUsed = 0;
             var results = TraverseMerkleTree(height, 0, ref hashesUsed, ref flagBitsUsed, null);
-            return hashesUsed != TransactionHashes.Count ? UInt256.Zero : results.First();
+            return hashesUsed != TransactionHashes.Count ? UInt256.Zero : results.First().Reverse();
         }
 
         /// <summary>
