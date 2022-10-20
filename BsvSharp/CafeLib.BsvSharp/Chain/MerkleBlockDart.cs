@@ -50,7 +50,14 @@ namespace CafeLib.BsvSharp.Chain
                 vHashes.Add(x.TxHash);
             });
 
-            PartialMerkleTree = new PartialMerkleTree(vHashes.Count, vHashes.ToArray(), vMatch.ToArray());
+            var bitArray = new BitArray(vMatch.ToArray());
+            var flags = new byte[bitArray.Length];
+            for (var i = 0; i < bitArray.Length; i++)
+            {
+                flags[i] = (byte)((bitArray[i / 8] ? 1 : 0) & 1 << i % 8);
+            }
+
+            PartialMerkleTreeDart = new PartialMerkleTreeDart(vHashes.Count, vHashes.ToArray(), flags);
         }
 
         /// <summary>
@@ -69,7 +76,14 @@ namespace CafeLib.BsvSharp.Chain
                 vMatch.Add(txIds.Contains(hash));
             }
 
-            PartialMerkleTree = new PartialMerkleTree(vHashes.Count, vHashes.ToArray(), vMatch.ToArray());
+            var bitArray = new BitArray(vMatch.ToArray());
+            var flags = new byte[bitArray.Length];
+            for (var i = 0; i < bitArray.Length; i++)
+            {
+                flags[i] = (byte)((bitArray[i / 8] ? 1 : 0) & 1 << i % 8);
+            }
+
+            PartialMerkleTreeDart = new PartialMerkleTreeDart(vHashes.Count, vHashes.ToArray(), flags);
         }
 
         /// <summary>
