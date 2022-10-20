@@ -57,8 +57,13 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             var hashOfFilteredTx = UInt256.FromHex("019f5b01d4195ecbc9398fbf3c3b1fa9bb3183301d7a1fb3bd174fcfa40a2b65");
             var filteredHashes = merkleBlock.FilteredTransactionHashes();
             Assert.Equal(hashOfFilteredTx, filteredHashes.First());
+        }
+
+        [Fact] public void MerkleBlockDart_ValidateTree_Test()
+        {
+            var merkleBlock = MerkleBlockDart.FromJson(MainnetBlock100014);
             var result = merkleBlock.ValidMerkleTree();
-            Assert.False(result);
+            Assert.True(result);
         }
     }
 }

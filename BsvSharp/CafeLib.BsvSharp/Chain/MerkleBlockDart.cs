@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
 using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
@@ -226,7 +227,7 @@ namespace CafeLib.BsvSharp.Chain
                 return false;
             }
 
-            return results.First() == _merkleRoot;
+            return results.First().Reverse() == _merkleRoot;
         }
 
         private IList<UInt256> TraverseMerkleTree(int depth, int pos, ref uint hashesUsed, ref uint flagBitsUsed, IList<UInt256> hashes, bool checkForTxs = false)
@@ -268,7 +269,7 @@ namespace CafeLib.BsvSharp.Chain
                     right = results.First();
                 }
 
-                return checkForTxs ? hashes : new[] { Hashes.Hash256(new ByteSpan(left.Span) + right.Span) };
+                return checkForTxs ? hashes : new[] { Hashes.Hash256(new ByteSpan(left.Reverse().Span) + right.Reverse().Span).Reverse() };
             }
         }
 

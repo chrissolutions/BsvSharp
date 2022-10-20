@@ -212,7 +212,7 @@ namespace CafeLib.BsvSharp.Chain
                 right = results.First();
             }
 
-            return checkForTxs ? hashes : new[] { Hashes.Hash256(new ByteSpan(left.Span) + right.Span) };
+            return checkForTxs ? hashes : new[] { Hashes.Hash256(new ByteSpan(left.Reverse().Span) + right.Reverse().Span).Reverse() };
         }
 
         #endregion

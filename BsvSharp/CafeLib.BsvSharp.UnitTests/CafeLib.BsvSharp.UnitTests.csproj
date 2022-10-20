@@ -27,4 +27,6 @@
     <Folder Include="Encode\" />
   </ItemGroup>
 
+  <ProjectExtensions><VisualStudio><UserProperties data_4script_3tests_1json__JsonSchema="https://beaujs.com/schema.json" /></VisualStudio></ProjectExtensions>
+
 </Project>
