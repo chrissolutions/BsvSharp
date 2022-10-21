@@ -14,10 +14,6 @@ namespace CafeLib.BsvSharp.Chain
 {
     public record MerkleBlock : BlockHeader
     {
-        private int _numTransactions;
-        private IList<UInt256> _hashes;
-        private IList<byte> _flags;
-
         private PartialMerkleTree PartialMerkleTree { get; init; }
 
         /// <summary>
@@ -98,11 +94,7 @@ namespace CafeLib.BsvSharp.Chain
         )
             : base(header)
         {
-            _numTransactions = transactionCount;
-            _hashes = hashes.ToArray();
-            _flags = flags.ToArray();
-
-            PartialMerkleTree = new PartialMerkleTree(transactionCount, _hashes, _flags);
+            PartialMerkleTree = new PartialMerkleTree(transactionCount, hashes.ToArray(), flags.ToArray());
         }
 
         /// <summary>
@@ -190,73 +182,6 @@ namespace CafeLib.BsvSharp.Chain
         private bool TrySerializeBlock(IDataWriter writer)
         {
             return TrySerializeHeader(writer) && PartialMerkleTree.Serialize(writer);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        private int CalcTreeHeight()
-        {
-            var height = 0;
-            while (CalcTreeWidth(height) > 1)
-            {
-                height++;
-            }
-            return height;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="height"></param>
-        /// <returns></returns>
-        private int CalcTreeWidth(int height)
-        {
-            return (_numTransactions + (1 << height) - 1) >> height;
-        }
-
-        private IList<UInt256> TraverseMerkleTree(int depth, int pos, ref uint hashesUsed, ref uint flagBitsUsed, IList<UInt256> hashes, bool checkForTxs = false)
-        {
-            hashes ??= new List<UInt256>();
-            if (flagBitsUsed > _flags.Count * 8)
-            {
-                return null;
-            }
-
-            var isParentOfMatch = ((_flags[(int)(flagBitsUsed >> 3)] >> (int)(flagBitsUsed++ & 7)) & 1) != 0;
-            if (depth == 0 || !isParentOfMatch)
-            {
-                // If at height 0, or nothing interesting below, use stored hash and do not descend.
-                if (hashesUsed >= _hashes.Count)
-                {
-                    return null;
-                }
-
-                var hash = _hashes[(int)hashesUsed++];
-
-                // In case of height 0, we have a matched txid.
-                if (depth == 0 && isParentOfMatch)
-                {
-                    hashes.Add(hash);
-                }
-
-                return new[] { hash };
-            }
-            else
-            {
-                var results = TraverseMerkleTree(depth - 1, pos * 2, ref hashesUsed, ref flagBitsUsed, hashes, checkForTxs);
-                var left = results.First();
-                var right = left;
-
-                if (pos * 2 + 1 < CalcTreeWidth(depth - 1))
-                {
-                    results = TraverseMerkleTree(depth - 1, pos * 2 + 1, ref hashesUsed, ref flagBitsUsed, hashes, checkForTxs);
-                    right = results.First();
-                }
-
-                return checkForTxs ? hashes : new[] { Hashes.Hash256(new ByteSpan(left.Reverse().Span) + right.Reverse().Span).Reverse() };
-            }
         }
 
         #endregion
