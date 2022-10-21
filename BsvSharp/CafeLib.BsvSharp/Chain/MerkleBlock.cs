@@ -6,7 +6,6 @@ using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
 using CafeLib.Core.Numerics;
-using CafeLib.Cryptography;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
