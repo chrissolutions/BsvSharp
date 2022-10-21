@@ -115,16 +115,10 @@ namespace CafeLib.BsvSharp.Chain
                 TransactionHashes.Add(hash);
             }
 
-            //if (!reader.TryReadVariant(out count)) return false;
-            //var vBytes = new byte[count];
-            //reader.TryCopyTo(vBytes);
-            //Flags = new List<bool>();
-            //for (var i = 0; i < count * 8; i++)
-            //{
-            //    Flags.Add((vBytes[i / 8] & 1 << i % 8) != 0);
-            //}
-
-            IsBad = false;
+            if (!reader.TryReadVariant(out count)) return false;
+            var vBytes = new byte[count];
+            IsBad = !reader.TryCopyTo(vBytes);
+            Flags = vBytes;
             return !IsBad;
         }
 
@@ -135,16 +129,13 @@ namespace CafeLib.BsvSharp.Chain
         public bool Serialize(IDataWriter writer)
         {
             writer.Write(new VarInt(TransactionCount));
-            foreach (var t in TransactionHashes)
+            foreach (var hash in TransactionHashes)
             {
-                writer.Write(t);
+                writer.Write(hash);
             }
 
-            var vBytes = new byte[(Flags.Count + 7) / 8];
-            for (var p = 0; p < Flags.Count; p++)
-                vBytes[p / 8] |= (byte)(Convert.ToByte(Flags[p]) << p % 8);
-            writer.Write(new VarInt(vBytes.Length));
-            writer.Write(new VarType(vBytes));
+            writer.Write(new VarInt(Flags.Count));
+            writer.Write(new VarType(Flags.ToArray()));
             return true;
         }
 
