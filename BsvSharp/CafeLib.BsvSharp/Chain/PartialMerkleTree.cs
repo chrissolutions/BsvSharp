@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.PortableExecutable;
 using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Numerics;
@@ -16,9 +15,9 @@ namespace CafeLib.BsvSharp.Chain
     {
         protected uint TransactionCount { get; private set; }
 
-        protected IList<UInt256> TransactionHashes { get; }
+        protected IList<UInt256> TransactionHashes { get; private set; }
 
-        protected IList<byte> Flags { get; set; }
+        protected IList<byte> Flags { get; private set; }
 
         public bool IsBad { get; private set; }
 
@@ -106,18 +105,20 @@ namespace CafeLib.BsvSharp.Chain
         ///
         public bool Deserialize(ref ByteSequenceReader reader)
         {
-            if (!reader.TryReadVariant(out var count)) return false;
-            TransactionCount = (uint)count;
+            if (!reader.TryReadLittleEndian(out uint count)) return false;
+            TransactionCount = count;
 
-            for (var i = 0; i < TransactionCount; i++)
+            if (!reader.TryReadVariant(out var numHashes)) return false;
+            TransactionHashes = new List<UInt256>();
+            for (var i = 0; i < numHashes; i++)
             {
                 var hash = UInt256.Zero;
-                if (reader.TryReadUInt256(ref hash)) return false;
-                TransactionHashes.Add(hash);
+                if (!reader.TryReadUInt256(ref hash)) return false;
+                TransactionHashes.Add(hash.Reverse());
             }
 
-            if (!reader.TryReadVariant(out count)) return false;
-            var vBytes = new byte[count];
+            if (!reader.TryReadVariant(out var numFlags)) return false;
+            var vBytes = new byte[numFlags];
             IsBad = !reader.TryCopyTo(vBytes);
             Flags = vBytes;
             return !IsBad;

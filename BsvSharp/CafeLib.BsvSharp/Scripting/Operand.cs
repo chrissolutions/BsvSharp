@@ -196,7 +196,7 @@ namespace CafeLib.BsvSharp.Scripting
             Code = Opcode.OP_INVALIDOPCODE;
             Data = VarType.Empty;
 
-            if (!r.TryRead(out var opcode)) goto fail;
+            if (!r.TryRead(out byte opcode)) goto fail;
 
             Code = (Opcode)opcode;
 

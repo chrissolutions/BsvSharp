@@ -2,6 +2,7 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
+using System;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.Core.Buffers;
@@ -49,29 +50,13 @@ namespace CafeLib.BsvSharp.Persistence
             return this;
         }
 
-        public IDataWriter Write(int v)
-        {
-            _buffer.Add(v.AsReadOnlySpan());
-            return this;
-        }
+        public IDataWriter Write(int v) => WriteBytes(v.AsReadOnlySpan());
 
-        public IDataWriter Write(uint v)
-        {
-            _buffer.Add(v.AsReadOnlySpan());
-            return this;
-        }
+        public IDataWriter Write(uint v) => WriteBytes(v.AsReadOnlySpan());
 
-        public IDataWriter Write(long v)
-        {
-            _buffer.Add(v.AsReadOnlySpan());
-            return this;
-        }
+        public IDataWriter Write(long v) => WriteBytes(v.AsReadOnlySpan());
 
-        public IDataWriter Write(ulong v)
-        {
-            _buffer.Add(v.AsReadOnlySpan());
-            return this;
-        }
+        public IDataWriter Write(ulong v) => WriteBytes(v.AsReadOnlySpan());
 
         public IDataWriter Write(string data)
         {
@@ -96,5 +81,26 @@ namespace CafeLib.BsvSharp.Persistence
             _buffer.Add(v.Span);
             return this;
         }
+
+        #region Helpers
+
+        private IDataWriter WriteBytes(ReadOnlyByteSpan span)
+        {
+            if (BitConverter.IsLittleEndian)
+            {
+                _buffer.Add(span);
+            }
+            else
+            {
+                var bytes = new byte[span.Length];
+                span.CopyTo(bytes);
+                Array.Reverse(bytes);
+                _buffer.Add(bytes);
+            }
+
+            return this;
+        }
+
+        #endregion
     }
 }

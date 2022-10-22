@@ -118,7 +118,7 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         /// <param name="hex">hex layout</param>
         /// <returns>merkle block</returns>
-        public static new MerkleBlock FromHex(string hex)
+        public new static MerkleBlock FromHex(string hex)
         {
             return FromBytes(Encoders.Hex.Decode(hex));
         }
