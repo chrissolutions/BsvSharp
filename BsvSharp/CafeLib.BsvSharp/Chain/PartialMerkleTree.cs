@@ -7,7 +7,6 @@ using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Numerics;
-using CafeLib.Cryptography;
 
 namespace CafeLib.BsvSharp.Chain
 {
@@ -15,7 +14,7 @@ namespace CafeLib.BsvSharp.Chain
     {
         protected uint TransactionCount { get; private set; }
 
-        protected IList<UInt256> TransactionHashes { get; private set; }
+        protected IList<UInt256> Hashes { get; private set; }
 
         protected IList<byte> Flags { get; private set; }
 
@@ -37,26 +36,26 @@ namespace CafeLib.BsvSharp.Chain
             : this()
         {
             TransactionCount = (uint)transactionCount;
-            TransactionHashes = hashes ?? new List<UInt256>();
+            Hashes = hashes ?? new List<UInt256>();
             Flags = flags ?? new List<byte>();
         }
 
         public IList<UInt256> FilteredHashes()
         {
             // Can't have more hashes than numTransactions
-            if (TransactionHashes.Count > TransactionCount)
+            if (Hashes.Count > TransactionCount)
             {
                 throw new MerkleTreeException("Invalid merkle tree - more hashes than transactions");
             }
 
             // Can't have more flag bits than num hashes
-            if (Flags.Count * 8 < TransactionHashes.Count)
+            if (Flags.Count * 8 < Hashes.Count)
             {
                 throw new MerkleTreeException("Invalid merkle tree - more flag bits than hashes");
             }
 
             // If there is only one hash the filter do not match any txs in the block
-            if (TransactionHashes.Count == 1)
+            if (Hashes.Count == 1)
             {
                 return Array.Empty<UInt256>().ToList();
             }
@@ -64,7 +63,7 @@ namespace CafeLib.BsvSharp.Chain
             var height = CalcTreeHeight();
             uint hashesUsed = 0, flagBitsUsed = 0;
             var result = TraverseMerkleTree(height, 0, ref hashesUsed, ref flagBitsUsed, null, true);
-            if (hashesUsed != TransactionHashes.Count)
+            if (hashesUsed != Hashes.Count)
             {
                 throw new MerkleTreeException("Invalid merkle tree");
             }
@@ -79,13 +78,13 @@ namespace CafeLib.BsvSharp.Chain
         public UInt256 GetMerkleRoot()
         {
             // Can't have more hashes than numTransactions
-            if (TransactionHashes.Count > TransactionCount)
+            if (Hashes.Count > TransactionCount)
             {
                 return UInt256.Zero;
             }
 
             // Can't have more flag bits than num hashes
-            if (Flags.Count * 8 < TransactionHashes.Count)
+            if (Flags.Count * 8 < Hashes.Count)
             {
                 return UInt256.Zero;
             }
@@ -94,7 +93,7 @@ namespace CafeLib.BsvSharp.Chain
 
             uint flagBitsUsed = 0, hashesUsed = 0;
             var results = TraverseMerkleTree(height, 0, ref hashesUsed, ref flagBitsUsed, null);
-            return hashesUsed != TransactionHashes.Count ? UInt256.Zero : results.First().Reverse();
+            return hashesUsed != Hashes.Count ? UInt256.Zero : results.First().Reverse();
         }
 
         /// <summary>
@@ -109,12 +108,12 @@ namespace CafeLib.BsvSharp.Chain
             TransactionCount = count;
 
             if (!reader.TryReadVariant(out var numHashes)) return false;
-            TransactionHashes = new List<UInt256>();
+            Hashes = new List<UInt256>();
             for (var i = 0; i < numHashes; i++)
             {
                 var hash = UInt256.Zero;
                 if (!reader.TryReadUInt256(ref hash)) return false;
-                TransactionHashes.Add(hash.Reverse());
+                Hashes.Add(hash.Reverse());
             }
 
             if (!reader.TryReadVariant(out var numFlags)) return false;
@@ -131,8 +130,8 @@ namespace CafeLib.BsvSharp.Chain
         public bool Serialize(IDataWriter writer)
         {
             writer.Write(TransactionCount);
-            writer.Write(new VarInt(TransactionHashes.Count));
-            foreach (var hash in TransactionHashes)
+            writer.Write(new VarInt(Hashes.Count));
+            foreach (var hash in Hashes)
             {
                 writer.Write(hash.Reverse());
             }
@@ -184,12 +183,12 @@ namespace CafeLib.BsvSharp.Chain
             if (depth == 0 || !isParentOfMatch)
             {
                 // If at height 0, or nothing interesting below, use stored hash and do not descend.
-                if (hashesUsed >= TransactionHashes.Count)
+                if (hashesUsed >= Hashes.Count)
                 {
                     return null;
                 }
 
-                var hash = TransactionHashes[(int)hashesUsed++];
+                var hash = Hashes[(int)hashesUsed++];
 
                 // In case of height 0, we have a matched txid.
                 if (depth == 0 && isParentOfMatch)
@@ -210,7 +209,7 @@ namespace CafeLib.BsvSharp.Chain
                 right = results.First();
             }
 
-            return checkForTxs ? hashes : new[] { Hashes.Hash256(new ByteSpan(left.Reverse().Span) + right.Reverse().Span).Reverse() };
+            return checkForTxs ? hashes : new[] { Cryptography.Hashes.Hash256(new ByteSpan(left.Reverse().Span) + right.Reverse().Span).Reverse() };
         }
 
         #endregion
