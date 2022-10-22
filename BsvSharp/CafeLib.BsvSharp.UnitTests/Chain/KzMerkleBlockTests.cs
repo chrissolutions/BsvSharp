@@ -5,6 +5,7 @@
 
 using System.Linq;
 using CafeLib.BsvSharp.Chain;
+using CafeLib.Core.Encodings;
 using CafeLib.Core.Numerics;
 using Xunit;
 
@@ -12,6 +13,8 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
 {
     public partial class KzMerkleBlockTests
     {
+        private static HexEncoder Hex = new ();
+
         [Fact]
         public void MerkleBlock_FromJson_Test()
         {
@@ -30,11 +33,22 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             Assert.Equal(hashOfFilteredTx, filteredHashes.First());
         }
 
-        [Fact] public void MerkleBlock_ValidateTree_Test()
+        [Fact] 
+        public void MerkleBlock_ValidateTree_Test()
         {
             var merkleBlock = MerkleBlock.FromJson(MainnetBlock100014);
             var result = merkleBlock.ValidMerkleTree();
             Assert.True(result);
+        }
+
+        [Fact]
+        public void MerkleBlock_Serialize_Test()
+        {
+            var merkleBlock = MerkleBlock.FromJson(MainnetBlock100014);
+            var buffer = merkleBlock.Serialize().ToArray();
+            //var hex = Hex.Encode(buffer);
+            var hex = Hex.Decode(MainnetBlock100014Hex);
+            Assert.Equal(hex, buffer);
         }
     }
 }
