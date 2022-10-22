@@ -133,7 +133,7 @@ namespace CafeLib.BsvSharp.Chain
             writer.Write(new VarInt(TransactionHashes.Count));
             foreach (var hash in TransactionHashes)
             {
-                writer.Write(hash);
+                writer.Write(hash.Reverse());
             }
 
             writer.Write(new VarInt(Flags.Count));
