@@ -59,7 +59,6 @@ namespace CafeLib.BsvSharp.Chain
             Transactions = new TransactionList(txs);
         }
 
-
         /// <summary>
         /// Create block from bytes.
         /// </summary>

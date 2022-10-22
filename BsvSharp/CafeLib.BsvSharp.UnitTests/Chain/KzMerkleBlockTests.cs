@@ -42,13 +42,21 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
         }
 
         [Fact]
+        public void MerkleBlock_FromBuffer_Test()
+        {
+            var merkleBlock = MerkleBlock.FromHex(MainnetBlock100014Hex);
+            var buffer = merkleBlock.Serialize().ToArray();
+            var bytes = Hex.Decode(MainnetBlock100014Hex);
+            Assert.Equal(bytes, buffer);
+        }
+
+        [Fact]
         public void MerkleBlock_Serialize_Test()
         {
             var merkleBlock = MerkleBlock.FromJson(MainnetBlock100014);
             var buffer = merkleBlock.Serialize().ToArray();
-            //var hex = Hex.Encode(buffer);
-            var hex = Hex.Decode(MainnetBlock100014Hex);
-            Assert.Equal(hex, buffer);
+            var bytes = Hex.Decode(MainnetBlock100014Hex);
+            Assert.Equal(bytes, buffer);
         }
     }
 }

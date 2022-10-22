@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using CafeLib.BsvSharp.Encoding;
+using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.Core.Buffers;
 using CafeLib.Core.Extensions;
@@ -20,6 +22,7 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         public MerkleBlock()
         {
+            PartialMerkleTree = new();
         }
 
         /// <summary>
@@ -94,6 +97,30 @@ namespace CafeLib.BsvSharp.Chain
             : base(header)
         {
             PartialMerkleTree = new PartialMerkleTree(transactionCount, hashes.ToArray(), flags.ToArray());
+        }
+
+        /// <summary>
+        /// Create MerkleBlock from bytes.
+        /// </summary>
+        /// <param name="bytes">bytes layout</param>
+        /// <returns>merkle block</returns>
+        /// <exception cref="BlockException"></exception>
+        public static MerkleBlock FromBytes(byte[] bytes)
+        {
+            var block = new MerkleBlock();
+            var ros = new ReadOnlyByteSequence(bytes);
+            var ok = block.Deserialize(ref ros);
+            return ok ? block : throw new BlockException(nameof(bytes));
+        }
+
+        /// <summary>
+        /// Create MerkleBlock from hexadecimal layout.
+        /// </summary>
+        /// <param name="hex">hex layout</param>
+        /// <returns>merkle block</returns>
+        public static new MerkleBlock FromHex(string hex)
+        {
+            return FromBytes(Encoders.Hex.Decode(hex));
         }
 
         /// <summary>
