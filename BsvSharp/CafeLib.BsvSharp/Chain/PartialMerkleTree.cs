@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using CafeLib.BsvSharp.Exceptions;
 using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Numerics;
@@ -128,14 +129,19 @@ namespace CafeLib.BsvSharp.Chain
         /// <returns></returns>
         public bool Serialize(IDataWriter writer)
         {
-            writer.Write(new VarInt(TransactionCount));
+            writer.Write(TransactionCount);
+            writer.Write(new VarInt(TransactionHashes.Count));
             foreach (var hash in TransactionHashes)
             {
                 writer.Write(hash);
             }
 
             writer.Write(new VarInt(Flags.Count));
-            writer.Write(new VarType(Flags.ToArray()));
+            foreach (var flag in Flags)
+            {
+                writer.Write(flag);
+            }
+
             return true;
         }
 
