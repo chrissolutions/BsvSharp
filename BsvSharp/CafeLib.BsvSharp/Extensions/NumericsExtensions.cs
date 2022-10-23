@@ -178,13 +178,15 @@ namespace CafeLib.BsvSharp.Extensions
         /// Reads an <see cref="UInt256"/> as in bitcoin VarInt format.
         /// </summary>
         /// <param name="reader">byte sequence reader</param>
-        /// <param name="destination"></param>
-        /// <returns></returns>
+        /// <param name="destination">UInt256 destination</param>
+        /// <param name="reverse">reverse byte pattern</param>
+        /// <returns>UInt256 value</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadUInt256(this ref ByteSequenceReader reader, ref UInt256 destination)
+        public static bool TryReadUInt256(this ref ByteSequenceReader reader, ref UInt256 destination, bool reverse = false)
         {
             var span = destination.Span;
             if (!reader.TryCopyTo(span)) return false;
+            if (reverse) span.Reverse();
             reader.Advance(span.Length);
             return true;
         }
