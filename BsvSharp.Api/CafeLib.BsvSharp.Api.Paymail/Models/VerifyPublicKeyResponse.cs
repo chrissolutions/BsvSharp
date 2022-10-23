@@ -1,16 +1,16 @@
-﻿using Newtonsoft.Json;
+﻿using System;
 
 namespace CafeLib.BsvSharp.Api.Paymail.Models
 {
-    internal class VerifyPublicKeyResponse
+    public record VerifyPublicKeyResponse : VerifyPublicKeyResponseBase
     {
-        [JsonProperty("handle")]
-        public string Handle { get; set; }
+        public VerifyPublicKeyResponse() { }
 
-        [JsonProperty("pubkey")]
-        public string PublicKey { get; set; }
+        public VerifyPublicKeyResponse(VerifyPublicKeyResponseBase response)
+            : base(response) { }
 
-        [JsonProperty("match")]
-        public bool Match { get; set; }
+        public Exception Exception { get; init; }
+
+        public bool IsValid { get; init; }
     }
 }

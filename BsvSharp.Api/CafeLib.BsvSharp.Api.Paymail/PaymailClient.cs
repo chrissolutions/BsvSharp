@@ -95,13 +95,21 @@ namespace CafeLib.BsvSharp.Api.Paymail
         /// <param name="receiverHandle"></param>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        public async Task<bool> VerifyPubKey(string receiverHandle, PublicKey pubKey)
+        public async Task<VerifyPublicKeyResponse> VerifyPubKey(string receiverHandle, PublicKey pubKey)
         {
-            var url = await GetVerifyUrl(receiverHandle, pubKey.ToHex());
-
-            var json = await GetAsync(url);
-            var response = JsonConvert.DeserializeObject<VerifyPublicKeyResponse>(json);
-            return response != null && response.PublicKey == pubKey.ToHex() && response.Match;
+            try
+            {
+                var url = await GetVerifyUrl(receiverHandle, pubKey.ToHex());
+                var json = await GetAsync(url);
+                var response = JsonConvert.DeserializeObject<VerifyPublicKeyResponseBase>(json);
+                return response == null
+                    ? new VerifyPublicKeyResponse()
+                    : new VerifyPublicKeyResponse(response) { IsValid = response.PublicKey == pubKey.ToHex() && response.Match };
+            }
+            catch (Exception ex)
+            {
+                return new VerifyPublicKeyResponse { Exception = ex };
+            }
         }
 
         /// <summary>
@@ -175,7 +183,7 @@ namespace CafeLib.BsvSharp.Api.Paymail
                 // If it is not correct, forget the input value and attempt to obtain the valid key.
                 if (await DomainHasCapability(domain, Capability.VerifyPublicKeyOwner))
                 {
-                    if (!await VerifyPubKey(paymail, pubkey))
+                    if (!(await VerifyPubKey(paymail, pubkey)).IsValid)
                         pubkey = null;
                 }
             }
@@ -211,7 +219,7 @@ namespace CafeLib.BsvSharp.Api.Paymail
                 return capabilities;
 
             var hostname = domain;
-            await Retry.Run(async x =>
+            await Retry.Run(async _ =>
             {
                 var dns = new LookupClient();
                 var response = await dns.QueryAsync($"_bsvalias._tcp.{domain}", QueryType.SRV);

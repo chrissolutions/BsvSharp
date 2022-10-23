@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using CafeLib.BsvSharp.Api.Paymail.Models;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Scripting;
 using CafeLib.BsvSharp.Units;
@@ -43,7 +44,7 @@ namespace CafeLib.BsvSharp.Api.Paymail
         /// <param name="paymailAddress"></param>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        Task<bool> VerifyPubKey(string paymailAddress, PublicKey pubKey);
+        Task<VerifyPublicKeyResponse> VerifyPubKey(string paymailAddress, PublicKey pubKey);
 
         /// <summary>
         /// Implements brfc 759684b1a19a, paymentDestination: bsvalias Payment Addressing (Basic Address Resolution)
