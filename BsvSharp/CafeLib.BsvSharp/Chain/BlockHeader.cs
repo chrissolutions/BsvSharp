@@ -28,13 +28,13 @@ namespace CafeLib.BsvSharp.Chain
         public const int BlockHeaderSize = 80;
         private const long MaxTimeOffset = 2 * 60 * 60;
 
-        protected int _version;
-        protected UInt256 _hash;
-        protected UInt256 _prevHash;
-        protected UInt256 _merkleRoot;
-        protected uint _timestamp;
-        protected uint _bits;
-        protected uint _nonce;
+        private int _version;
+        private UInt256 _hash;
+        private UInt256 _prevHash;
+        private UInt256 _merkleRoot;
+        private uint _timestamp;
+        private uint _bits;
+        private uint _nonce;
 
         /// Essential fields of a Bitcoin SV block header.
         public UInt256 Hash => _hash;
