@@ -13,7 +13,35 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
 {
     public partial class KzMerkleBlockTests
     {
-        private static HexEncoder Hex = new ();
+        private static readonly HexEncoder Hex = new();
+
+        [Fact]
+        public void MerkleBlock_FromBytes_Test()
+        {
+            var bytes = Hex.Decode(MainnetBlock100014Hex);
+            var merkleBlock = MerkleBlock.FromBytes(bytes);
+            var buffer = merkleBlock.Serialize().ToArray();
+            Assert.Equal(bytes, buffer);
+        }
+
+        [Fact]
+        public void MerkleBlock_FromHex_Test()
+        {
+            var merkleBlock = MerkleBlock.FromHex(MainnetBlock100014Hex);
+            var buffer = merkleBlock.Serialize().ToArray();
+            var bytes = Hex.Decode(MainnetBlock100014Hex);
+            Assert.Equal(bytes, buffer);
+        }
+
+        [Theory]
+        [InlineData(MainnetBlock100014Hex, "019f5b01d4195ecbc9398fbf3c3b1fa9bb3183301d7a1fb3bd174fcfa40a2b65")]
+        public void MerkleBlock_FromHex_Filtered_Test(string merkleHex, string filteredHash)
+        {
+            var merkleBlock = MerkleBlock.FromHex(merkleHex);
+            var hashOfFilteredTx = UInt256.FromHex(filteredHash);
+            var filteredHashes = merkleBlock.FilteredTransactionHashes();
+            Assert.Equal(hashOfFilteredTx, filteredHashes.First());
+        }
 
         [Fact]
         public void MerkleBlock_FromJson_Test()
@@ -39,15 +67,6 @@ namespace CafeLib.BsvSharp.UnitTests.Chain
             var merkleBlock = MerkleBlock.FromJson(MainnetBlock100014);
             var result = merkleBlock.ValidMerkleTree();
             Assert.True(result);
-        }
-
-        [Fact]
-        public void MerkleBlock_FromBuffer_Test()
-        {
-            var merkleBlock = MerkleBlock.FromHex(MainnetBlock100014Hex);
-            var buffer = merkleBlock.Serialize().ToArray();
-            var bytes = Hex.Decode(MainnetBlock100014Hex);
-            Assert.Equal(bytes, buffer);
         }
 
         [Fact]
