@@ -101,7 +101,6 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         /// <param name="reader">byte sequence reader</param>
         /// <returns>true if successful; false otherwise</returns>
-        ///
         public bool Deserialize(ref ByteSequenceReader reader)
         {
             if (!reader.TryReadLittleEndian(out uint count)) return false;
@@ -112,8 +111,8 @@ namespace CafeLib.BsvSharp.Chain
             for (var i = 0; i < numHashes; i++)
             {
                 var hash = UInt256.Zero;
-                if (!reader.TryReadUInt256(ref hash)) return false;
-                Hashes.Add(hash.Reverse());
+                if (!reader.TryReadUInt256(ref hash, true)) return false;
+                Hashes.Add(hash);
             }
 
             if (!reader.TryReadVariant(out var numFlags)) return false;
