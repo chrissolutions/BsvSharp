@@ -15,9 +15,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CafeLib.BsvSharp" Version="2.0.10" />
-    <PackageReference Include="CafeLib.Core" Version="2.0.2" />
-    <PackageReference Include="CafeLib.Web.Request" Version="2.0.2" />
+    <PackageReference Include="CafeLib.BsvSharp" Version="2.0.11" />
+    <PackageReference Include="CafeLib.Core" Version="2.0.3" />
+    <PackageReference Include="CafeLib.Web.Request" Version="2.0.3" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.2" />
     <PackageReference Include="Moq" Version="4.18.2" />

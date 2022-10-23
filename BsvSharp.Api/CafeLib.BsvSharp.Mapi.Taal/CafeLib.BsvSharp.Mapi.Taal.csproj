@@ -32,8 +32,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CafeLib.BsvSharp" Version="2.0.10" />
-    <PackageReference Include="CafeLib.Web.Request" Version="2.0.2" />
+    <PackageReference Include="CafeLib.BsvSharp" Version="2.0.11" />
+    <PackageReference Include="CafeLib.Web.Request" Version="2.0.3" />
   </ItemGroup>
 
   <ItemGroup>
