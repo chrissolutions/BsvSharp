@@ -1,16 +1,19 @@
-﻿using Newtonsoft.Json;
+﻿using CafeLib.BsvSharp.Keys;
+using Newtonsoft.Json;
+using System;
+using System.Text.RegularExpressions;
 
 namespace CafeLib.BsvSharp.Api.Paymail.Models
 {
-    internal class GetPublicKeyResponse
+    public record GetPublicKeyResponse : GetIdentityResponse
     {
-        [JsonProperty("bsvalias")]
-        public string BsvAlias { get; set; }
+        public GetPublicKeyResponse(bool successful = true)
+            : base(successful) { }
 
-        [JsonProperty("handle")]
-        public string Handle { get; set; }
+        public GetPublicKeyResponse(Exception ex)
+            : base(ex) { }
 
-        [JsonProperty("pubkey")]
-        public string PubKey { get; set; }
+        internal GetPublicKeyResponse(GetIdentityResponse response, Func<bool> successful)
+            : base(response, successful) { }
     }
 }

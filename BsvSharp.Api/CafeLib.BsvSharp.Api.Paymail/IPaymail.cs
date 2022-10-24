@@ -36,7 +36,7 @@ namespace CafeLib.BsvSharp.Api.Paymail
         /// </summary>
         /// <param name="paymailAddress"></param>
         /// <returns></returns>
-        Task<PublicKey> GetPublicKey(string paymailAddress);
+        Task<GetPublicKeyResponse> GetPublicKey(string paymailAddress);
 
         /// <summary>
         /// Verify public key.

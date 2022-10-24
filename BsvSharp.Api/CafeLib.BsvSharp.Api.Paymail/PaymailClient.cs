@@ -78,15 +78,20 @@ namespace CafeLib.BsvSharp.Api.Paymail
         /// </summary>
         /// <param name="paymailAddress"></param>
         /// <returns></returns>
-        public async Task<PublicKey> GetPublicKey(string paymailAddress)
+        public async Task<GetPublicKeyResponse> GetPublicKey(string paymailAddress)
         {
-            var url = await GetIdentityUrl(paymailAddress);
-            var json = await GetAsync(url);
-            var response = JsonConvert.DeserializeObject<GetPublicKeyResponse>(json);
-            var pubkey = response != null ? new PublicKey(response.PubKey) : null;
-            return pubkey != null && pubkey.IsCompressed && new[] { 2, 3 }.ToArray().Contains(pubkey.Data[0])
-                ? pubkey
-                : null;
+            try
+            {
+                var url = await GetIdentityUrl(paymailAddress);
+                var json = await GetAsync(url);
+                var response = JsonConvert.DeserializeObject<GetPublicKeyResponse>(json);
+                var pubkey = response != null ? new PublicKey(response.PubKey) : null;
+                return new GetPublicKeyResponse(response, () => pubkey != null && pubkey.IsCompressed && new[] { 2, 3 }.ToArray().Contains(pubkey.Data[0]));
+            }
+            catch (Exception ex)
+            {
+                return new GetPublicKeyResponse(ex);
+            }
         }
 
         /// <summary>
@@ -101,14 +106,14 @@ namespace CafeLib.BsvSharp.Api.Paymail
             {
                 var url = await GetVerifyUrl(receiverHandle, pubKey.ToHex());
                 var json = await GetAsync(url);
-                var response = JsonConvert.DeserializeObject<VerifyPublicKeyResponseBase>(json);
-                return response == null
-                    ? new VerifyPublicKeyResponse()
-                    : new VerifyPublicKeyResponse(response) { IsValid = response.PublicKey == pubKey.ToHex() && response.Match };
+                var response = JsonConvert.DeserializeObject<VerifyPublicKeyResponse>(json);
+                return response != null
+                    ? new VerifyPublicKeyResponse(response, () => response.PublicKey == pubKey.ToHex() && response.Match)
+                    : new VerifyPublicKeyResponse(false);
             }
             catch (Exception ex)
             {
-                return new VerifyPublicKeyResponse { Exception = ex };
+                return new VerifyPublicKeyResponse(ex);
             }
         }
 
@@ -159,8 +164,8 @@ namespace CafeLib.BsvSharp.Api.Paymail
         /// <returns>true if both the public key and signature were confirmed as valid.</returns>
         public async Task<bool> IsValidSignature(string paymail, string message, string signature)
         {
-            var pubKey = await GetPublicKey(paymail);
-            return pubKey.IsValid && pubKey.VerifyMessage(message, signature);
+            var response = await GetPublicKey(paymail);
+            return response.IsSuccessful && new PublicKey(response.PubKey).VerifyMessage(message, signature);
         }
 
         /// <summary>
@@ -183,7 +188,7 @@ namespace CafeLib.BsvSharp.Api.Paymail
                 // If it is not correct, forget the input value and attempt to obtain the valid key.
                 if (await DomainHasCapability(domain, Capability.VerifyPublicKeyOwner))
                 {
-                    if (!(await VerifyPubKey(paymail, pubkey)).IsValid)
+                    if (!(await VerifyPubKey(paymail, pubkey)).IsSuccessful)
                         pubkey = null;
                 }
             }
@@ -191,7 +196,8 @@ namespace CafeLib.BsvSharp.Api.Paymail
             // Attempt to determine the correct pubkey for the paymail.
             if (pubkey == null && await DomainHasCapability(domain, Capability.Pki))
             {
-                pubkey = await GetPublicKey(paymail);
+                var response = await GetPublicKey(paymail);
+                pubkey = response.IsSuccessful ? new PublicKey(response.PubKey) : null;
             }
 
             return pubkey != null 

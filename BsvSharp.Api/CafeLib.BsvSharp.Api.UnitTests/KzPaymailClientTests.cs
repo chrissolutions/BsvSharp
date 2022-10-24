@@ -50,8 +50,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests {
             //var privkey = PrivateKey.FromB58("KxXvocKqZtdHvZP5HHNShrwDQVz2muNPisrzoyeyhXc4tZhBj1nM");
             //var pubkey = privkey.GetPubKey();
             var pubkey = new PublicKey(publicKey);
-            var k = await Paymail.GetPublicKey(email);
-            Assert.Equal(k, pubkey);
+            var response = await Paymail.GetPublicKey(email);
+            Assert.NotNull(response);
+            Assert.Equal(response.PubKey, pubkey.ToString());
         }
 
         [Theory]
@@ -64,7 +65,7 @@ namespace CafeLib.BsvSharp.Api.UnitTests {
         {
             var pubkey = new PublicKey(publicKey);
             var result = await Paymail.VerifyPubKey(paymail, pubkey);
-            Assert.Equal(expected, result.IsValid);
+            Assert.Equal(expected, result.IsSuccessful);
         }
 
         [Fact]
