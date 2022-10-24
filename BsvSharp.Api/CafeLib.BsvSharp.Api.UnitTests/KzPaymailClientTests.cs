@@ -3,7 +3,6 @@
 // Distributed under the Open BSV software license, see the accompanying file LICENSE.
 #endregion
 
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using CafeLib.BsvSharp.Api.Paymail;
 using CafeLib.BsvSharp.Extensions;
@@ -14,7 +13,7 @@ using Xunit;
 namespace CafeLib.BsvSharp.Api.UnitTests {
     public class PaymailClientTests : IAsyncLifetime
     {
-        public static PaymailClient Paymail { get; } = new PaymailClient();
+        public static PaymailClient Paymail { get; } = new();
 
         public async Task InitializeAsync()
         {

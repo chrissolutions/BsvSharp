@@ -5,12 +5,18 @@ namespace CafeLib.BsvSharp.Api.Paymail.Models
 {
     public record VerifyPublicKeyResponse : PaymailResponse
     {
-        public VerifyPublicKeyResponse(bool successful = true)
+        public VerifyPublicKeyResponse()
+            : base(true)
+        {
+        }
+
+        public VerifyPublicKeyResponse(bool successful)
             : base(successful) { }
 
         internal VerifyPublicKeyResponse(VerifyPublicKeyResponse response, Func<bool> successful)
             : base(successful)
         {
+            BsvAlias = response.BsvAlias;
             Handle = response.Handle;
             PublicKey = response.PublicKey;
             Match = response.Match;
@@ -18,6 +24,9 @@ namespace CafeLib.BsvSharp.Api.Paymail.Models
 
         public VerifyPublicKeyResponse(Exception ex)
             : base(ex) { }
+
+        [JsonProperty("bsvalias")]
+        public string BsvAlias { get; init; }
 
         [JsonProperty("handle")]
         public string Handle { get; init; }
