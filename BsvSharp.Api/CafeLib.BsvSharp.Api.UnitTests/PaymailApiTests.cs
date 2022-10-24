@@ -13,11 +13,11 @@ namespace CafeLib.BsvSharp.Api.UnitTests
 {
     public class PaymailApiTests : IAsyncLifetime
     {
-        public static PaymailClient Paymail { get; } = new PaymailClient();
+        public static PaymailClient Paymail { get; } = new();
 
         public async Task InitializeAsync()
         {
-            await Retry.Run(10, async x =>
+            await Retry.Run(10, async _ =>
             {
                 await Paymail.CacheDomain("moneybutton.com");
             });
@@ -80,8 +80,8 @@ namespace CafeLib.BsvSharp.Api.UnitTests
             var key = PrivateKey.FromWif("KxXvocKqZtdHvZP5HHNShrwDQVz2muNPisrzoyeyhXc4tZhBj1nM");
 
             var r = new PaymailClient();
-            var s = await r.GetOutputScript(key, "tonesnotes@moneybutton.com", "testpaymail@kizmet.org");
-            Assert.True(s.Length > 0);
+            var response = await r.GetOutputScript(key, "tonesnotes@moneybutton.com", "testpaymail@kizmet.org");
+            Assert.True(response.Output.Length > 0);
         }
 
 #if false

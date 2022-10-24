@@ -6,7 +6,6 @@ namespace CafeLib.BsvSharp.Api.Paymail.Models
     public record VerifyPublicKeyResponse : PaymailResponse
     {
         public VerifyPublicKeyResponse()
-            : base(true)
         {
         }
 

@@ -127,32 +127,41 @@ namespace CafeLib.BsvSharp.Api.Paymail
         /// <param name="amount"></param>
         /// <param name="purpose"></param>
         /// <returns></returns>
-        public async Task<Script> GetOutputScript(PrivateKey key, string receiverHandle, string senderHandle, string senderName = null, Amount? amount = null, string purpose = "")
+        public async Task<GetOutputScriptResponse> GetOutputScript(PrivateKey key, string receiverHandle, string senderHandle, string senderName = null, Amount? amount = null, string purpose = "")
         {
-            amount ??= Amount.Zero;
-            var dt = DateTime.UtcNow.ToString("o");
-            var message = $"{senderHandle}{amount.Value.Satoshis}{dt}{purpose}";
-            var signature = key?.SignMessage(message).ToString() ?? "";
-
-            // var ok = key.GetPubKey().VerifyMessage(message, signature);
-
-            var request = new GetOutputScriptRequest
+            try
             {
-                SenderHandle = senderHandle,
-                Amount = amount.Value.Satoshis,
-                Timestamp = dt,
-                Purpose = purpose ?? "",
-                SenderName = senderName ?? "",
-                Signature = signature
-            };
+                amount ??= Amount.Zero;
+                var dt = DateTime.UtcNow.ToString("o");
+                var message = $"{senderHandle}{amount.Value.Satoshis}{dt}{purpose}";
+                var signature = key?.SignMessage(message).ToString() ?? "";
 
-            var url = await GetAddressUrl(receiverHandle);
-            var json = JObject.FromObject(request);
+                // var ok = key.GetPubKey().VerifyMessage(message, signature);
 
-            var response = await PostAsync(url, json);
-            // e.g. {"output":"76a914bdfbe8a16162ba467746e382a081a1857831811088ac"} 
-            var outputScript = JsonConvert.DeserializeObject<GetOutputScriptResponse>(response);
-            return outputScript != null ? Script.FromHex(outputScript.Output) : Script.None;
+                var request = new GetOutputScriptRequest
+                {
+                    SenderHandle = senderHandle,
+                    Amount = amount.Value.Satoshis,
+                    Timestamp = dt,
+                    Purpose = purpose ?? "",
+                    SenderName = senderName ?? "",
+                    Signature = signature
+                };
+
+                var url = await GetAddressUrl(receiverHandle);
+                var json = JObject.FromObject(request);
+
+                var response = await PostAsync(url, json);
+                // e.g. {"output":"76a914bdfbe8a16162ba467746e382a081a1857831811088ac"} 
+                var scriptResponse = JsonConvert.DeserializeObject<GetScriptResponse>(response);
+                var outputScriptResponse = new GetOutputScriptResponse(scriptResponse)
+                    { Script = scriptResponse?.Output != null ? Script.FromHex(scriptResponse.Output) : Script.None };
+                return outputScriptResponse;
+            }
+            catch (Exception ex)
+            {
+                return new GetOutputScriptResponse(ex);
+            }
         }
 
         /// <summary>

@@ -1,11 +1,12 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Text.RegularExpressions;
 
 namespace CafeLib.BsvSharp.Api.Paymail.Models
 {
     public record GetIdentityResponse : PaymailResponse
     {
+        public GetIdentityResponse() { }
+
         public GetIdentityResponse(bool successful = true)
             : base(successful) { }
 

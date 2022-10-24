@@ -1,13 +1,12 @@
-﻿using CafeLib.BsvSharp.Keys;
-using Newtonsoft.Json;
-using System;
-using System.Text.RegularExpressions;
+﻿using System;
 
 namespace CafeLib.BsvSharp.Api.Paymail.Models
 {
     public record GetPublicKeyResponse : GetIdentityResponse
     {
-        public GetPublicKeyResponse(bool successful = true)
+        public GetPublicKeyResponse() { }
+
+        public GetPublicKeyResponse(bool successful)
             : base(successful) { }
 
         public GetPublicKeyResponse(Exception ex)

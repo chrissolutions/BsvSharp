@@ -6,6 +6,11 @@ namespace CafeLib.BsvSharp.Api.Paymail.Models
     {
         private readonly Lazy<bool> _lazyFunc;
 
+        protected PaymailResponse()
+            : this(true)
+        {
+        }
+
         protected PaymailResponse(bool successful = true)
         {
             _lazyFunc = new Lazy<bool>(() => successful);

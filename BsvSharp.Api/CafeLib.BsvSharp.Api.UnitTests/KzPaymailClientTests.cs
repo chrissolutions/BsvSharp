@@ -79,8 +79,9 @@ namespace CafeLib.BsvSharp.Api.UnitTests {
             // var key = KzElectrumSv.GetMasterPrivKey("<replace with actual wallet seed>").Derive($"0/{int.MaxValue}").PrivKey;
             var key = PrivateKey.FromWif("KxXvocKqZtdHvZP5HHNShrwDQVz2muNPisrzoyeyhXc4tZhBj1nM");
 
-            var s = await Paymail.GetOutputScript(key, "tonesnotes@moneybutton.com", "testpaymail@kizmet.org");
-            Assert.True(s.Length > 0);
+            var response = await Paymail.GetOutputScript(key, "tonesnotes@moneybutton.com", "testpaymail@kizmet.org");
+            Assert.True(response.IsSuccessful);
+            Assert.True(response.Output.Length > 0);
         }
 
         [Fact]

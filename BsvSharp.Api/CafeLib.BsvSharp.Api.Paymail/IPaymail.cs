@@ -56,7 +56,7 @@ namespace CafeLib.BsvSharp.Api.Paymail
         /// <param name="amount"></param>
         /// <param name="purpose"></param>
         /// <returns></returns>
-        Task<Script> GetOutputScript(PrivateKey key, string receiverAddress, string senderAddress, string senderName = null, Amount? amount = null, string purpose = "");
+        Task<GetOutputScriptResponse> GetOutputScript(PrivateKey key, string receiverAddress, string senderAddress, string senderName = null, Amount? amount = null, string purpose = "");
 
         /// <summary>
         /// Verifies that the message was signed by the private key corresponding to the paymail public key.
