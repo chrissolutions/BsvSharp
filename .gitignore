@@ -33,6 +33,7 @@ _ReSharper*/
 #Nuget packages folder
 packages/
 Repo/
+apikey.json
+buildapi.cmd
 buildnuget.cmd
-/BsvSharp.Api/CafeLib.BsvSharp.Api.UnitTests/apikey.json
 /.config/dotnet-tools.json

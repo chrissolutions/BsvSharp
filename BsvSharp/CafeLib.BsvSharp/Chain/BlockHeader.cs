@@ -29,19 +29,20 @@ namespace CafeLib.BsvSharp.Chain
         private const long MaxTimeOffset = 2 * 60 * 60;
 
         private int _version;
+        private UInt256 _hash;
         private UInt256 _prevHash;
-        private UInt256 _merkleRootHash;
+        private UInt256 _merkleRoot;
         private uint _timestamp;
         private uint _bits;
         private uint _nonce;
 
         /// Essential fields of a Bitcoin SV block header.
-        public UInt256 Hash { get; private set; }
+        public UInt256 Hash => _hash;
 
         /// Public access to essential header fields.
         public int Version => _version;
         public UInt256 PrevHash => _prevHash;
-        public UInt256 MerkleRoot => _merkleRootHash;
+        public UInt256 MerkleRoot => _merkleRoot;
         public uint Timestamp => _timestamp;
         public uint Bits => _bits;
         public uint Nonce => _nonce;
@@ -49,8 +50,16 @@ namespace CafeLib.BsvSharp.Chain
         /// <summary>
         /// Default constructor.
         /// </summary>
-        protected BlockHeader()
+        internal BlockHeader()
         {
+        }
+
+        protected BlockHeader(BlockHeader header)
+        {
+            Initialize(header._version, header._prevHash, header._merkleRoot, header._timestamp, header._bits, header._nonce);
+            _hash = CalculateHash(Serialize());
+            if (header._hash != UInt256.Zero && header.Hash != Hash) 
+                throw new BlockException("incoming has not equal to serialized header hash value");
         }
 
         /// <summary>
@@ -58,19 +67,31 @@ namespace CafeLib.BsvSharp.Chain
         /// </summary>
         /// <param name="version">block version number</param>
         /// <param name="prevHash">sha256 hash of the previous block header</param>
-        /// <param name="merkleRootHash">Sha256 hash at the root of the transaction merkle tree</param>
+        /// <param name="merkleRoot">Sha256 hash at the root of the transaction merkle tree</param>
         /// <param name="timestamp">current block timestamp as seconds since the unix epoch</param>
         /// <param name="bits">the current difficulty target in compact format</param>
         /// <param name="nonce">the nonce field that miners use to find a sha256 hash value that matches the difficulty target</param>
-        public BlockHeader(int version, UInt256 prevHash, UInt256 merkleRootHash, uint timestamp, uint bits, uint nonce)
+        public BlockHeader(int version, UInt256 prevHash, UInt256 merkleRoot, uint timestamp, uint bits, uint nonce)
+            : this(version, UInt256.Zero, prevHash, merkleRoot, timestamp, bits, nonce)
         {
-            _version = version;
-            _prevHash = prevHash;
-            _merkleRootHash = merkleRootHash;
-            _timestamp = timestamp;
-            _bits = bits;
-            _nonce = nonce;
-            Hash = CalculateHash(Serialize());
+        }
+
+        /// <summary>
+        /// Constructs a new block header
+        /// </summary>
+        /// <param name="version">block version number</param>
+        /// <param name="hash"></param>
+        /// <param name="prevHash">sha256 hash of the previous block header</param>
+        /// <param name="merkleRoot">Sha256 hash at the root of the transaction merkle tree</param>
+        /// <param name="timestamp">current block timestamp as seconds since the unix epoch</param>
+        /// <param name="bits">the current difficulty target in compact format</param>
+        /// <param name="nonce">the nonce field that miners use to find a sha256 hash value that matches the difficulty target</param>
+        internal BlockHeader(int version, UInt256 hash, UInt256 prevHash, UInt256 merkleRoot, uint timestamp, uint bits, uint nonce)
+        {
+            Initialize(version, prevHash, merkleRoot, timestamp, bits, nonce);
+            _hash = CalculateHash(Serialize());
+            if (hash != UInt256.Zero && _hash != hash)
+                throw new BlockException("incoming has not equal to serialized header hash value");
         }
 
         /// <summary>
@@ -163,18 +184,6 @@ namespace CafeLib.BsvSharp.Chain
         #region Protected Methods
 
         /// <summary>
-        /// Calculate the block hash
-        /// </summary>
-        /// <param name="bytes">bytes</param>
-        /// <returns>calculated block hash</returns>
-        protected static UInt256 CalculateHash(ReadOnlyByteSpan bytes)
-        {
-            var hash1 = Hashes.ComputeSha256(bytes);
-            var hash2 = Hashes.ComputeSha256(hash1);
-            return new UInt256(hash2);
-        }
-
-        /// <summary>
         /// Deserialize the block header from the sequence reader.
         /// </summary>
         /// <param name="reader">sequence reader</param>
@@ -187,13 +196,13 @@ namespace CafeLib.BsvSharp.Chain
             var start = reader.Data.Position;
             if (!reader.TryReadLittleEndian(out _version)) return false;
             if (!reader.TryReadUInt256(ref _prevHash)) return false;
-            if (!reader.TryReadUInt256(ref _merkleRootHash)) return false;
+            if (!reader.TryReadUInt256(ref _merkleRoot)) return false;
             if (!reader.TryReadLittleEndian(out _timestamp)) return false;
             if (!reader.TryReadLittleEndian(out _bits)) return false;
             if (!reader.TryReadLittleEndian(out _nonce)) return false;
             var end = reader.Data.Position;
 
-            Hash = CalculateHash(reader.Data.Sequence.Slice(start, end).FirstSpan);
+            _hash = CalculateHash(reader.Data.Sequence.Slice(start, end).FirstSpan);
             return true;
         }
 
@@ -206,7 +215,7 @@ namespace CafeLib.BsvSharp.Chain
             writer
                 .Write(_version)
                 .Write(_prevHash)
-                .Write(_merkleRootHash)
+                .Write(_merkleRoot)
                 .Write(_timestamp)
                 .Write(_bits)
                 .Write(_nonce);
@@ -224,6 +233,32 @@ namespace CafeLib.BsvSharp.Chain
             var target = new UInt256(targetBits.Value & 0xFFFFFF);
             var mov = 8 * ((targetBits >> 24) - 3);
             return target << (int)mov;
+        }
+
+        #endregion
+
+        #region Helpers
+
+        private void Initialize(int version, UInt256 prevHash, UInt256 merkleRootHash, uint timestamp, uint bits, uint nonce)
+        {
+            _version = version;
+            _prevHash = prevHash;
+            _merkleRoot = merkleRootHash;
+            _timestamp = timestamp;
+            _bits = bits;
+            _nonce = nonce;
+        }
+
+        /// <summary>
+        /// Calculate the block hash
+        /// </summary>
+        /// <param name="bytes">bytes</param>
+        /// <returns>calculated block hash</returns>
+        private static UInt256 CalculateHash(ReadOnlyByteSpan bytes)
+        {
+            var hash1 = Hashes.ComputeSha256(bytes);
+            var hash2 = Hashes.ComputeSha256(hash1);
+            return new UInt256(hash2);
         }
 
         #endregion

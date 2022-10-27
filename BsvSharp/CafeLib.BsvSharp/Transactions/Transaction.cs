@@ -7,6 +7,7 @@ using System.Linq;
 using CafeLib.BsvSharp.Builders;
 using CafeLib.BsvSharp.Encoding;
 using CafeLib.BsvSharp.Exceptions;
+using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Keys;
 using CafeLib.BsvSharp.Network;
 using CafeLib.BsvSharp.Numerics;
@@ -522,8 +523,6 @@ namespace CafeLib.BsvSharp.Transactions
         /// <returns></returns>
         internal bool TryReadTransaction(ref ByteSequenceReader r)
         {
-            var start = r.Data.Position;
-
             if (!r.TryReadLittleEndian(out int version)) return false;
             Version = version;
 
@@ -548,13 +547,6 @@ namespace CafeLib.BsvSharp.Transactions
             if (!r.TryReadLittleEndian(out uint lockTime)) return false;
             LockTime = lockTime;
 
-            var end = r.Data.Position;
-
-            //// Compute the transaction hash.
-            //var txBytes = r.Data.Sequence.Slice(start, end).ToArray();
-            //var hash1 = Hashes.ComputeSha256(txBytes);
-            //var hash2 = Hashes.ComputeSha256(hash1);
-            //TxHash = new UInt256(hash2);
             return true;
         }
 
@@ -565,7 +557,7 @@ namespace CafeLib.BsvSharp.Transactions
         /// <returns>readonly byte span</returns>
         public byte[] Serialize(bool performChecks = false)
         {
-            var writer = (ByteDataWriter) WriteTo(new ByteDataWriter(), new {performChecks});
+            var writer = (ByteDataWriter) WriteTo(new ByteDataWriter(), performChecks);
             return writer.ToArray();
         }
 
@@ -600,18 +592,17 @@ namespace CafeLib.BsvSharp.Transactions
         /// </summary>
         /// <param name="writer">data writer</param>
         /// <returns>data writer</returns>
-        public IDataWriter WriteTo(IDataWriter writer) => WriteTo(writer, new { performChecks = false });
+        public IDataWriter WriteTo(IDataWriter writer) => WriteTo(writer, false);
 
         /// <summary>
         /// Serialize Script to data writer
         /// </summary>
         /// <param name="writer">data writer</param>
-        /// <param name="parameters">performCheck parameter</param>
+        /// <param name="performChecks">performCheck parameter</param>
         /// <returns></returns>
-        public IDataWriter WriteTo(IDataWriter writer, object parameters)
+        public IDataWriter WriteTo(IDataWriter writer, bool performChecks)
         {
-            dynamic args = parameters;
-            if (args.performChecks)
+            if (performChecks)
             {
                 DoSerializationChecks();
             }
@@ -623,8 +614,6 @@ namespace CafeLib.BsvSharp.Transactions
 
 
         private Consensus Consensus => _consensus.Value;
-
-        private UInt256 GetHash() => Hashes.Hash256(Serialize());
 
 
         //The hash is the double-sha256 of the serialized transaction (reversed)

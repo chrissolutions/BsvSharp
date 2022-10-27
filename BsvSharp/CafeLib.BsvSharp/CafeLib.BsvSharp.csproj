@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Description>Bitcoin SV library and services.</Description>
-    <Version Condition=" '$(Version)' == '' ">2.0.9</Version>
+    <Version Condition=" '$(Version)' == '' ">2.0.11</Version>
     <Copyright>© 2021 Chris Solutions</Copyright>
     <PackageReleaseNotes></PackageReleaseNotes>
     <PackageIcon>cafelib.png</PackageIcon>
@@ -26,6 +26,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Chain\IBlockParser.cs" />
+    <Compile Remove="Chain\MerkleExtensions.cs" />
+    <Compile Remove="Chain\MerkleTree.cs" />
+    <Compile Remove="Chain\MerkleTreeNode.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Include="Mnemonics\Cultures\ChineseSimplified.words" />
     <EmbeddedResource Include="Mnemonics\Cultures\ChineseTraditional.words" />
     <EmbeddedResource Include="Mnemonics\Cultures\English.words" />
@@ -37,11 +44,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CafeLib.Core" Version="2.0.2" />
-    <PackageReference Include="CafeLib.Core.Buffers" Version="2.0.2" />
-    <PackageReference Include="CafeLib.Core.Encodings" Version="2.0.2" />
-    <PackageReference Include="CafeLib.Core.Numerics" Version="2.0.2" />
-    <PackageReference Include="CafeLib.Cryptography" Version="2.0.2" />
+    <PackageReference Include="CafeLib.Core" Version="2.0.3" />
+    <PackageReference Include="CafeLib.Core.Buffers" Version="2.0.3" />
+    <PackageReference Include="CafeLib.Core.Encodings" Version="2.0.3" />
+    <PackageReference Include="CafeLib.Core.Numerics" Version="2.0.3" />
+    <PackageReference Include="CafeLib.Cryptography" Version="2.0.3" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>

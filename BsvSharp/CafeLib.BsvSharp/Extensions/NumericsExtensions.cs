@@ -3,6 +3,7 @@
 #endregion
 
 using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.Core.Buffers;
@@ -177,15 +178,54 @@ namespace CafeLib.BsvSharp.Extensions
         /// Reads an <see cref="UInt256"/> as in bitcoin VarInt format.
         /// </summary>
         /// <param name="reader">byte sequence reader</param>
-        /// <param name="destination"></param>
-        /// <returns></returns>
+        /// <param name="destination">UInt256 destination</param>
+        /// <param name="reverse">reverse byte pattern</param>
+        /// <returns>UInt256 value</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool TryReadUInt256(this ref ByteSequenceReader reader, ref UInt256 destination)
+        public static bool TryReadUInt256(this ref ByteSequenceReader reader, ref UInt256 destination, bool reverse = false)
         {
             var span = destination.Span;
             if (!reader.TryCopyTo(span)) return false;
+            if (reverse) span.Reverse();
             reader.Advance(span.Length);
             return true;
         }
+
+        /// <summary>
+        /// Reads an <see cref="UInt64"/> as in bitcoin Variant format.
+        /// </summary>
+        /// <returns>False if there wasn't enough data for an <see cref="UInt64"/>.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool TryReadVariant(this ref ByteSequenceReader reader, out long value)
+        {
+            value = 0L;
+
+            var b = reader.Data.TryRead(out var b0);
+            if (!b) return false;
+
+            switch (b0)
+            {
+                case <= 0xfc:
+                    value = b0;
+                    break;
+
+                case 0xfd:
+                    b = reader.Data.TryReadLittleEndian(out short v16);
+                    value = v16;
+                    break;
+
+                case 0xfe:
+                    b = reader.Data.TryReadLittleEndian(out int v32);
+                    value = v32;
+                    break;
+
+                default:
+                    b = reader.Data.TryReadLittleEndian(out value);
+                    break;
+            }
+
+            return b;
+        }
+
     }
 }

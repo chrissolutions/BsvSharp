@@ -78,15 +78,20 @@ namespace CafeLib.BsvSharp.Api.Paymail
         /// </summary>
         /// <param name="paymailAddress"></param>
         /// <returns></returns>
-        public async Task<PublicKey> GetPublicKey(string paymailAddress)
+        public async Task<GetPublicKeyResponse> GetPublicKey(string paymailAddress)
         {
-            var url = await GetIdentityUrl(paymailAddress);
-            var json = await GetAsync(url);
-            var response = JsonConvert.DeserializeObject<GetPublicKeyResponse>(json);
-            var pubkey = response != null ? new PublicKey(response.PubKey) : null;
-            return pubkey != null && pubkey.IsCompressed && new[] { 2, 3 }.ToArray().Contains(pubkey.Data[0])
-                ? pubkey
-                : null;
+            try
+            {
+                var url = await GetIdentityUrl(paymailAddress);
+                var json = await GetAsync(url);
+                var response = JsonConvert.DeserializeObject<GetPublicKeyResponse>(json);
+                var pubkey = response != null ? new PublicKey(response.PubKey) : null;
+                return new GetPublicKeyResponse(response, () => pubkey != null && pubkey.IsCompressed && new[] { 2, 3 }.ToArray().Contains(pubkey.Data[0]));
+            }
+            catch (Exception ex)
+            {
+                return new GetPublicKeyResponse(ex);
+            }
         }
 
         /// <summary>
@@ -95,13 +100,21 @@ namespace CafeLib.BsvSharp.Api.Paymail
         /// <param name="receiverHandle"></param>
         /// <param name="pubKey"></param>
         /// <returns></returns>
-        public async Task<bool> VerifyPubKey(string receiverHandle, PublicKey pubKey)
+        public async Task<VerifyPublicKeyResponse> VerifyPubKey(string receiverHandle, PublicKey pubKey)
         {
-            var url = await GetVerifyUrl(receiverHandle, pubKey.ToHex());
-
-            var json = await GetAsync(url);
-            var response = JsonConvert.DeserializeObject<VerifyPublicKeyResponse>(json);
-            return response != null && response.PublicKey == pubKey.ToHex() && response.Match;
+            try
+            {
+                var url = await GetVerifyUrl(receiverHandle, pubKey.ToHex());
+                var json = await GetAsync(url);
+                var response = JsonConvert.DeserializeObject<VerifyPublicKeyResponse>(json);
+                return response != null
+                    ? new VerifyPublicKeyResponse(response, () => response.PublicKey == pubKey.ToHex() && response.Match)
+                    : new VerifyPublicKeyResponse(false);
+            }
+            catch (Exception ex)
+            {
+                return new VerifyPublicKeyResponse(ex);
+            }
         }
 
         /// <summary>
@@ -114,32 +127,41 @@ namespace CafeLib.BsvSharp.Api.Paymail
         /// <param name="amount"></param>
         /// <param name="purpose"></param>
         /// <returns></returns>
-        public async Task<Script> GetOutputScript(PrivateKey key, string receiverHandle, string senderHandle, string senderName = null, Amount? amount = null, string purpose = "")
+        public async Task<GetOutputScriptResponse> GetOutputScript(PrivateKey key, string receiverHandle, string senderHandle, string senderName = null, Amount? amount = null, string purpose = "")
         {
-            amount ??= Amount.Zero;
-            var dt = DateTime.UtcNow.ToString("o");
-            var message = $"{senderHandle}{amount.Value.Satoshis}{dt}{purpose}";
-            var signature = key?.SignMessage(message).ToString() ?? "";
-
-            // var ok = key.GetPubKey().VerifyMessage(message, signature);
-
-            var request = new GetOutputScriptRequest
+            try
             {
-                SenderHandle = senderHandle,
-                Amount = amount.Value.Satoshis,
-                Timestamp = dt,
-                Purpose = purpose ?? "",
-                SenderName = senderName ?? "",
-                Signature = signature
-            };
+                amount ??= Amount.Zero;
+                var dt = DateTime.UtcNow.ToString("o");
+                var message = $"{senderHandle}{amount.Value.Satoshis}{dt}{purpose}";
+                var signature = key?.SignMessage(message).ToString() ?? "";
 
-            var url = await GetAddressUrl(receiverHandle);
-            var json = JObject.FromObject(request);
+                // var ok = key.GetPubKey().VerifyMessage(message, signature);
 
-            var response = await PostAsync(url, json);
-            // e.g. {"output":"76a914bdfbe8a16162ba467746e382a081a1857831811088ac"} 
-            var outputScript = JsonConvert.DeserializeObject<GetOutputScriptResponse>(response);
-            return outputScript != null ? Script.FromHex(outputScript.Output) : Script.None;
+                var request = new GetOutputScriptRequest
+                {
+                    SenderHandle = senderHandle,
+                    Amount = amount.Value.Satoshis,
+                    Timestamp = dt,
+                    Purpose = purpose ?? "",
+                    SenderName = senderName ?? "",
+                    Signature = signature
+                };
+
+                var url = await GetAddressUrl(receiverHandle);
+                var json = JObject.FromObject(request);
+
+                var response = await PostAsync(url, json);
+                // e.g. {"output":"76a914bdfbe8a16162ba467746e382a081a1857831811088ac"} 
+                var scriptResponse = JsonConvert.DeserializeObject<GetScriptResponse>(response);
+                var outputScriptResponse = new GetOutputScriptResponse(scriptResponse)
+                    { Script = scriptResponse?.Output != null ? Script.FromHex(scriptResponse.Output) : Script.None };
+                return outputScriptResponse;
+            }
+            catch (Exception ex)
+            {
+                return new GetOutputScriptResponse(ex);
+            }
         }
 
         /// <summary>
@@ -151,8 +173,8 @@ namespace CafeLib.BsvSharp.Api.Paymail
         /// <returns>true if both the public key and signature were confirmed as valid.</returns>
         public async Task<bool> IsValidSignature(string paymail, string message, string signature)
         {
-            var pubKey = await GetPublicKey(paymail);
-            return pubKey.IsValid && pubKey.VerifyMessage(message, signature);
+            var response = await GetPublicKey(paymail);
+            return response.IsSuccessful && new PublicKey(response.PubKey).VerifyMessage(message, signature);
         }
 
         /// <summary>
@@ -175,7 +197,7 @@ namespace CafeLib.BsvSharp.Api.Paymail
                 // If it is not correct, forget the input value and attempt to obtain the valid key.
                 if (await DomainHasCapability(domain, Capability.VerifyPublicKeyOwner))
                 {
-                    if (!await VerifyPubKey(paymail, pubkey))
+                    if (!(await VerifyPubKey(paymail, pubkey)).IsSuccessful)
                         pubkey = null;
                 }
             }
@@ -183,7 +205,8 @@ namespace CafeLib.BsvSharp.Api.Paymail
             // Attempt to determine the correct pubkey for the paymail.
             if (pubkey == null && await DomainHasCapability(domain, Capability.Pki))
             {
-                pubkey = await GetPublicKey(paymail);
+                var response = await GetPublicKey(paymail);
+                pubkey = response.IsSuccessful ? new PublicKey(response.PubKey) : null;
             }
 
             return pubkey != null 
@@ -211,7 +234,7 @@ namespace CafeLib.BsvSharp.Api.Paymail
                 return capabilities;
 
             var hostname = domain;
-            await Retry.Run(async x =>
+            await Retry.Run(async _ =>
             {
                 var dns = new LookupClient();
                 var response = await dns.QueryAsync($"_bsvalias._tcp.{domain}", QueryType.SRV);

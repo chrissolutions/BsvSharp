@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CafeLib.BsvSharp.Exceptions;
+using CafeLib.BsvSharp.Extensions;
 using CafeLib.BsvSharp.Numerics;
 using CafeLib.BsvSharp.Persistence;
 using CafeLib.BsvSharp.Transactions;
@@ -57,7 +58,6 @@ namespace CafeLib.BsvSharp.Chain
         {
             Transactions = new TransactionList(txs);
         }
-
 
         /// <summary>
         /// Create block from bytes.

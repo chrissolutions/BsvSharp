@@ -70,6 +70,7 @@ namespace CafeLib.BsvSharp.Keys
         public PublicKey(ReadOnlyByteSpan bytes)
             : this()
         {
+            if (!CheckFormat(bytes, false)) throw new FormatException("Invalid public key");
             if (bytes.Length <= 0 || bytes.Length != PredictLength(bytes[0])) return;
             _keyData = new byte[bytes.Length];
             bytes.CopyTo(_keyData);
@@ -316,7 +317,7 @@ namespace CafeLib.BsvSharp.Keys
             return (new PublicKey(p.GetEncoded()), new UInt256(r));
         }
 
-        public override int GetHashCode() => _keyData.GetHashCodeOfValues();
+        public override int GetHashCode() => ToArray().GetHashCodeOfValues();
 
         public bool Equals(PublicKey o) => o is not null && _keyData.SequenceEqual(o._keyData);
         public override bool Equals(object obj) => obj is PublicKey key && this == key;
@@ -336,6 +337,24 @@ namespace CafeLib.BsvSharp.Keys
         public static bool operator !=(PublicKey x, PublicKey y) => !(x == y);
 
         #region Helpers
+
+        internal static bool CheckFormat(ReadOnlyByteSpan data, bool deep)
+        {
+            var quick = (data.Length == 33 && (data[0] == 0x02 || data[0] == 0x03)) ||
+                        (data.Length == 65 && (data[0] == 0x04 || data[0] == 0x06 || data[0] == 0x07));
+
+            if (!deep || !quick)
+                return quick;
+            try
+            {
+                var _ = new ECKey(data, false);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// Invalidate the public key.
@@ -380,7 +399,7 @@ namespace CafeLib.BsvSharp.Keys
         /// <returns></returns>
         private bool VerifyTxSig(UInt256 hash, VarType sig)
         {
-            var sigBytes = sig[0..(sig.Length-1)];
+            var sigBytes = sig[..^1];
             var signature = ECDSASignature.FromDER(sigBytes);
             var r = new BigInteger(1, signature.R.ToByteArray());
             var s = new BigInteger(1, signature.S.ToByteArray());
